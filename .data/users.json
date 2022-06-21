@@ -1,0 +1,46 @@
+{
+  "__private": {
+    "next_id": 5,
+    "id_map": {
+      "0": "cl3uzt03p00000i7443tb7pgz",
+      "1": "cl3uzt03p00010i743ckr85sn",
+      "2": "cl3uzt03p00020i74abj5cjsp",
+      "3": "cl3uzt03p00030i743rzg9lar",
+      "4": "cl3uzt03p00040i74gpckdxrk"
+    }
+  },
+  "cl3uzt03p00000i7443tb7pgz": {
+    "name": "Jean-Luc",
+    "friends": [
+      1,
+      3
+    ],
+    "_created_at": 1654051918020,
+    "_updated_at": 1654051918020,
+    "_id": 0
+  },
+  "cl3uzt03p00010i743ckr85sn": {
+    "name": "Riker",
+    "_created_at": 1654051918020,
+    "_updated_at": 1654051918021,
+    "_id": 1
+  },
+  "cl3uzt03p00020i74abj5cjsp": {
+    "name": "Kathryn",
+    "_created_at": 1654051918021,
+    "_updated_at": 1654051918021,
+    "_id": 2
+  },
+  "cl3uzt03p00030i743rzg9lar": {
+    "name": "Data",
+    "_created_at": 1654051918021,
+    "_updated_at": 1654051918021,
+    "_id": 3
+  },
+  "cl3uzt03p00040i74gpckdxrk": {
+    "name": "Worf",
+    "_created_at": 1654051918021,
+    "_updated_at": 1654051918021,
+    "_id": 4
+  }
+}

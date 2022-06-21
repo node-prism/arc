@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "es2022",
+    "target": "esnext",
+    "outDir": "lib",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationDir": "lib",
+    "paths": {
+      "#db/*": ["./src/db/*"],
+      "#services/*": ["./src/app/services/*"]
+    }
+  }
+}

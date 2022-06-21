@@ -1,0 +1,30 @@
+{
+  "__private": {
+    "next_id": 0,
+    "id_map": {}
+  },
+  "cl4g66vkc009msh742m7p6bjt": {
+    "xxx": "xxx",
+    "_created_at": 1655332432716,
+    "_updated_at": 1655332432716,
+    "_id": "cl4g66vkc009msh742m7p6bjt"
+  },
+  "cl4g66vkc009nsh746jvfbibj": {
+    "yyy": "yyy",
+    "_created_at": 1655332432716,
+    "_updated_at": 1655332432716,
+    "_id": "cl4g66vkc009nsh746jvfbibj"
+  },
+  "cl4g66vkc009osh749az67b4v": {
+    "zzz": "zzz",
+    "_created_at": 1655332432716,
+    "_updated_at": 1655332432716,
+    "_id": "cl4g66vkc009osh749az67b4v"
+  },
+  "cl4g66vkc009psh744rd0b6uk": {
+    "a": 1,
+    "_created_at": 1655332432716,
+    "_updated_at": 1655332432716,
+    "_id": "cl4g66vkc009psh744rd0b6uk"
+  }
+}
