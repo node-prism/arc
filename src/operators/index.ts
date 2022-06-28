@@ -5,6 +5,7 @@ import { $gte } from "./boolean/gte";
 import { $lt } from "./boolean/lt";
 import { $lte } from "./boolean/lte";
 import { $and } from "./boolean/and";
+import { $or } from "./boolean/or";
 import { $set } from "./mutation/set";
 import { $change } from "./mutation/change";
 import { $inc, $dec, $mult, $div } from "./mutation/math";
@@ -19,6 +20,7 @@ export const booleanOperators = {
   $lt,
   $lte,
   $and,
+  $or,
   $includes,
   $in,
 };
