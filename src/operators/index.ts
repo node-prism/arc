@@ -10,7 +10,7 @@ import { $set } from "./mutation/set";
 import { $change } from "./mutation/change";
 import { $inc, $dec, $mult, $div } from "./mutation/math";
 import { $includes } from "./boolean/includes";
-import { $in } from "./boolean/in";
+import { $oneOf } from "./boolean/oneOf";
 import { $append } from "./mutation/append";
 import { $merge } from "./mutation/merge";
 
@@ -22,7 +22,7 @@ export const booleanOperators = {
   $and,
   $or,
   $includes,
-  $in,
+  $oneOf,
 };
 
 const mutationOperators = {
