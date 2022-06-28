@@ -7,7 +7,7 @@ import {
   ID_KEY,
   UPDATED_AT_KEY,
 } from ".";
-import {applyQueryOptions} from "./find";
+import { applyQueryOptions } from "./find";
 import { processMutationOperators } from "./operators";
 import { returnFound } from "./return_found";
 import { ensureArray, Ov } from "./utils";

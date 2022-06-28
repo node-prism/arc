@@ -2,7 +2,6 @@ import { Collection, ID_KEY, QueryOptions } from ".";
 
 export class Transaction<T> {
   collection: Collection<T>;
-
   inserted: T[] = [];
   removed: T[] = [];
   updated: { documents: T[], operations: object, options: QueryOptions }[] = [];
@@ -57,7 +56,6 @@ export class Transaction<T> {
         // the purpose of this is to restore metadata like timestamps.
         // this.collection.assign({ [ID_KEY]: document[ID_KEY] }, document);
         this.collection.assign(document[ID_KEY], document);
-
       }
     });
 
@@ -66,11 +64,9 @@ export class Transaction<T> {
     this.removed = [];
   }
 
-
   commit() {
     this.inserted = [];
     this.updated = [];
     this.removed = [];
   }
-
 }

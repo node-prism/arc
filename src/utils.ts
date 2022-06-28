@@ -15,7 +15,8 @@ export function isEmptyObject(item: any) {
 export const Ov = Object.values;
 export const Ok = Object.keys;
 
-export const safeHasOwnProperty = (obj: object, prop: string) => (obj ? Object.prototype.hasOwnProperty.call(obj, prop) : false);
+export const safeHasOwnProperty = (obj: object, prop: string) =>
+  obj ? Object.prototype.hasOwnProperty.call(obj, prop) : false;
 
 export function isFunction(item: any) {
   return typeof item === "function";
