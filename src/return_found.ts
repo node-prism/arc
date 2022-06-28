@@ -113,13 +113,6 @@ export function returnFound(
       }
 
       Ok(query).forEach((key) => {
-        // if (isObject(sourceObject)) {
-        //   if (checkAgainstQuery(sourceObject, query)) {
-        //     appendResult(parentDocument);
-        //   }
-        // } else if (checkAgainstQuery(source, query[key])) {
-        //   appendResult(parentDocument);
-        // }
         if (isObject(sourceObject)) {
           if (checkAgainstQuery(source[_index], query[key])) {
             appendResult(parentDocument);

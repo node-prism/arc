@@ -292,14 +292,6 @@ export class Collection<T> {
 
   getId() {
     return cuid();
-    // return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-    //   /[xy]/g,
-    //   function (c) {
-    //     let r = (Math.random() * 16) | 0,
-    //       v = c == "x" ? r : (r & 0x3) | 0x8;
-    //     return v.toString(16);
-    //   }
-    // );
   }
 
   nextIntegerId() {
@@ -310,25 +302,3 @@ export class Collection<T> {
     return new Transaction(this);
   }
 }
-
-// type User = {
-//   _id?: number;
-//   name: string;
-//   friends?: number[];
-// }
-//
-// const users = new Collection<User>(".data", "users", { integerIds: true });
-//
-// users.insert([
-//   { name: "Jean-Luc", friends: [1, 3] }, // will and data
-//   { name: "Riker" },
-//   { name: "Kathryn" },
-//   { name: "Data" },
-//   { name: "Worf" },
-// ]);
-//
-// const jeansFriends = users.find({ name: "Jean-Luc" })
-// .map((user) => users.find({ _id: { $in: user.friends } }));
-//
-// console.log("jeansFriends", ...jeansFriends);
-
