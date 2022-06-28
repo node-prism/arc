@@ -1,7 +1,7 @@
 A lightweight, in-memory document database for smaller projects.
 You can think of this as MongoDB's little brother.
 
-# Quickstart
+# Installation
 
 ```bash
 npm i @prism/db
