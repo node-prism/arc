@@ -1,10 +1,24 @@
 import { Collection, ID_KEY, QueryOptions } from ".";
 
+enum OpType {
+  INSERT = "insert",
+  UPDATE = "update",
+  REMOVE = "remove"
+};
+
+interface UpdateOperation<T> {
+  documents: T[];
+  operations: object;
+  options: QueryOptions;
+}
+
 export class Transaction<T> {
   collection: Collection<T>;
-  inserted: T[] = [];
-  removed: T[] = [];
-  updated: { documents: T[], operations: object, options: QueryOptions }[] = [];
+  inserted: T[][] = [];
+  removed: T[][] = [];
+  updated: UpdateOperation<T>[] = [];
+
+  operations: OpType[] = [];
 
   constructor(collection: Collection<T>) {
     this.collection = collection;
@@ -12,61 +26,81 @@ export class Transaction<T> {
 
   insert(documents: T[] | T): T[] {
     const inserted = this.collection.insert(documents);
-    this.inserted = this.inserted.concat(inserted);
+    this.inserted.push(inserted);
+    this.operations.push(OpType.INSERT);
     return inserted;
   }
 
   update(query: object, operations: object, options: QueryOptions = {}): T[] {
     const documents = this.collection.find(query, options);
-    this.updated = this.updated.concat({ documents, operations, options });
+    this.updated.push({ documents, operations, options });
+    this.operations.push(OpType.UPDATE);
     return this.collection.update(query, operations, options);
   }
 
   remove(query: object, options: QueryOptions = {}): T[] {
     const removed = this.collection.remove(query, options);
-    this.removed = this.removed.concat(removed);
+    this.removed.push(removed);
+    this.operations.push(OpType.REMOVE);
     return removed;
   }
 
   rollback() {
-    this.inserted.forEach((document) => {
-      if (document[ID_KEY] !== undefined) {
-        this.collection.remove({
-          [ID_KEY]: document[ID_KEY],
-        })
-      } else {
-        this.collection.remove({ ...document } as unknown as object);
-      }
-    });
-
-    this.updated.forEach((entry) => {
-      entry.documents.forEach((document) => {
+    const uninsert = (documents: T[]) => {
+      documents.forEach((document) => {
         if (document[ID_KEY] !== undefined) {
-          // this.collection.assign({ [ID_KEY]: document[ID_KEY] }, document);
-          this.collection.assign(document[ID_KEY], document);
+          this.collection.remove({ [ID_KEY]: document[ID_KEY] })
         } else {
-          this.collection.update({ ...document } as unknown as object, entry.operations, entry.options);
+          this.collection.remove({ ...document } as unknown as object);
         }
       });
-    });
+    };
 
-    this.removed.forEach((document) => {
-      if (document[ID_KEY] !== undefined) {
-        // this.collection.insert(document);
-        // the purpose of this is to restore metadata like timestamps.
-        // this.collection.assign({ [ID_KEY]: document[ID_KEY] }, document);
-        this.collection.assign(document[ID_KEY], document);
+    const unupdate = (operation: UpdateOperation<T>) => {
+      operation.documents.forEach((document) => {
+        if (document[ID_KEY] !== undefined) {
+          this.collection.assign(document[ID_KEY], document);
+        } else {
+          this.collection.update({ ...document } as unknown as object, operation.operations, operation.options);
+        }
+      });
+    };
+
+    const unremove = (documents: T[]) => {
+      documents.forEach((document) => {
+        if (document[ID_KEY] !== undefined) {
+          this.collection.assign(document[ID_KEY], document);
+        }
+      });
+    };
+
+    this.operations.reverse().forEach((opType) => {
+      switch (opType) {
+        case OpType.INSERT:
+          uninsert(this.inserted.pop() as T[]);
+          break;
+        case OpType.UPDATE:
+          unupdate(this.updated.pop());
+          break;
+        case OpType.REMOVE:
+          unremove(this.removed.pop() as T[]);
+          break;
       }
     });
 
     this.inserted = [];
     this.updated = [];
     this.removed = [];
+    this.operations = [];
   }
 
+  /**
+   * Finalizes the transaction.
+   */
   commit() {
     this.inserted = [];
     this.updated = [];
     this.removed = [];
+    this.collection._transaction = null;
   }
 }

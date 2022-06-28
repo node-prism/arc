@@ -100,6 +100,7 @@ export class Collection<T> {
   name: string;
   options: CollectionOptions<T>;
   data: CollectionData = {};
+  _transaction: Transaction<T> = null;
 
   constructor(
     storagePath: string = ".data",
@@ -298,7 +299,17 @@ export class Collection<T> {
     return this.data.__private.next_id++;
   }
 
+  /**
+   * Starts a new transaction.
+   *
+   * @throws {Error} If a transaction is already in progress.
+   */
   transaction(): Transaction<T> {
-    return new Transaction(this);
+    if (this._transaction) {
+      throw new Error("Cannot start a transaction while another is already in progress.");
+    }
+
+    this._transaction = new Transaction<T>(this);
+    return this._transaction;
   }
 }

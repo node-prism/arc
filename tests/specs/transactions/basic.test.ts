@@ -1,7 +1,8 @@
 import { testSuite, expect } from "manten";
+import { Transaction } from "../../../src/transaction";
 import { nrml, testCollection } from "../../common";
 
-export default testSuite(async ({ describe }) => {
+export default testSuite(async ({ describe, test }) => {
   describe("inserts", ({ test }) => {
     test("will insert and remove on rollback", () => {
       const collection = testCollection();
@@ -144,6 +145,19 @@ export default testSuite(async ({ describe }) => {
       const latest = collection.find();
       expect(latest).toEqual(original);
     });
+  });
+
+  test("throws if already in a transaction", () => {
+    const collection = testCollection();
+    const tx = collection.transaction();
+
+    // Cannot start a new transaction when one is already in progress.
+    expect(collection.transaction).toThrow();
+    tx.commit();
+
+    // Test that we're able to start a new transaction
+    // now that the previous one has been committed.
+    expect(collection.transaction()).toBeInstanceOf(Transaction);
   });
 
 });
