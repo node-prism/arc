@@ -7,6 +7,7 @@ import { $lte } from "./boolean/lte";
 import { $and } from "./boolean/and";
 import { $or } from "./boolean/or";
 import { $set } from "./mutation/set";
+import { $unset } from "./mutation/unset";
 import { $change } from "./mutation/change";
 import { $inc, $dec, $mult, $div } from "./mutation/math";
 import { $includes } from "./boolean/includes";
@@ -29,6 +30,7 @@ const mutationOperators = {
   $append,
   $merge,
   $set,
+  $unset,
   $change,
   $inc,
   $dec,
