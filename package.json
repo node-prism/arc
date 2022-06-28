@@ -4,6 +4,10 @@
   "description": "",
   "main": "lib/src/index.js",
   "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "types": "lib/src/index.d.ts",
   "scripts": {
     "build": "tsc",
