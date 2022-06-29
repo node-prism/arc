@@ -6,6 +6,8 @@ import { $lt } from "./boolean/lt";
 import { $lte } from "./boolean/lte";
 import { $and } from "./boolean/and";
 import { $or } from "./boolean/or";
+import { $fn } from "./boolean/fn";
+import { $re } from "./boolean/re";
 import { $set } from "./mutation/set";
 import { $unset } from "./mutation/unset";
 import { $change } from "./mutation/change";
@@ -24,6 +26,8 @@ export const booleanOperators = {
   $or,
   $includes,
   $oneOf,
+  $fn,
+  $re,
 };
 
 const mutationOperators = {
