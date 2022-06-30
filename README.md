@@ -85,6 +85,7 @@ collection.remove({ planet: "Earth" });
 // ];
 
 collection.find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
+//                                                  └─ asc     └─ desc
 
 // [
 //   { name: "Zorf", age: 24 },
