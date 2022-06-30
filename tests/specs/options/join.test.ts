@@ -1,11 +1,11 @@
 import { testSuite, expect } from "manten";
-import { nrml, testCollection2, testCollection } from "../../common";
+import { nrml, testCollection } from "../../common";
 
 export default testSuite(async ({ describe }) => {
   describe("join", ({ test }) => {
     test("works", () => {
       const users = testCollection();
-      const tickets = testCollection2({ integerIds: true });
+      const tickets = testCollection({ name: "tickets", integerIds: true });
 
       users.insert({ name: "Jonathan", tickets: [3, 4] });
       tickets.insert({ title: "Ticket 0", description: "Ticket 0 description" });
@@ -29,7 +29,7 @@ export default testSuite(async ({ describe }) => {
 
     test("respects query options", () => {
       const users = testCollection();
-      const tickets = testCollection2({ integerIds: true });
+      const tickets = testCollection({ name: "tickets", integerIds: true });
 
       users.insert({ name: "Jonathan", tickets: [3, 4] });
       tickets.insert({ title: "Ticket 0", description: "Ticket 0 description" });
@@ -50,6 +50,96 @@ export default testSuite(async ({ describe }) => {
 
       expect(res).toHaveProperty("userTickets");
       expect((res as any).userTickets).toEqual(tks);
+    });
+
+    test("multiple joins", () => {
+      const users = testCollection();
+      const skills = testCollection({ name: "skills", integerIds: true });
+      const items = testCollection({ name: "items", integerIds: true });
+
+      users.insert({ name: "Jonathan", skills: [3, 4], items: [4, 5] });
+
+      skills.insert({ title: "Skill 0" });
+      skills.insert({ title: "Skill 1" });
+      skills.insert({ title: "Skill 2" });
+
+      items.insert({ title: "Item 0" });
+      items.insert({ title: "Item 1" });
+      items.insert({ title: "Item 2" });
+
+      const res = nrml(
+        users.find(
+          { name: "Jonathan" },
+          {
+            join: [
+              {
+                collection: skills,
+                from: "skills",
+                to: "_id",
+                as: "userSkills",
+              },
+              {
+                collection: items,
+                from: "items",
+                to: "_id",
+                as: "userItems",
+              },
+            ],
+          }
+        )
+      )[0];
+
+      const sks = skills.find({ _id: { $oneOf: [3, 4] } });
+      const its = items.find({ _id: { $oneOf: [4, 5] } });
+
+      expect(res).toEqual({
+        name: "Jonathan",
+        skills: [3, 4],
+        items: [4, 5],
+        userSkills: [...sks],
+        userItems: [...its],
+      });
+    });
+
+    test("nested joins", () => {
+      const users = testCollection();
+      const tickets = testCollection({ name: "tickets", integerIds: true });
+      const seats = testCollection({ name: "seats", integerIds: true });
+
+      users.insert({ name: "Jonathan", tickets: [3, 4] });
+      tickets.insert({ title: "Ticket 0", seat: 3 });
+      tickets.insert({ title: "Ticket 1", seat: 5 });
+      tickets.insert({ title: "Ticket 2" });
+      seats.insert({ seat: "S3" });
+      seats.insert({ seat: "S4" });
+      seats.insert({ seat: "S5" });
+
+      const res = nrml(users.find({ name: "Jonathan" }, {
+        join: [{
+          collection: tickets,
+          from: "tickets",
+          to: "_id",
+          as: "userTickets",
+          options: {
+            join: [{
+              collection: seats,
+              from: "seat",
+              to: "_id",
+              as: "userSeats",
+            }]
+          },
+        }],
+      }))[0];
+
+      const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
+      const sts = seats.find({ _id: { $oneOf: [3, 5] } });
+
+      expect(res).toHaveProperty("userTickets");
+      res["userTickets"].forEach((t: any) => {
+        expect(t).toHaveProperty("userSeats");
+      });
+      expect((res as any).userTickets[0]).toEqual({ ...tks[0] as object, userSeats: [sts[0]] });
+      expect((res as any).userTickets[1]).toEqual({ ...tks[1] as object, userSeats: [sts[1]] });
     });
   });
 });
