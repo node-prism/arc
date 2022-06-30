@@ -263,13 +263,10 @@ users.find(
 
 ## Misc
 
----
+### Renaming builtin property names
 
-The default document ID property is `_id`, but this can be changed
-to whatever you want it to be by setting the `ID_KEY` export.
-
-The default property names for document ID (`_id`), the "created at"
-(`_created_at`) and "updated at" (`_updated_at`) timestamps can all be changed.
+The default property names for document ID (default `_id`), "created at"
+(default `_created_at`) and "updated at" (default `_updated_at`) timestamps can all be changed.
 
 ```typescript
 import { ID_KEY, CREATED_AT_KEY, UPDATED_AT_KEY } from "@prism/db";
@@ -279,9 +276,9 @@ CREATED_AT_KEY = "createdAt";
 UPDATED_AT_KEY = "updatedAt";
 ```
 
-If you must do this, do it before creating your collections.
+If you do this, make sure to do it at the beginning of collection creation.
 
----
+### Documents
 
-The return value from find, update and remove is always an array, even if there
+The returned value from `find`, `update` and `remove` is always an array, even when there
 are no results.
