@@ -25,7 +25,7 @@ type Planet = {
   temp: {
     avg: number;
   };
-}
+};
 
 // from `./.data` load or create `planets.json`
 const collection = new Collection<Planet>(".data", "planets");
@@ -37,9 +37,10 @@ const collection = new Collection<Planet>(".data", "planets");
 collection.insert({ planet: "Mercury", diameter: 4880, temp: { avg: 475 } });
 collection.insert([
   { planet: "Venus", diameter: 12_104, temp: { avg: 737_000 } },
-  { planet: "Earth", diameter: 12_742, temp: { avg: 288 } }
+  { planet: "Earth", diameter: 12_742, temp: { avg: 288 } },
 ]);
 ```
+
 ## Finding
 
 ```typescript
@@ -108,10 +109,7 @@ Mostly useful when paired with `sort`.
 //   { a: 3, b: 3, c: 3 },
 // ];
 
-collection.find(
-  { a: { $gt: 0 } },
-  { skip: 1, take: 1 }
-);
+collection.find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
 
 // [
 //   { a: 2, b: 2, c: 2 },
@@ -121,8 +119,6 @@ collection.find(
 ## Projection
 
 The ID property of a document is always included unless explicitly excluded.
-
-
 
 ### Implicit exclusion
 
@@ -137,10 +133,7 @@ in the projection are excluded from the result document.
 //   { a: 1, b: 1, c: 1 },
 // ];
 
-collection.find(
-  { a: 1 },
-  { project: { b: 1 } }
-);
+collection.find({ a: 1 }, { project: { b: 1 } });
 
 // [
 //   { _id: .., b: 1 },
@@ -160,10 +153,7 @@ in the projection are included from the result document.
 //   { a: 1, b: 1, c: 1 },
 // ];
 
-collection.find(
-  { a: 1 },
-  { project: { b: 0 } }
-);
+collection.find({ a: 1 }, { project: { b: 0 } });
 
 // [
 //   { _id: .., a: 1, c: 1 },
@@ -182,10 +172,7 @@ This is effectively the same behavior as implicit inclusion.
 //   { a: 1, b: 1, c: 1 },
 // ];
 
-collection.find(
-  { a: 1 },
-  { project: { b: 1, c: 0 } }
-);
+collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
 
 // [
 //   { _id: .., a: 1, b: 1 },
@@ -213,15 +200,17 @@ collection.find(
 users.find(
   { name: "Alice" },
   {
-    join: [{
-      collection: tickets,
-      from: "purchased",
-      to: "_id",
-      as: "tickets",
-      options: {
-        project: { _id: 0 }
+    join: [
+      {
+        collection: tickets,
+        from: "purchased",
+        to: "_id",
+        as: "tickets",
+        options: {
+          project: { _id: 0 },
+        },
       },
-    }],
+    ],
   }
 );
 
