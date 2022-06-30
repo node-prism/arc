@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { ID_KEY, QueryOptions } from ".";
-import { Ok, Ov } from "./utils";
+import { ensureArray, Ok, Ov } from "./utils";
 
 enum ProjectionMode {
   Explicit = 0,
@@ -63,6 +63,33 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
   if (options.take && typeof options.take === "number") {
     data = data.slice(0, options.take);
+  }
+
+  if (options.join) {
+    const qo = options.join?.options || {};
+    const db = options.join.collection;
+    data = data.map((item) => {
+      item[options.join.as] = ensureArray(item[options.join.as]);
+
+      if (Array.isArray(item[options.join.from])) {
+        item[options.join.from].forEach((key: unknown) => {
+          const query = { [`${options.join.to}`]: key };
+          item[options.join.as] = item[options.join.as].concat(
+            db.find(query, qo)
+          );
+        });
+
+        return item;
+      }
+
+      const query = { [`${options.join.to}`]: item[options.join.from] };
+
+      item[options.join.as] = item[options.join.as].concat(
+        db.find(query, qo)
+      );
+
+      return item;
+    });
   }
 
   return data;

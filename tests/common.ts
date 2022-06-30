@@ -19,6 +19,25 @@ export function testCollection<T>({ integerIds = false } = {}): Collection<T> {
   return collection;
 }
 
+export function testCollection2<T>({ integerIds = false } = {}): Collection<T> {
+  const collection = new Collection<T>(".test", "test2", {
+    autosync: true,
+    integerIds,
+  });
+  collection.drop();
+
+  // Adding some items to ensure that result sets correctly
+  // ignore unmatched queries in all cases.
+  // @ts-ignore
+  collection.insert({ xxx: "xxx" });
+  // @ts-ignore
+  collection.insert({ yyy: "yyy" });
+  // @ts-ignore
+  collection.insert({ zzz: "zzz" });
+
+  return collection;
+}
+
 export function nrml<T>(results: T[], { keepIds = false } = {}): T[] {
   // Remove all the _id fields, and
   // remove all the `_created_at` and `_updated_at` fields.

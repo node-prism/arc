@@ -56,6 +56,15 @@ export type QueryOptions = Partial<{
    * 0: property excluded from result document
    */
   project: { [property: string]: 1 | 0 };
+
+  join: {
+    collection: Collection<any>;
+    from: string;
+    to: string;
+    as: string;
+    options?: QueryOptions;
+  };
+  
 }>;
 
 export function defaultQueryOptions(): QueryOptions {
