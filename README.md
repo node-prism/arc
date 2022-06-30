@@ -75,6 +75,195 @@ Any queries that work with `.find` work with `.remove`.
 collection.remove({ planet: "Earth" });
 ```
 
+## Sorting
+
+```typescript
+// [
+//   { name: "Deanna Troi", age: 28 },
+//   { name: "Worf", age: 24 },
+//   { name: "Xorf", age: 24 },
+//   { name: "Zorf", age: 24 },
+//   { name: "Jean-Luc Picard", age: 59 },
+//   { name: "William Riker", age: 29 },
+// ];
+
+collection.find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
+
+// [
+//   { name: "Zorf", age: 24 },
+//   { name: "Xorf", age: 24 },
+//   { name: "Worf", age: 24 },
+//   { name: "Deanna Troi", age: 28 },
+//   { name: "William Riker", age: 29 },
+//   { name: "Jean-Luc Picard", age: 59 },
+// ];
+```
+
+## Skip-take (i.e. LIMIT)
+
+Mostly useful when paired with `sort`.
+
+```typescript
+// [
+//   { a: 1, b: 1, c: 1 },
+//   { a: 2, b: 2, c: 2 },
+//   { a: 3, b: 3, c: 3 },
+// ];
+
+collection.find(
+  { a: { $gt: 0 } },
+  { skip: 1, take: 1 }
+);
+
+// [
+//   { a: 2, b: 2, c: 2 },
+// ];
+```
+
+## Projection
+
+The ID property of a document is always included unless explicitly excluded.
+
+
+
+### Implicit exclusion
+
+When all projected properties have a value of `1`, this
+is "implicit exclusion" mode.
+
+In this mode, all document properties that are not defined
+in the projection are excluded from the result document.
+
+```typescript
+// [
+//   { a: 1, b: 1, c: 1 },
+// ];
+
+collection.find(
+  { a: 1 },
+  { project: { b: 1 } }
+);
+
+// [
+//   { _id: .., b: 1 },
+// ];
+```
+
+### Implicit inclusion
+
+When all projected properties have a value of `0`, this
+is "implicit inclusion" mode.
+
+In this mode, all document properties that are not defined
+in the projection are included from the result document.
+
+```typescript
+// [
+//   { a: 1, b: 1, c: 1 },
+// ];
+
+collection.find(
+  { a: 1 },
+  { project: { b: 0 } }
+);
+
+// [
+//   { _id: .., a: 1, c: 1 },
+// ];
+```
+
+### Explicit
+
+In the only remaining case, all document properties
+are included unless explicitly removed with a `0`.
+
+This is effectively the same behavior as implicit inclusion.
+
+```typescript
+// [
+//   { a: 1, b: 1, c: 1 },
+// ];
+
+collection.find(
+  { a: 1 },
+  { project: { b: 1, c: 0 } }
+);
+
+// [
+//   { _id: .., a: 1, b: 1 },
+// ];
+```
+
+## Joining
+
+```typescript
+// "users" collection
+
+// [
+//   { name: "Alice", purchased: [1, 2] },
+// ];
+
+// "tickets" collection
+
+// [
+//   { _id: 0, seat: "A1" },
+//   { _id: 1, seat: "B1" },
+//   { _id: 2, seat: "C1" },
+//   { _id: 3, seat: "D1" },
+// ];
+
+users.find(
+  { name: "Alice" },
+  {
+    join: {
+      collection: tickets,
+      from: "purchased",
+      to: "_id",
+      as: "tickets",
+      options: {
+        project: { _id: 0 }
+      },
+    },
+  }
+);
+
+// [
+//   {
+//     name: "Alice",
+//     purchased: [1, 2],
+//     tickets: [
+//       { seat: "B1" },
+//       { seat: "C1" },
+//     ],
+//   },
+// ];
+```
+
+`join` allows for `QueryOptions` which in turn alows for `join`.
+This means that joins can be chained for more complex relationships
+between collections.
+
+```typescript
+users.find(
+  { .. },
+  {
+    join: {
+      collection: tickets,
+      options: {
+        join: {
+          collection: seats,
+          options: {
+            join: {
+              collection: auditoriums,
+            }
+          }
+        }
+      }
+    }
+  }
+);
+```
+
 ## Misc
 
 ---
