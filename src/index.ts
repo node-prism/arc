@@ -27,15 +27,35 @@ export type CollectionOptions<T> = Partial<{
 }>;
 
 export type QueryOptions = Partial<{
+  /** When true, attempts to deeply match the query against documents. */
   deep: boolean;
+
   /** Specifies the key to return by. */
   returnKey: string;
+
   /** When true, returns cloned data (not a reference). default true */
   clonedData: boolean;
 
-  sort: undefined | { [key: string]: number };
-  skip: any;
-  project: undefined | { [key: string]: 1 | 0 };
+  /**
+   * -1 || 0: descending
+   *  1: ascending
+   */
+  sort: { [property: string]: -1 | 0 | 1 };
+
+  /**
+   * Particularly useful when sorting, `skip` defines the number of documents
+   * to ignore from the beginning of the result set.
+   */
+  skip: number;
+
+  /** Determines the number of documents returned. */
+  take: number;
+
+  /**
+   * 1: property included in result document
+   * 0: property excluded from result document
+   */
+  project: { [property: string]: 1 | 0 };
 }>;
 
 export function defaultQueryOptions(): QueryOptions {
