@@ -9,9 +9,6 @@ npm i @prism/db
 
 # API overview
 
-Below is a brief overview of the API to help you get a feel
-for what this package can do for you.
-
 For a more thorough API reference, please look at the tests in this repository.
 
 ## Creating a collection
