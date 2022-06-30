@@ -57,13 +57,13 @@ export type QueryOptions = Partial<{
    */
   project: { [property: string]: 1 | 0 };
 
-  join: {
+  join: Array<{
     collection: Collection<any>;
     from: string;
     to: string;
     as: string;
     options?: QueryOptions;
-  };
+  }>;
   
 }>;
 

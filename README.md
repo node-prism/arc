@@ -215,7 +215,7 @@ collection.find(
 users.find(
   { name: "Alice" },
   {
-    join: {
+    join: [{
       collection: tickets,
       from: "purchased",
       to: "_id",
@@ -223,7 +223,7 @@ users.find(
       options: {
         project: { _id: 0 }
       },
-    },
+    }],
   }
 );
 
@@ -247,19 +247,19 @@ between collections.
 users.find(
   { .. },
   {
-    join: {
+    join: [{
       collection: tickets,
       options: {
-        join: {
+        join: [{
           collection: seats,
           options: {
-            join: {
+            join: [{
               collection: auditoriums,
-            }
+            }]
           }
-        }
+        }]
       }
-    }
+    }]
   }
 );
 ```

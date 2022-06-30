@@ -65,30 +65,34 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     data = data.slice(0, options.take);
   }
 
-  if (options.join) {
-    const qo = options.join?.options || {};
-    const db = options.join.collection;
-    data = data.map((item) => {
-      item[options.join.as] = ensureArray(item[options.join.as]);
+  if (options.join && Array.isArray(options.join)) {
+    options.join.forEach((join) => {
+      const qo = join?.options || {};
+      const db = join.collection;
+      data = data.map((item) => {
+        item[join.as] = ensureArray(item[join.as]);
 
-      if (Array.isArray(item[options.join.from])) {
-        item[options.join.from].forEach((key: unknown) => {
-          const query = { [`${options.join.to}`]: key };
-          item[options.join.as] = item[options.join.as].concat(
-            db.find(query, qo)
-          );
-        });
+        if (item[join.from] === undefined) return item;
+
+        if (Array.isArray(item[join.from])) {
+          item[join.from].forEach((key: unknown) => {
+            const query = { [`${join.to}`]: key };
+            item[join.as] = item[join.as].concat(
+              db.find(query, qo)
+            );
+          });
+
+          return item;
+        }
+
+        const query = { [`${join.to}`]: item[join.from] };
+
+        item[join.as] = item[join.as].concat(
+          db.find(query, qo)
+        );
 
         return item;
-      }
-
-      const query = { [`${options.join.to}`]: item[options.join.from] };
-
-      item[options.join.as] = item[options.join.as].concat(
-        db.find(query, qo)
-      );
-
-      return item;
+      });
     });
   }
 

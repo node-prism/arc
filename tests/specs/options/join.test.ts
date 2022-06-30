@@ -13,12 +13,12 @@ export default testSuite(async ({ describe }) => {
       tickets.insert({ title: "Ticket 2", description: "Ticket 2 description" });
 
       const res = nrml(users.find({ name: "Jonathan" }, {
-        join: {
+        join: [{
           collection: tickets,
           from: "tickets",
           to: "_id",
           as: "userTickets",
-        },
+        }],
       }))[0];
 
       const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
@@ -37,13 +37,13 @@ export default testSuite(async ({ describe }) => {
       tickets.insert({ title: "Ticket 2", description: "Ticket 2 description" });
 
       const res = nrml(users.find({ name: "Jonathan" }, {
-        join: {
+        join: [{
           collection: tickets,
           from: "tickets",
           to: "_id",
           as: "userTickets",
           options: { project: { title: 1 } },
-        },
+        }],
       }))[0];
 
       const tks = tickets.find({ _id: { $oneOf: [3, 4] } }, { project: { title: 1 } });
