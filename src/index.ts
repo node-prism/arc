@@ -58,10 +58,19 @@ export type QueryOptions = Partial<{
   project: { [property: string]: 1 | 0 };
 
   join: Array<{
+    /** The collection to join on. */
     collection: Collection<any>;
+
+    /** The property containing the foreign key(s). */
     from: string;
+
+    /** The property on the joining collection that the foreign key should point to. */
     to: string;
+
+    /** The name of the property to be created while will contain the joined documents. */
     as: string;
+
+    /** QueryOptions that will be applied to the joined collection. */
     options?: QueryOptions;
   }>;
   
