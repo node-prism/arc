@@ -64,7 +64,7 @@ export default function find<T>(
     let r = [];
     if (q[ID_KEY] && !isObject(q[ID_KEY]) && !collectionOptions.integerIds) {
       r.push(data[q[ID_KEY]]);
-    } else if (q[ID_KEY] && collectionOptions.integerIds) {
+    } else if (q[ID_KEY] && !isObject(q[ID_KEY]) && collectionOptions.integerIds) {
       let f = data.__private.id_map[q[ID_KEY]];
       // If we have `f`, it's a uuid.
       if (f) r.push(data[f])
