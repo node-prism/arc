@@ -21,7 +21,7 @@ export function testCollection<T>({ integerIds = false } = {}): Collection<T> {
 
 export function testCollection2<T>({ integerIds = false } = {}): Collection<T> {
   const collection = new Collection<T>(".test", "test2", {
-    autosync: true,
+    autosync: false,
     integerIds,
   });
   collection.drop();
