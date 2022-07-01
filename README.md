@@ -146,7 +146,7 @@ collection.find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
 // ];
 ```
 
-## Skip-take (i.e. LIMIT)
+### Skip-take (i.e. LIMIT)
 
 Mostly useful when paired with `sort`.
 
@@ -164,11 +164,11 @@ collection.find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
 // ];
 ```
 
-## Projection
+### Projection
 
 The ID property of a document is always included unless explicitly excluded.
 
-### Implicit exclusion
+#### Implicit exclusion
 
 When all projected properties have a value of `1`, this
 is "implicit exclusion" mode.
@@ -188,7 +188,7 @@ collection.find({ a: 1 }, { project: { b: 1 } });
 // ];
 ```
 
-### Implicit inclusion
+#### Implicit inclusion
 
 When all projected properties have a value of `0`, this
 is "implicit inclusion" mode.
@@ -208,7 +208,7 @@ collection.find({ a: 1 }, { project: { b: 0 } });
 // ];
 ```
 
-### Explicit
+#### Explicit
 
 In the only remaining case, all document properties
 are included unless explicitly removed with a `0`.
@@ -227,7 +227,7 @@ collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
 // ];
 ```
 
-## Joining
+### Joining
 
 ```typescript
 // "users" collection
