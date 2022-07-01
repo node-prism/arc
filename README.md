@@ -75,7 +75,53 @@ Any queries that work with `.find` work with `.remove`.
 collection.remove({ planet: "Earth" });
 ```
 
-## Sorting
+## Query options
+
+`find`, `update` and `remove` accept a `QueryOptions` object.
+
+```typescript
+{
+  /**
+   * -1 || 0: descending
+   *  1: ascending
+   */
+  sort: { [property: string]: -1 | 0 | 1 };
+
+  /**
+   * 1: property included in result document
+   * 0: property excluded from result document
+   */
+  project: { [property: string]: 1 | 0 };
+
+  /**
+   * Particularly useful when sorting, `skip` defines the number of documents
+   * to ignore from the beginning of the result set.
+   */
+  skip: number;
+
+  /** Determines the number of documents returned. */
+  take: number;
+
+  join: Array<{
+    /** The collection to join on. */
+    collection: Collection<any>;
+
+    /** The property containing the foreign key(s). */
+    from: string;
+
+    /** The property on the joining collection that the foreign key should point to. */
+    to: string;
+
+    /** The name of the property to be created while will contain the joined documents. */
+    as: string;
+
+    /** QueryOptions that will be applied to the joined collection. */
+    options?: QueryOptions;
+  }>;
+}
+```
+
+### Sorting
 
 ```typescript
 // [
