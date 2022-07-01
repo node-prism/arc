@@ -44,14 +44,16 @@ collection.insert([
 ## Finding
 
 ```typescript
-// finds Venus and Earth documents
-collection.find({ diameter: { $gt: 12_000 } });
-// finds Earth document
-collection.find({ planet: "Earth" });
-// finds Mercury and Earth documents
-collection.find({ temp: { avg: { $lt: 1_000 } } });
 // finds Earth document
 collection.find({ avg: 288 });
+collection.find({ planet: "Earth" });
+
+// finds Venus and Earth documents
+collection.find({ diameter: { $gt: 12_000 } });
+
+// finds Mercury and Earth documents
+collection.find({ temp: { avg: { $lt: 1_000 } } });
+
 // finds Mercury and Earth documents
 collection.find({ $and: [{ avg: { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
 ```
