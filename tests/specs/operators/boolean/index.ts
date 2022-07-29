@@ -8,5 +8,6 @@ export default testSuite(async ({ describe }) => {
     runTestSuite(import("./fn.test.js"));
     runTestSuite(import("./re.test.js"));
     runTestSuite(import("./oneOf.test.js"));
+    runTestSuite(import("./length.test.js"));
   });
 });
