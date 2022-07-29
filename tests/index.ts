@@ -8,11 +8,9 @@ await describe("options", async ({ runTestSuite }) => {
   runTestSuite(import("./specs/options"));
 });
 
-await describe("update", async ({ describe }) => {
-  await describe("operators", ({ runTestSuite }) => {
-    runTestSuite(import("./specs/operators/boolean"));
-    runTestSuite(import("./specs/operators/mutation"));
-  });
+await describe("operators", ({ runTestSuite }) => {
+  runTestSuite(import("./specs/operators/boolean"));
+  runTestSuite(import("./specs/operators/mutation"));
 });
 
 await describe("upsert", ({ runTestSuite }) => {
