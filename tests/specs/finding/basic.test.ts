@@ -11,7 +11,7 @@ export default testSuite(async ({ describe }) => {
       collection.insert({ a: 3 });
       const found = nrml(collection.find({ a: 4 }));
       expect(found).toEqual([]);
-    })
+    });
 
     test("simple find", () => {
       const collection = testCollection();
