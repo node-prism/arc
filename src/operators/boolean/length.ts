@@ -1,4 +1,4 @@
-import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
+import { isObject, Ok, safeHasOwnProperty } from "../../utils";
 
 /**
  * $length asserts the length of an array or string.
