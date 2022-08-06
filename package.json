@@ -1,5 +1,5 @@
 {
-  "name": "@prism/db",
+  "name": "@prsm/db",
   "version": "1.5.0",
   "description": "",
   "main": "lib/src/index.js",
@@ -13,7 +13,7 @@
     "build": "tsc",
     "test": "tsx tests/index.ts"
   },
-  "author": "",
+  "author": "nvms",
   "license": "ISC",
   "devDependencies": {
     "@types/lodash": "^4.14.182",
