@@ -4,7 +4,7 @@ You can think of this as MongoDB's little brother.
 # Installation
 
 ```bash
-npm i @prism/db
+npm i @prsm/db
 ```
 
 # API overview
