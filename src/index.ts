@@ -233,6 +233,9 @@ export class Collection<T> {
   remove(query: object, options: QueryOptions = {}): T[] {
     let found = this.find(query, { ...options, clonedData: false });
 
+    // Copy the found array so we can return unmodified data.
+    const cloned = found.map((doc) => Object.assign({}, doc));
+
     found.forEach((document) => {
       if (this.options.integerIds) {
         const intid = document[ID_KEY];
@@ -248,7 +251,7 @@ export class Collection<T> {
 
     this.sync();
 
-    return found;
+    return cloned;
   }
 
   insert(documents: T[] | T): T[] {
