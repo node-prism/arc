@@ -20,3 +20,7 @@ await describe("upsert", ({ runTestSuite }) => {
 await describe("transactions", ({ runTestSuite }) => {
   runTestSuite(import("./specs/transactions"));
 });
+
+await describe("remove", ({ runTestSuite }) => {
+  runTestSuite(import("./specs/remove"));
+});
