@@ -8,7 +8,7 @@ import { update } from "./update";
 import { deeplyRemoveEmptyObjects, isEmptyObject, isObject, Ok } from "./utils";
 
 export interface StorageAdapter<T> {
-  read: () => Promise<{ [key: string]: T }>;
+  read: () => { [key: string]: T };
   write: (data: { [key: string]: T }) => any;
 }
 
@@ -166,8 +166,8 @@ export class Collection<T> {
     this.initializeData();
   }
 
-  async initializeData() {
-    this.data = await this.options.adapter.read();
+  initializeData() {
+    this.data = this.options.adapter.read();
   }
 
   /**

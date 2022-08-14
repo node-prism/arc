@@ -12,9 +12,9 @@ export default class FilesystemAdapter<T> implements StorageAdapter<T> {
     queue: SimpleFIFO;
     constructor(storagePath: string, name: string);
     prepareStorage(): void;
-    read(): Promise<{
+    read(): {
         [key: string]: T;
-    }>;
+    };
     write(data: {
         [key: string]: T;
     }): void;

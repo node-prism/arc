@@ -47,19 +47,15 @@ export default class FilesystemAdapter<T> implements StorageAdapter<T> {
     }
   }
 
-  async read(): Promise<{ [key: string]: T }> {
-    let data: { [key: string]: T } = {};
-
+  read(): { [key: string]: T } {
     try {
-      data = Object.assign(
+      return Object.assign(
         {},
         JSON.parse(fs.readFileSync(this.filePath, "utf8")) || {}
       );
     } catch (e) {
-      data = {};
+      return {};
     }
-
-    return data;
   }
 
   write(data: { [key: string]: T }) {

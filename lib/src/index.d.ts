@@ -1,8 +1,8 @@
 import { Transaction } from "./transaction";
 export interface StorageAdapter<T> {
-    read: () => Promise<{
+    read: () => {
         [key: string]: T;
-    }>;
+    };
     write: (data: {
         [key: string]: T;
     }) => any;
@@ -79,7 +79,7 @@ export declare class Collection<T> {
     data: CollectionData;
     _transaction: Transaction<T>;
     constructor(storagePath?: string, name?: string, options?: CollectionOptions<T>);
-    initializeData(): Promise<void>;
+    initializeData(): void;
     /**
      * Given objects found by a query, assign `document` directly to these objects.
      * Does not add timestamps or anything else.
