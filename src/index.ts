@@ -114,9 +114,7 @@ function stripBooleanModifiers(query: object): object {
     }
   });
 
-  query = deeplyRemoveEmptyObjects(query);
-
-  return query;
+  return deeplyRemoveEmptyObjects(query);
 }
 
 export let ID_KEY = "_id";
@@ -231,7 +229,7 @@ export class Collection<T> {
   }
 
   remove(query: object, options: QueryOptions = {}): T[] {
-    let found = this.find(query, { ...options, clonedData: false });
+    const found = this.find(query, { ...options, clonedData: false });
 
     // Copy the found array so we can return unmodified data.
     const cloned = found.map((doc) => Object.assign({}, doc));

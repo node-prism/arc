@@ -67,7 +67,7 @@ export default class FilesystemAdapter<T> implements StorageAdapter<T> {
     ]);
 
     while (this.queue.length()) {
-      let ar = this.queue.shift();
+      const ar = this.queue.shift();
       ar[0](ar[1]);
     }
   }
