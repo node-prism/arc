@@ -21,13 +21,11 @@ export const changeProps = (
             ...itemClone,
             [key]: replaceProps[key],
           };
-        } else {
-          if (safeHasOwnProperty(itemClone, key)) {
-            itemClone = {
-              ...itemClone,
-              [key]: replaceProps[key],
-            };
-          }
+        } else if (safeHasOwnProperty(itemClone, key)) {
+          itemClone = {
+            ...itemClone,
+           [key]: replaceProps[key],
+          };
         }
       });
     }

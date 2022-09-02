@@ -9,10 +9,10 @@ import { returnFound } from "./return_found";
 import { ensureArray, isObject, Ov } from "./utils";
 
 const makeDistinctByKey = (arr: any[], key: string) => {
-  let map = new Map();
+  const map = new Map();
   let val: any;
   arr = ensureArray(arr);
-  let unique = arr.filter((el) => {
+  return arr.filter((el) => {
     if (el === undefined) return;
     val = map.get(el[key]);
     if (val) {
@@ -27,7 +27,6 @@ const makeDistinctByKey = (arr: any[], key: string) => {
     map.set(el[key], el[key]);
     return true;
   });
-  return unique;
 };
 
 
@@ -46,16 +45,15 @@ export default function find<T>(
   // if there's no query, return all data.
   if (!query.length) {
     if (options.clonedData) {
-      let distinctCloned = [];
+      const distinctCloned = [];
       for (const obj of [...Ov(data)]) {
         distinctCloned.push(_.cloneDeep(obj));
       }
       return distinctCloned;
     }
 
-    let d = [...Ov(data)];
-    let mutated = applyQueryOptions(d, options);
-    return mutated;
+    const d = [...Ov(data)];
+    return applyQueryOptions(d, options);
   }
 
   // we have a query
@@ -65,7 +63,7 @@ export default function find<T>(
     if (q[ID_KEY] && !isObject(q[ID_KEY]) && !collectionOptions.integerIds) {
       r.push(data[q[ID_KEY]]);
     } else if (q[ID_KEY] && !isObject(q[ID_KEY]) && collectionOptions.integerIds) {
-      let f = data.__private.id_map[q[ID_KEY]];
+      const f = data.__private.id_map[q[ID_KEY]];
       // If we have `f`, it's a uuid.
       if (f) r.push(data[f])
     } else {
@@ -79,13 +77,13 @@ export default function find<T>(
   }
 
   res = applyQueryOptions(res, options);
-  let distinct = makeDistinctByKey(res, ID_KEY);
+  const distinct = makeDistinctByKey(res, ID_KEY);
 
   if (!options.clonedData) {
     return distinct;
   }
 
-  let cloned = [];
+  const cloned = [];
   for (const obj of distinct) cloned.push(_.cloneDeep(obj));
   return cloned;
 }

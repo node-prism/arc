@@ -6,7 +6,7 @@ import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
  * users.find({ _id: { $oneOf: [1, 3, 4]  } })
  */
 export function $oneOf(source: object, query: object): boolean {
-  let matches = [];
+  const matches = [];
 
   if (isObject(query)) {
     Ok(query).forEach((k) => {

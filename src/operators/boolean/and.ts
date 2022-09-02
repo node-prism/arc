@@ -2,7 +2,7 @@ import { checkAgainstQuery } from "../../return_found";
 import { ensureArray, isObject, Ok } from "../../utils";
 
 export function $and(source: object, query: object): boolean {
-  let matches = [];
+  const matches = [];
 
   if (isObject(query)) {
     Ok(query).forEach((pk) => {

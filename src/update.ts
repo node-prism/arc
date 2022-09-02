@@ -23,7 +23,7 @@ export function update<T>(
   options = { ...defaultQueryOptions(), ...options };
   query = ensureArray(query);
 
-  let mutated = [];
+  const mutated = [];
 
   for (const q of query) {
     let itemsToMutate = [];
@@ -48,7 +48,5 @@ export function update<T>(
   }
 
   // Apply query options to mutated results before returning them.
-  mutated = applyQueryOptions(mutated, options);
-
-  return mutated;
+  return applyQueryOptions(mutated, options);
 }

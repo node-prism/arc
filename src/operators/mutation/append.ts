@@ -8,7 +8,7 @@ export function $append<T>(
   query: object,
   collection: Collection<T>
 ): T[] {
-  let mods = ensureArray(modifiers);
+  const mods = ensureArray(modifiers);
 
   mods.forEach((mod) => {
     source = appendProps(source, query, mod);

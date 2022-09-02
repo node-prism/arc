@@ -8,11 +8,11 @@ export function $change<T>(
   query: object,
   collection: Collection<T>
 ): T[] {
-  let mods = ensureArray(modifiers);
+  const mods = ensureArray(modifiers);
 
   mods.forEach((mod) => {
     if (!isObject(mod) && !Array.isArray(mod)) {
-      let obj = {};
+      const obj = {};
 
       Ok(query).forEach((key) => {
         obj[key] = mod;

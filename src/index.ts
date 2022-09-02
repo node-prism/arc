@@ -73,7 +73,7 @@ export type QueryOptions = Partial<{
     /** QueryOptions that will be applied to the joined collection. */
     options?: QueryOptions;
   }>;
-  
+
 }>;
 
 export function defaultQueryOptions(): QueryOptions {

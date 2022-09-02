@@ -16,8 +16,8 @@ function math<T>(
   op: Op,
   collection: Collection<T>
 ): T[] {
-  let mods = ensureArray(modifiers);
-  let operable = returnFound(
+  const mods = ensureArray(modifiers);
+  const operable = returnFound(
     source,
     query,
     {
@@ -125,8 +125,7 @@ export function $inc<T>(
   query: object,
   collection: Collection<T>
 ): T[] {
-  source = math<T>(source, modifiers, query, Op.Inc, collection);
-  return source;
+  return math<T>(source, modifiers, query, Op.Inc, collection);
 }
 
 export function $dec<T>(
@@ -135,8 +134,7 @@ export function $dec<T>(
   query: object,
   collection: Collection<T>
 ): T[] {
-  source = math<T>(source, modifiers, query, Op.Dec, collection);
-  return source;
+  return math<T>(source, modifiers, query, Op.Dec, collection);
 }
 
 export function $mult<T>(
@@ -145,8 +143,7 @@ export function $mult<T>(
   query: object,
   collection: Collection<T>
 ): T[] {
-  source = math<T>(source, modifiers, query, Op.Mult, collection);
-  return source;
+  return math<T>(source, modifiers, query, Op.Mult, collection);
 }
 
 export function $div<T>(
@@ -155,6 +152,5 @@ export function $div<T>(
   query: object,
   collection: Collection<T>
 ): T[] {
-  source = math<T>(source, modifiers, query, Op.Div, collection);
-  return source;
+  return math<T>(source, modifiers, query, Op.Div, collection);
 }

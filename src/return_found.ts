@@ -19,7 +19,7 @@ export function checkAgainstQuery(source: object, query: object): boolean {
     return Ok(query).every((key) => {
       if (source[key] === query[key]) return true;
 
-      let mods = [];
+      const mods = [];
 
       // Operators are sometimes a toplevel key:
       // find({ $and: [{ a: 1 }, { b: 2 }] })
@@ -39,7 +39,7 @@ export function checkAgainstQuery(source: object, query: object): boolean {
         let allmatch = true;
 
         mods.forEach((mod) => {
-          let res = booleanOperators[mod](source, query);
+          const res = booleanOperators[mod](source, query);
           if (Array.isArray(res) && !res.length) allmatch = false;
           else if (!res) allmatch = false;
         });

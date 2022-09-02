@@ -12,7 +12,7 @@ import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
  * find({ "nums": { $includes: [1, 2, 3] } })
  */
 export function $includes(source: object, query: object): boolean {
-  let matches = [];
+  const matches = [];
 
   if (isObject(query)) {
     Ok(query).forEach((k) => {

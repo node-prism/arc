@@ -12,7 +12,7 @@ export function $length(source: object, query: object): boolean {
 
   if (isObject(query)) {
     Ok(query).forEach((k) => {
-      let qry = query[k]["$length"];
+      const qry = query[k]["$length"];
 
       if (safeHasOwnProperty(source, k)) {
         if (Array.isArray(source[k]) || typeof source[k] === "string") {
