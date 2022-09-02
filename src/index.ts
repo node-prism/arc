@@ -36,6 +36,9 @@ export type QueryOptions = Partial<{
   /** When true, returns cloned data (not a reference). default true */
   clonedData: boolean;
 
+  /** Provide fallback values for null or undefined properties */
+  ifNull: Record<string, any>;
+
   /**
    * -1 || 0: descending
    *  1: ascending

@@ -7,5 +7,6 @@ export default testSuite(async ({ describe }) => {
     runTestSuite(import("./project.test.js"));
     runTestSuite(import("./skip_take.test.js"));
     runTestSuite(import("./join.test.js"));
+    runTestSuite(import("./ifNull.test.js"));
   });
 });

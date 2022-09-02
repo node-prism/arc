@@ -49,6 +49,17 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     }
   }
 
+  if (options.ifNull) {
+    data = data.map((item) => {
+      for (const key in options.ifNull) {
+        if (item[key] === null || item[key] === undefined) {
+          item[key] = options.ifNull[key];
+       }
+      }
+      return item;
+    });
+  }
+
   if (options.sort) {
     data = _.orderBy(
       data,
