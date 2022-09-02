@@ -121,6 +121,20 @@ collection.remove({ planet: "Earth" });
 }
 ```
 
+### ifNull
+
+```typescript
+// [
+//   { a: 1, b: 2, c: 3 },
+// ];
+
+collection.find({ a: 1 }, { ifNull: { d: 4 } });
+
+// [
+//   { a: 1, b: 2, c: 3, d: 4 },
+// ];
+```
+
 ### Sorting
 
 ```typescript
