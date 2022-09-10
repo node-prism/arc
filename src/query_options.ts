@@ -34,7 +34,7 @@ function applyProjectionAggregation(data: any[], options: QueryOptions): any[] {
       }
       return 0;
     },
-    $sub: (item: object, arr: string[]|number[]) => {
+    $sub: (item: object, arr: (string|number)[]) => {
       let res = undefined;
       for (const a of arr) {
         if (typeof a === "number") {
@@ -51,7 +51,7 @@ function applyProjectionAggregation(data: any[], options: QueryOptions): any[] {
       }
       return res;
     },
-    $add: (item: object, arr: string[]|number[]) => {
+    $add: (item: object, arr: (string|number)[]) => {
       let res = undefined;
       for (const a of arr) {
         if (typeof a === "number") {
@@ -68,7 +68,7 @@ function applyProjectionAggregation(data: any[], options: QueryOptions): any[] {
       }
       return res;
     },
-    $mult: (item: object, arr: string[]|number[]) => {
+    $mult: (item: object, arr: (string|number)[]) => {
       let res = 1;
       for (const el of arr) {
         if (typeof el === "number") {
@@ -79,7 +79,7 @@ function applyProjectionAggregation(data: any[], options: QueryOptions): any[] {
       }
       return res;
     },
-    $div: (item: object, arr: string[]|number[]) => {
+    $div: (item: object, arr: (string|number)[]) => {
       let res = undefined;
       for (const el of arr) {
         if (typeof el === "number") {
