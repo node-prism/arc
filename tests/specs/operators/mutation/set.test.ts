@@ -32,5 +32,13 @@ export default testSuite(async ({ describe }) => {
       const found = nrml(collection.find({ a: 1 }));
       expect(found).toEqual([{ a: 1, b: { d: 6 } }]);
     });
+    test("shorthand behavior", () => {
+      const collection = testCollection();
+      collection.insert({ a: 1, b: { c: 1 } });
+      collection.insert({ a: 2, b: { c: 2 } });
+      collection.update({ a: 1 }, { $set: 11 });
+      const found = nrml(collection.find({ a: 11 }));
+      expect(found).toEqual([{ a: 11, b: { c: 1 } }]);
+    });
   });
 });
