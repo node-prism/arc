@@ -19,9 +19,10 @@ export function $set<T>(
       });
 
       source = changeProps(source, query, obj, true);
-    } else {
-      source = changeProps(source, query, mod, true);
+      return;
     }
+
+    source = changeProps(source, query, mod, true);
   });
 
   return source;
