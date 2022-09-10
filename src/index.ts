@@ -101,20 +101,20 @@ function stripBooleanModifiers(query: object): object {
   Object.keys(query).forEach((key) => {
     if (Ok(query[key]).every((value) => ops.includes(value))) {
       delete query[key];
-    } else {
-      if (!isObject(query[key])) return;
-      if (Ok(query[key]).every((value) => ops.includes(value))) {
-        delete query[key];
-        return;
-      }
-      Ok(query[key]).forEach((k) => {
-        if (!ops.includes(k)) {
-          stripBooleanModifiers(query[key][k]);
-        } else {
-          delete query[key][k];
-        }
-      });
+      return;
     }
+    if (!isObject(query[key])) return;
+    if (Ok(query[key]).every((value) => ops.includes(value))) {
+      delete query[key];
+      return;
+    }
+    Ok(query[key]).forEach((k) => {
+      if (!ops.includes(k)) {
+        stripBooleanModifiers(query[key][k]);
+      } else {
+        delete query[key][k];
+      }
+    });
   });
 
   return deeplyRemoveEmptyObjects(query);
