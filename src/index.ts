@@ -58,7 +58,17 @@ export type QueryOptions = Partial<{
    * 1: property included in result document
    * 0: property excluded from result document
    */
-  project: { [property: string]: 1 | 0 | Record<string, any> };
+  project: {
+    [property: string]:
+      0 |
+      1 |
+      Record<"$floor", string> |
+      Record<"$ceil", string> |
+      Record<"$sub", (string|number)[]> |
+      Record<"$mult", (string|number)[]> |
+      Record<"$div", (string|number)[]> |
+      Record<"$add", (string|number)[]>;
+  };
 
   join: Array<{
     /** The collection to join on. */
