@@ -22,7 +22,7 @@ export function $set<T>(
     } else {
       source = changeProps(source, query, mod, true);
     }
-  })
+  });
 
   return source;
 }
