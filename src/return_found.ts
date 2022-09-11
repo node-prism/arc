@@ -54,11 +54,7 @@ export function checkAgainstQuery(source: object, query: object): boolean {
     });
   }
 
-  if (Array.isArray(source) && isObject(query)) {
-    return source.some((s) => checkAgainstQuery(s, query));
-  }
-
-  return false;
+  return source === query;
 }
 
 export function returnFound(
@@ -109,6 +105,26 @@ export function returnFound(
   }
 
   source = ensureArray(source);
+
+  const queryHasMods = Object.keys(query).some((key) => key.startsWith("$"));
+
+  if (isObject(query) && Array.isArray(source) && !queryHasMods) {
+    source.forEach((sourceObject, _index) => {
+      if (safeHasOwnProperty(sourceObject, options.returnKey)) {
+        parentDocument = sourceObject;
+      }
+
+      Ok(query).forEach((key) => {
+        if (isObject(sourceObject)) {
+          if (checkAgainstQuery(source[_index], query[key])) {
+            appendResult(parentDocument);
+          }
+        } else if (checkAgainstQuery(source, query[key])) {
+          appendResult(parentDocument);
+        }
+      });
+    });
+  }
 
   if (!isEmptyObject(query) && Array.isArray(source)) {
     source.forEach((item) => processObject(item));

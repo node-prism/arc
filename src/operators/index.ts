@@ -11,6 +11,7 @@ import { $re } from "./boolean/re";
 import { $includes } from "./boolean/includes";
 import { $oneOf } from "./boolean/oneOf";
 import { $length } from "./boolean/length";
+import { $not } from "./boolean/not";
 import { $set } from "./mutation/set";
 import { $unset } from "./mutation/unset";
 import { $change } from "./mutation/change";

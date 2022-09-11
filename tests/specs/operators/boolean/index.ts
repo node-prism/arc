@@ -9,5 +9,6 @@ export default testSuite(async ({ describe }) => {
     runTestSuite(import("./re.test.js"));
     runTestSuite(import("./oneOf.test.js"));
     runTestSuite(import("./length.test.js"));
+    runTestSuite(import("./not.test.js"));
   });
 });
