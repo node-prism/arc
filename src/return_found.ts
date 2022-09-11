@@ -106,6 +106,8 @@ export function returnFound(
 
   source = ensureArray(source);
 
+  // If the query included mods, then we defer to the result of those mods
+  // to determine if we should return a document.
   const queryHasMods = Object.keys(query).some((key) => key.startsWith("$"));
 
   if (isObject(query) && Array.isArray(source) && !queryHasMods) {
