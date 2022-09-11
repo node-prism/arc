@@ -31,6 +31,7 @@ export const booleanOperators = {
   $fn,
   $re,
   $length,
+  $not,
 };
 
 const mutationOperators = {
