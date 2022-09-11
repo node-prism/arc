@@ -1,3 +1,4 @@
+import cuid from "cuid";
 import _ from "lodash";
 import { ID_KEY, QueryOptions } from ".";
 import { ensureArray, Ok, Ov } from "./utils";
@@ -183,27 +184,32 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     options.join.forEach((join) => {
       const qo = join?.options || {};
       const db = join.collection;
+      const tmp = cuid();
       data = data.map((item) => {
         item[join.as] = ensureArray(item[join.as]);
+        item[tmp] = [];
 
         if (item[join.from] === undefined) return item;
 
         if (Array.isArray(item[join.from])) {
           item[join.from].forEach((key: unknown) => {
             const query = { [`${join.on}`]: key };
-            item[join.as] = item[join.as].concat(
+            item[tmp] = item[tmp].concat(
               db.find(query, qo)
             );
           });
+
+          item[join.as] = item[tmp];
+          delete item[tmp];
 
           return item;
         }
 
         const query = { [`${join.on}`]: item[join.from] };
 
-        item[join.as] = item[join.as].concat(
-          db.find(query, qo)
-        );
+        item[tmp] = db.find(query, qo);
+        item[join.as] = item[tmp];
+        delete item[tmp];
 
         return item;
       });

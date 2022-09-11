@@ -27,6 +27,30 @@ export default testSuite(async ({ describe }) => {
       expect((res as any).userTickets).toEqual(tks);
     });
 
+    test("will overwrite original property", () => {
+      const users = testCollection();
+      const tickets = testCollection({ name: "tickets", integerIds: true });
+
+      users.insert({ name: "Jonathan", tickets: [3, 4] });
+      tickets.insert({ title: "Ticket 0", description: "Ticket 0 description" });
+      tickets.insert({ title: "Ticket 1", description: "Ticket 1 description" });
+      tickets.insert({ title: "Ticket 2", description: "Ticket 2 description" });
+
+      const res = nrml(users.find({ name: "Jonathan" }, {
+        join: [{
+          collection: tickets,
+          from: "tickets",
+          on: "_id",
+          as: "tickets",
+        }],
+      }))[0];
+
+      const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
+
+      expect(res).toHaveProperty("tickets");
+      expect((res as any).tickets).toEqual(tks);
+    });
+
     test("respects query options", () => {
       const users = testCollection();
       const tickets = testCollection({ name: "tickets", integerIds: true });
