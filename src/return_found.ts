@@ -54,7 +54,11 @@ export function checkAgainstQuery(source: object, query: object): boolean {
     });
   }
 
-  return source === query;
+  if (Array.isArray(source) && isObject(query)) {
+    return source.some((s) => checkAgainstQuery(s, query));
+  }
+
+  return false;
 }
 
 export function returnFound(
@@ -105,24 +109,6 @@ export function returnFound(
   }
 
   source = ensureArray(source);
-
-  if (isObject(query) && Array.isArray(source)) {
-    source.forEach((sourceObject, _index) => {
-      if (safeHasOwnProperty(sourceObject, options.returnKey)) {
-        parentDocument = sourceObject;
-      }
-
-      Ok(query).forEach((key) => {
-        if (isObject(sourceObject)) {
-          if (checkAgainstQuery(source[_index], query[key])) {
-            appendResult(parentDocument);
-          }
-        } else if (checkAgainstQuery(source, query[key])) {
-          appendResult(parentDocument);
-        }
-      });
-    });
-  }
 
   if (!isEmptyObject(query) && Array.isArray(source)) {
     source.forEach((item) => processObject(item));
