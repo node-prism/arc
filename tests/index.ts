@@ -4,6 +4,10 @@ await describe("find", async ({ runTestSuite }) => {
   runTestSuite(import("./specs/finding"));
 });
 
+await describe("filter", async ({ runTestSuite }) => {
+  runTestSuite(import("./specs/filter"));
+});
+
 await describe("insert", async ({ runTestSuite }) => {
   runTestSuite(import("./specs/insert"));
 });
