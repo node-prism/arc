@@ -16,7 +16,7 @@ export default testSuite(async ({ describe }) => {
         join: [{
           collection: tickets,
           from: "tickets",
-          to: "_id",
+          on: "_id",
           as: "userTickets",
         }],
       }))[0];
@@ -40,7 +40,7 @@ export default testSuite(async ({ describe }) => {
         join: [{
           collection: tickets,
           from: "tickets",
-          to: "_id",
+          on: "_id",
           as: "userTickets",
           options: { project: { title: 1 } },
         }],
@@ -75,13 +75,13 @@ export default testSuite(async ({ describe }) => {
               {
                 collection: skills,
                 from: "skills",
-                to: "_id",
+                on: "_id",
                 as: "userSkills",
               },
               {
                 collection: items,
                 from: "items",
-                to: "_id",
+                on: "_id",
                 as: "userItems",
               },
             ],
@@ -118,13 +118,13 @@ export default testSuite(async ({ describe }) => {
         join: [{
           collection: tickets,
           from: "tickets",
-          to: "_id",
+          on: "_id",
           as: "userTickets",
           options: {
             join: [{
               collection: seats,
               from: "seat",
-              to: "_id",
+              on: "_id",
               as: "userSeats",
             }]
           },

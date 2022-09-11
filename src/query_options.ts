@@ -190,7 +190,7 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
         if (Array.isArray(item[join.from])) {
           item[join.from].forEach((key: unknown) => {
-            const query = { [`${join.to}`]: key };
+            const query = { [`${join.on}`]: key };
             item[join.as] = item[join.as].concat(
               db.find(query, qo)
             );
@@ -199,7 +199,7 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
           return item;
         }
 
-        const query = { [`${join.to}`]: item[join.from] };
+        const query = { [`${join.on}`]: item[join.from] };
 
         item[join.as] = item[join.as].concat(
           db.find(query, qo)

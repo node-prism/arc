@@ -78,7 +78,7 @@ export type QueryOptions = Partial<{
     from: string;
 
     /** The property on the joining collection that the foreign key should point to. */
-    to: string;
+    on: string;
 
     /** The name of the property to be created while will contain the joined documents. */
     as: string;
