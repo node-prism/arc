@@ -210,6 +210,15 @@ export class Collection<T> {
     return undefined;
   }
 
+  filter(fn: (document: T) => boolean): T[] {
+    const _data = Object.assign({}, this.data);
+    delete _data.__private;
+    return Object.values(_data).filter((doc: T) => {
+      try { return fn(doc); }
+      catch (e) { return false; }
+    });
+  }
+
   find(query?: object, options: QueryOptions = {}): T[] {
     return find<T>(this.data, query, options, this.options);
   }
