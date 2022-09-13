@@ -36,15 +36,7 @@ export function checkAgainstQuery(source: object, query: object): boolean {
       }
 
       if (mods.length) {
-        let allmatch = true;
-
-        mods.forEach((mod) => {
-          const res = booleanOperators[mod](source, query);
-          if (Array.isArray(res) && !res.length) allmatch = false;
-          else if (!res) allmatch = false;
-        });
-
-        return allmatch;
+        return mods.every((mod) => booleanOperators[mod](source, query));
       }
 
       return (
