@@ -72,7 +72,8 @@ collection.update({ planet: "Earth" }, { $inc: { population: 1 } });
 Any queries that work with `.find` work with `.remove`.
 
 ```typescript
-collection.remove({ planet: "Earth" });
+// remove every planet except Earth
+collection.remove({ $not: { planet: "Earth" } });
 ```
 
 ## Query options
@@ -81,17 +82,17 @@ collection.remove({ planet: "Earth" });
 
 ```typescript
 {
+  /** When true, attempts to deeply match the query against documents. */
+  deep: boolean;
+
+  /** Provide fallback values for null or undefined properties */
+  ifNull: Record<string, any>;
+
   /**
    * -1 || 0: descending
    *  1: ascending
    */
   sort: { [property: string]: -1 | 0 | 1 };
-
-  /**
-   * 1: property included in result document
-   * 0: property excluded from result document
-   */
-  project: { [property: string]: 1 | 0 };
 
   /**
    * Particularly useful when sorting, `skip` defines the number of documents
@@ -102,6 +103,22 @@ collection.remove({ planet: "Earth" });
   /** Determines the number of documents returned. */
   take: number;
 
+  /**
+   * 1: property included in result document
+   * 0: property excluded from result document
+   */
+  project: {
+    [property: string]:
+      0 |
+      1 |
+      Record<"$floor", string> |
+      Record<"$ceil", string> |
+      Record<"$sub", (string|number)[]> |
+      Record<"$mult", (string|number)[]> |
+      Record<"$div", (string|number)[]> |
+      Record<"$add", (string|number)[]>;
+  };
+
   join: Array<{
     /** The collection to join on. */
     collection: Collection<any>;
@@ -110,7 +127,7 @@ collection.remove({ planet: "Earth" });
     from: string;
 
     /** The property on the joining collection that the foreign key should point to. */
-    to: string;
+    on: string;
 
     /** The name of the property to be created while will contain the joined documents. */
     as: string;
@@ -160,7 +177,7 @@ collection.find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
 // ];
 ```
 
-### Skip-take (i.e. LIMIT)
+### Skip & take (i.e. LIMIT)
 
 Mostly useful when paired with `sort`.
 
@@ -247,7 +264,7 @@ collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
 // "users" collection
 
 // [
-//   { name: "Alice", purchased: [1, 2] },
+//   { name: "Alice", purchasedTicketIds: [1, 2] },
 // ];
 
 // "tickets" collection
@@ -266,7 +283,7 @@ users.find(
       {
         collection: tickets,
         from: "purchased",
-        to: "_id",
+        on: "_id",
         as: "tickets",
         options: {
           project: { _id: 0 },
@@ -279,7 +296,7 @@ users.find(
 // [
 //   {
 //     name: "Alice",
-//     purchased: [1, 2],
+//     purchasedTicketIds: [1, 2],
 //     tickets: [
 //       { seat: "B1" },
 //       { seat: "C1" },
