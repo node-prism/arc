@@ -19,6 +19,14 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ a: 6, b: { c: 5 } }]);
     });
 
+    test("increments all properties in query", () => {
+      const collection = testCollection();
+      collection.insert({ a: 1, b: 2 });
+      collection.update({ a: 1, b: 2 }, { $inc: 5 });
+      const found = nrml(collection.find({ a: 6 }));
+      expect(found).toEqual([{ a: 6, b: 7 }]);
+    });
+
     test("implcitly creates properties", () => {
       const collection = testCollection();
       collection.insert({ a: 1 });
