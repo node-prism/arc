@@ -10,7 +10,6 @@ export function $not(source: object, query: object): boolean {
         let nots = query[pk];
         nots = ensureArray(nots);
         nots.forEach((not: object) => {
-          // if any of the keys in the `not` object don't exist in source, add false.
           if (!Ok(not).every((notKey) => safeHasOwnProperty(source, notKey))) {
             matches.push(false);
             return;
