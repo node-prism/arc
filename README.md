@@ -282,6 +282,32 @@ collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
 // ];
 ```
 
+#### Aggregation
+
+```typescript
+// [
+//   { math: 72, english: 82, science: 92 },
+//   { math: 60, english: 70, science: 80 },
+//   { math: 90, english: 72, science: 84 }
+// ]
+
+collection.find(
+  {},
+  {
+    project: {
+      total: { $add: ["$math", "$english", "$science"] },
+      average: { $div: ["$total", 3] },
+    },
+  }
+);
+
+// [
+//   { math: 72, english: 82, science: 92, total: 246, average: 82 },
+//   { math: 60, english: 70, science: 80, total: 210, average: 70 },
+//   { math: 90, english: 72, science: 84, total: 246, average: 82 },
+// ]
+```
+
 ### Joining
 
 ```typescript
