@@ -24,6 +24,12 @@ export declare type QueryOptions = Partial<{
     returnKey: string;
     /** When true, returns cloned data (not a reference). default true */
     clonedData: boolean;
+    /** Provide fallback values for null or undefined properties */
+    ifNull: Record<string, any>;
+    /** Provide fallback values for 'empty' properties ([], {}, "") */
+    ifEmpty: Record<string, any>;
+    /** Provide fallback values for null, undefined, or 'empty' properties. */
+    ifNullOrEmpty: Record<string, any>;
     /**
      * -1 || 0: descending
      *  1: ascending
@@ -43,7 +49,7 @@ export declare type QueryOptions = Partial<{
      * 0: property excluded from result document
      */
     project: {
-        [property: string]: 1 | 0;
+        [property: string]: 0 | 1 | Record<"$floor", string> | Record<"$ceil", string> | Record<"$sub", (string | number)[]> | Record<"$mult", (string | number)[]> | Record<"$div", (string | number)[]> | Record<"$add", (string | number)[]>;
     };
     join: Array<{
         /** The collection to join on. */
@@ -51,7 +57,7 @@ export declare type QueryOptions = Partial<{
         /** The property containing the foreign key(s). */
         from: string;
         /** The property on the joining collection that the foreign key should point to. */
-        to: string;
+        on: string;
         /** The name of the property to be created while will contain the joined documents. */
         as: string;
         /** QueryOptions that will be applied to the joined collection. */
@@ -86,6 +92,7 @@ export declare class Collection<T> {
      * Used by transaction update rollback.
      */
     assign(id: unknown, document: T): T;
+    filter(fn: (document: T) => boolean): T[];
     find(query?: object, options?: QueryOptions): T[];
     update(query: object, operations: object, options?: QueryOptions): T[];
     upsert(query: object, operations: object, options?: QueryOptions): T[];
