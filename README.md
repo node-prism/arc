@@ -88,6 +88,12 @@ collection.remove({ $not: { planet: "Earth" } });
   /** Provide fallback values for null or undefined properties */
   ifNull: Record<string, any>;
 
+  /** Provide fallback values for 'empty' properties ([], {}, "") */
+  ifEmpty: Record<string, any>;
+
+  /** Provide fallback values for null, undefined, or 'empty' properties. */
+  ifNullOrEmpty: Record<string, any>;
+
   /**
    * -1 || 0: descending
    *  1: ascending
@@ -148,6 +154,24 @@ collection.remove({ $not: { planet: "Earth" } });
 collection.find({ a: 1 }, { ifNull: { d: 4 } });
 
 // [
+//   { a: 1, b: 2, c: 3, d: 4 },
+// ];
+```
+
+### ifEmpty
+
+```typescript
+// [
+//   { a: 1, b: 2, c: 3, d: "  " },
+//   { a: 1, b: 2, c: 3, d: [] },
+//   { a: 1, b: 2, c: 3, d: {} },
+// ];
+
+collection.find({ a: 1 }, { ifEmpty: { d: 4 } });
+
+// [
+//   { a: 1, b: 2, c: 3, d: 4 },
+//   { a: 1, b: 2, c: 3, d: 4 },
 //   { a: 1, b: 2, c: 3, d: 4 },
 // ];
 ```

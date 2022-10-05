@@ -39,6 +39,12 @@ export type QueryOptions = Partial<{
   /** Provide fallback values for null or undefined properties */
   ifNull: Record<string, any>;
 
+  /** Provide fallback values for 'empty' properties ([], {}, "") */
+  ifEmpty: Record<string, any>;
+
+  /** Provide fallback values for null, undefined, or 'empty' properties. */
+  ifNullOrEmpty: Record<string, any>;
+
   /**
    * -1 || 0: descending
    *  1: ascending

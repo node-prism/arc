@@ -153,17 +153,6 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     data = applyProjectionAggregation(data, options);
   }
 
-  if (options.ifNull) {
-    data = data.map((item) => {
-      for (const key in options.ifNull) {
-        if (item[key] === null || item[key] === undefined) {
-          item[key] = options.ifNull[key];
-       }
-      }
-      return item;
-    });
-  }
-
   if (options.sort) {
     data = _.orderBy(
       data,
@@ -214,6 +203,48 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
         return item;
       });
     });
+  }
+
+  function ifNull(item: any, opts: Record<string, any>) {
+    for (const key in opts) {
+      if (item[key] === null || item[key] === undefined) {
+        item[key] = opts[key];
+      }
+    }
+
+    return item;
+  }
+
+  function ifEmpty(item: any, opts: Record<string, any>) {
+    for (const key in opts) {
+      if (Array.isArray(item[key]) && item[key].length === 0) {
+        item[key] = opts[key];
+      }
+
+      if (typeof item[key] === "string" && item[key].trim().length === 0) {
+        item[key] = opts[key];
+      }
+
+      if (typeof item[key] === "object" && Object.keys(item[key]).length === 0) {
+        item[key] = opts[key];
+      }
+    }
+
+    return item;
+  }
+
+  if (options.ifNull) {
+    data = data.map((item) => ifNull(item, options.ifNull));
+  }
+
+  if (options.ifEmpty) {
+    data = data.map((item) => ifEmpty(item, options.ifEmpty));
+  }
+
+  if (options.ifNullOrEmpty) {
+    data = data
+      .map((item) => ifNull(item, options.ifNullOrEmpty))
+      .map((item) => ifEmpty(item, options.ifNullOrEmpty));
   }
 
   return data;
