@@ -29,7 +29,6 @@ const makeDistinctByKey = (arr: any[], key: string) => {
   });
 };
 
-
 export default function find<T>(
   data: CollectionData,
   query: any,
@@ -52,8 +51,7 @@ export default function find<T>(
       return distinctCloned;
     }
 
-    const d = [...Ov(data)];
-    return applyQueryOptions(d, options);
+    return applyQueryOptions([...Ov(data)], options);
   }
 
   // we have a query
@@ -68,7 +66,6 @@ export default function find<T>(
       if (f) r.push(data[f])
     } else {
       r = returnFound([...Ov(data)], q, options, null);
-      // r = returnFound(data, q);
       if (r === undefined) r = [];
       r = ensureArray(r);
     }

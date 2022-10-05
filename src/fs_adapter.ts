@@ -25,7 +25,6 @@ export default class FilesystemAdapter<T> implements StorageAdapter<T> {
   queue: SimpleFIFO;
 
   constructor(storagePath: string, name: string) {
-    // if name doesn't end with `.json`, add it.
     if (!name.endsWith(".json")) {
       name += ".json";
     }
@@ -51,7 +50,7 @@ export default class FilesystemAdapter<T> implements StorageAdapter<T> {
     try {
       return Object.assign(
         {},
-        JSON.parse(fs.readFileSync(this.filePath, "utf8")) || {}
+        JSON.parse(fs.readFileSync(this.filePath, "utf8")) || {},
       );
     } catch (e) {
       return {};

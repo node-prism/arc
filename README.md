@@ -165,7 +165,7 @@ collection.find({ a: 1 }, { ifNull: { d: 4 } });
 // ];
 
 collection.find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
-//                                                  └─ asc     └─ desc
+//                                                  └─ asc    └─ desc
 
 // [
 //   { name: "Zorf", age: 24 },
