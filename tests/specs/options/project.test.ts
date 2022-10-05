@@ -102,6 +102,29 @@ export default testSuite(async ({ describe }) => {
           add1: 16.6,
         }]);
       });
+
+      test("more realistic use-case", () => {
+        const collection = testCollection();
+        collection.insert({ math: 72, english: 82, science: 92 });
+        collection.insert({ math: 60, english: 70, science: 80 });
+        collection.insert({ math: 90, english: 72, science: 84 });
+
+        const found = nrml(collection.find(
+          { math: { $gt: 50 } },
+          {
+            project: {
+              total: { $add: ["$math", "$english", "$science"] },
+              average: { $div: ["$total", 3] },
+            },
+          }
+        ));
+
+        expect(found).toEqual([
+          { math: 72, english: 82, science: 92, total: 246, average: 82 },
+          { math: 60, english: 70, science: 80, total: 210, average: 70 },
+          { math: 90, english: 72, science: 84, total: 246, average: 82 },
+        ]);
+      });
     });
   });
 });
