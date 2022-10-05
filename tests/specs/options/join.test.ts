@@ -51,7 +51,26 @@ export default testSuite(async ({ describe }) => {
       expect((res as any).tickets).toEqual(tks);
     });
 
-    test("respects query options", () => {
+    test("creates the 'as' property even when nothing matches", () => {
+      const users = testCollection();
+      const tickets = testCollection({ name: "tickets" });
+
+      users.insert({ name: "Jonathan", tickets: [] });
+
+      const res = nrml(users.find({ name: "Jonathan" }, {
+        join: [{
+          collection: tickets,
+          from: "tickets",
+          on: "_id",
+          as: "userTickets",
+        }],
+      }))[0];
+      
+      expect(res).toHaveProperty("userTickets");
+      expect((res as any).userTickets).toEqual([]);
+    });
+
+    test("respects QueryOptions", () => {
       const users = testCollection();
       const tickets = testCollection({ name: "tickets", integerIds: true });
 
