@@ -172,6 +172,11 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
   if (options.join && Array.isArray(options.join)) {
     options.join.forEach((join) => {
+      if (!join.collection) throw new Error("Missing required field in join: collection");
+      if (!join.from) throw new Error("Missing required field in join: from");
+      if (!join.on) throw new Error("Missing required field in join: on");
+      if (!join.as) throw new Error("Missing required field in join: as");
+
       const qo = join?.options || {};
       const db = join.collection;
       const tmp = cuid();
