@@ -1,11 +1,6 @@
 import { StorageAdapter } from ".";
-export declare class SimpleFIFO {
-    elements: any[];
-    push(...args: any[]): void;
-    shift(): any;
-    length(): number;
-}
-export default class FilesystemAdapter<T> implements StorageAdapter<T> {
+import { SimpleFIFO } from "./fs_adapter";
+export default class EncryptedFilesystemAdapter<T> implements StorageAdapter<T> {
     storagePath: string;
     name: string;
     filePath: string;
