@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "cuid": "^2.1.8",
+    "dot-wild": "^3.0.1",
     "lodash": "^4.17.21"
   }
 }

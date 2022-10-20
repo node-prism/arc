@@ -1,4 +1,5 @@
 import cuid from "cuid";
+import * as dot from "dot-wild";
 import _ from "lodash";
 import { ID_KEY, QueryOptions } from ".";
 import { ensureArray, Ok, Ov } from "./utils";
@@ -178,10 +179,11 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
         item[join.as] = ensureArray(item[join.as]);
         item[tmp] = [];
 
-        if (item[join.from] === undefined) return item;
+        const from = join.from.includes(".") ? dot.get(item, join.from) : item[join.from];
+        if (from === undefined) return item;
 
-        if (Array.isArray(item[join.from])) {
-          item[join.from].forEach((key: unknown) => {
+        if (Array.isArray(from)) {
+          from.forEach((key: unknown) => {
             const query = { [`${join.on}`]: key };
             item[tmp] = item[tmp].concat(
               db.find(query, qo)
@@ -194,7 +196,7 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
           return item;
         }
 
-        const query = { [`${join.on}`]: item[join.from] };
+        const query = { [`${join.on}`]: from };
 
         item[tmp] = db.find(query, qo);
         item[join.as] = item[tmp];
