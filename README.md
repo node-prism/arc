@@ -332,7 +332,7 @@ users.find(
     join: [
       {
         collection: tickets,
-        from: "purchased",
+        from: "purchasedTicketIds",
         on: "_id",
         as: "tickets",
         options: {
