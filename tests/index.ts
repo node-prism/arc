@@ -32,3 +32,7 @@ await describe("transactions", ({ runTestSuite }) => {
 await describe("remove", ({ runTestSuite }) => {
   runTestSuite(import("./specs/remove"));
 });
+
+await describe("encrypted adapter", ({ runTestSuite }) => {
+  runTestSuite(import("./specs/encrypted_adapter"));
+});

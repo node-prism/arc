@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { StorageAdapter } from ".";
 
-class SimpleFIFO {
+export class SimpleFIFO {
   elements: any[] = [];
 
   push(...args: any[]) {

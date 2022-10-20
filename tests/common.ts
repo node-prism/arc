@@ -1,4 +1,5 @@
 import { Collection, CREATED_AT_KEY, ID_KEY, UPDATED_AT_KEY } from "../src";
+import EncryptedFilesystemAdapter from "../src/fs_adapter_enc";
 
 const getCollection = <T>({ name = "test", integerIds = false }): Collection<T> => {
   const collection = new Collection<T>(".test", name, {
@@ -19,8 +20,22 @@ const getCollection = <T>({ name = "test", integerIds = false }): Collection<T> 
   return collection;
 };
 
+const getEncryptedCollection = <T>({ name = "test", integerIds = false }): Collection<T> => { 
+  const collection = new Collection<T>(".test", name, {
+    autosync: false,
+    integerIds,
+    adapter: new EncryptedFilesystemAdapter(".test", name),
+  });
+
+  return collection;
+};
+
 export function testCollection<T>({ name = "test", integerIds = false } = {}): Collection<T> {
   return getCollection({ name, integerIds });
+}
+
+export function testCollectionEncrypted<T>({ name = "test", integerIds = false } = {}): Collection<T> {
+  return getEncryptedCollection({ name, integerIds });
 }
 
 export function nrml<T>(results: T[], { keepIds = false } = {}): T[] {
@@ -34,5 +49,4 @@ export function nrml<T>(results: T[], { keepIds = false } = {}): T[] {
     delete result[CREATED_AT_KEY];
     delete result[UPDATED_AT_KEY];
     return result;
-  });
-}
+  }); }
