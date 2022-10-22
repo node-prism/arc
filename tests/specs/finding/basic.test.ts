@@ -13,6 +13,18 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([]);
     });
 
+    test("empty find returns everything", () => {
+      const collection = testCollection();
+      collection.remove({ xxx: "xxx" });
+      collection.remove({ yyy: "yyy" });
+      collection.remove({ zzz: "zzz" });
+      collection.insert({ a: 1 });
+      collection.insert({ a: 2 });
+      collection.insert({ a: 3 });
+      const found = nrml(collection.find({}));
+      expect(found).toEqual([{ a: 1 }, { a: 2 }, { a: 3 }]);
+    });
+
     test("simple find", () => {
       const collection = testCollection();
       collection.insert({ foo: "bar" });

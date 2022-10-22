@@ -44,11 +44,14 @@ export default function find<T>(
   // if there's no query, return all data.
   if (!query.length) {
     if (options.clonedData) {
-      const distinctCloned = [];
-      for (const obj of [...Ov(data)]) {
-        distinctCloned.push(_.cloneDeep(obj));
+      const out = [];
+
+      for (const key in data) {
+        if (key === "__private") continue;
+        out.push(_.cloneDeep(data[key]));
       }
-      return distinctCloned;
+
+      return out;
     }
 
     return applyQueryOptions([...Ov(data)], options);
