@@ -13,6 +13,7 @@ import { $oneOf } from "./boolean/oneOf";
 import { $length } from "./boolean/length";
 import { $not } from "./boolean/not";
 import { $has } from "./boolean/has";
+import { $hasAny } from "./boolean/hasAny";
 import { $set } from "./mutation/set";
 import { $unset } from "./mutation/unset";
 import { $change } from "./mutation/change";
@@ -34,6 +35,7 @@ export const booleanOperators = {
   $length,
   $not,
   $has,
+  $hasAny,
 };
 
 const mutationOperators = {
