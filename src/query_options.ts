@@ -18,7 +18,7 @@ const getSortDirections = (nums: number[]) =>
 
 const stripSign = (str: string) => str[0] === "$" ? str.slice(1) : str;
 
-function applyProjectionAggregation(data: any[], options: QueryOptions): any[] {
+function applyAggregation(data: any[], options: QueryOptions): any[] {
   const ops = {
     $floor: (item: object, str: string) => {
       if (!str.startsWith("$")) return;
@@ -100,14 +100,15 @@ function applyProjectionAggregation(data: any[], options: QueryOptions): any[] {
     }
   };
 
-  Ok(options.project).forEach((key) => {
-    if (typeof options.project[key] !== "object") return;
-    Ok(options.project[key]).forEach((operation) => {
+
+  Ok(options.aggregate).forEach((key) => {
+    if (typeof options.aggregate[key] !== "object") return;
+    Ok(options.aggregate[key]).forEach((operation) => {
       if (operation[0] !== "$") return;
       if (!ops[operation]) return;
 
       data = data.map((item) => {
-        item[key] = ops[operation](item, options.project[key][operation]);
+        item[key] = ops[operation](item, options.aggregate[key][operation]);
         return item;
       });
     });
@@ -117,6 +118,13 @@ function applyProjectionAggregation(data: any[], options: QueryOptions): any[] {
 }
 
 export function applyQueryOptions(data: any[], options: QueryOptions): any {
+  if (options.aggregate) {
+    data = applyAggregation(data, options);
+  }
+
+  // Apply projection after aggregation so that we have the opportunity to remove
+  // any intermediate properties that were used strictly in aggregation and should not
+  // be included in the result set.
   if (options.project) {
     // What is the projection mode?
     // 1. Implicit exclusion: { a: 1, b: 1 }
@@ -149,9 +157,6 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
       const omit = Object.keys(options.project).filter((key) => options.project[key] === 0);
       data = data.map((item) => _.omit(item, omit));
     }
-
-    // After removing unneeded fields, apply aggregation operations.
-    data = applyProjectionAggregation(data, options);
   }
 
   if (options.sort) {

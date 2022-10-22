@@ -65,9 +65,11 @@ export type QueryOptions = Partial<{
    * 0: property excluded from result document
    */
   project: {
+    [property: string]: 0 | 1;
+  };
+
+  aggregate: {
     [property: string]:
-      0 |
-      1 |
       Record<"$floor", string> |
       Record<"$ceil", string> |
       Record<"$sub", (string|number)[]> |
