@@ -73,9 +73,6 @@ export declare type PrivateData = {
     id_map: {
         [id: string]: string;
     };
-    indexes: {
-        [key: string]: string;
-    };
 };
 export declare type CollectionData = {
     [key: string]: any;
