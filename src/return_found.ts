@@ -27,12 +27,20 @@ export function checkAgainstQuery(source: object, query: object): boolean {
 
       // Operators are sometimes a subkey:
       // find({ number: { $gt: 100 } })
-      if (isObject(query[key]) && !isEmptyObject(query[key])) {
-        mods = mods.concat(Ok(query[key]).filter((k) => k.startsWith("$")));
+      // $not is a special case: it calls `returnFound` so will handle subkey mods itself.
+      if (key !== "$not") {
+        if (isObject(query[key]) && !isEmptyObject(query[key])) {
+          mods = mods.concat(Ok(query[key]).filter((k) => k.startsWith("$")));
+        }
       }
 
       if (mods.length) {
-        return mods.every((mod) => booleanOperators[mod](source, query));
+        return mods.every((mod) => {
+          if (mod === "$not") {
+            return !booleanOperators[mod](source, query);
+          }
+          return booleanOperators[mod](source, query)
+        });
       }
 
       return (

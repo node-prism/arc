@@ -1,25 +1,35 @@
-import { checkAgainstQuery } from "../../return_found";
-import { Ok, isObject, safeHasOwnProperty, ensureArray } from "../../utils";
+import { ID_KEY } from "../..";
+import { returnFound } from "../../return_found";
+import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
 
 export function $not(source: object, query: object): boolean {
   const matches = [];
 
   if (isObject(query)) {
-    Ok(query).forEach((pk) => {
-      if (pk === "$not") {
-        let nots = query[pk];
-        nots = ensureArray(nots);
-        nots.forEach((not: object) => {
-          if (!Ok(not).every((notKey) => safeHasOwnProperty(source, notKey))) {
-            matches.push(false);
-            return;
-          }
+    Ok(query).forEach((key) => {
+      if (key !== "$not") return;
 
-          matches.push(!checkAgainstQuery(source, not));
-        });
+      if (!isObject(query[key])) {
+        throw new Error(`$not operator requires an object as its value, received: ${query[key]}`);
       }
+
+      const nots = ensureArray(query[key]);
+      matches.push(
+        nots.every((not) => {
+          if (isObject(not)) {
+            const found = returnFound(source, not, { deep: true, returnKey: ID_KEY, clonedData: true }, source);
+
+            if (found && found.length) {
+              return false;
+            }
+
+            return true;
+          }
+          return safeHasOwnProperty(source, not)
+        })
+      );
     });
   }
 
-  return matches.filter(Boolean).length > 0;
+  return matches.every((m) => !m) ?? false;
 }

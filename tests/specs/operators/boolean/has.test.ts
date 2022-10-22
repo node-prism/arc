@@ -16,5 +16,17 @@ export default testSuite(async ({ describe }) => {
       const found = nrml(collection.find({ $has: ["a", "b"] }));
       expect(found).toEqual([{ a: 2, b: 1 }, { a: 6, b: 3 }]);
     });
+
+    test("works with $not", () => {
+      const collection = testCollection();
+      collection.insert([{ a: 2 }, { b: 4 }, { c: 5 }, { a: 6 }]);
+      const found = nrml(collection.find({ $not: { $has: "a" } }));
+      expect(found).toEqual([
+        { xxx: "xxx" },
+        { yyy: "yyy" },
+        { zzz: "zzz" },
+        { b: 4 }, { c: 5 }
+      ]);
+    });
   });
 });
