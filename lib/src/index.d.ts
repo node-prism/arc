@@ -49,7 +49,10 @@ export declare type QueryOptions = Partial<{
      * 0: property excluded from result document
      */
     project: {
-        [property: string]: 0 | 1 | Record<"$floor", string> | Record<"$ceil", string> | Record<"$sub", (string | number)[]> | Record<"$mult", (string | number)[]> | Record<"$div", (string | number)[]> | Record<"$add", (string | number)[]>;
+        [property: string]: 0 | 1;
+    };
+    aggregate: {
+        [property: string]: Record<"$floor", string> | Record<"$ceil", string> | Record<"$sub", (string | number)[]> | Record<"$mult", (string | number)[]> | Record<"$div", (string | number)[]> | Record<"$add", (string | number)[]>;
     };
     join: Array<{
         /** The collection to join on. */
