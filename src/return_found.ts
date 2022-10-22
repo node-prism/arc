@@ -12,7 +12,19 @@ export function checkAgainstQuery(source: object, query: object): boolean {
   if (typeof source !== typeof query) return false;
 
   if (Array.isArray(source) && Array.isArray(query)) {
-    return source.every((_, key) => checkAgainstQuery(source[key], query[key]));
+    // if any item in source OR query is either an object or an array, return
+    // checkAgainstQuery(source, query) for each item in source and query
+    if (
+      source.some((item) => isObject(item) || Array.isArray(item)) ||
+      query.some((item) => isObject(item) || Array.isArray(item))
+    ) {
+      return source.every((_, key) =>
+        checkAgainstQuery(source[key], query[key])
+      );
+    }
+
+    // otherwise stringify each item and compare equality
+    return [...source].map((i) => `${i}`).sort().join(",") === [...query].map((i) => `${i}`).sort().join(",");
   }
 
   if (isObject(source) && isObject(query)) {

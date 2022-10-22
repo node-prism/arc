@@ -74,9 +74,15 @@ export default testSuite(async ({ describe }) => {
       const collection = testCollection();
       collection.insert({ foo: ["bar", "baz"] });
       collection.insert({ foo: ["bar", "boo"] });
-      collection.insert({ foo: ["bar", "baz"] });
+      collection.insert({ foo: ["baz", "bar"] });
       const found = nrml(collection.find({ foo: ["bar", "baz"] }));
-      expect(found).toEqual([{ foo: ["bar", "baz"] }, { foo: ["bar", "baz"] }]);
+      expect(found).toEqual([{ foo: ["bar", "baz"] }, { foo: ["baz", "bar"] }]);
+
+      collection.insert({ nums: [1, 2, 3] });
+      collection.insert({ nums: [2, 3, 1] });
+      collection.insert({ nums: [1, 3, 5] });
+      const found2 = nrml(collection.find({ nums: [3, 2, 1] }));
+      expect(found2).toEqual([{ nums: [1, 2, 3] }, { nums: [2, 3, 1] }]);
     });
 
     test("array literal should exclude items that don't match the exact array", () => {
