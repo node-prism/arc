@@ -114,9 +114,11 @@ collection.remove({ $not: { planet: "Earth" } });
    * 0: property excluded from result document
    */
   project: {
+    [property: string]: 0 | 1;
+  };
+
+  aggregate: {
     [property: string]:
-      0 |
-      1 |
       Record<"$floor", string> |
       Record<"$ceil", string> |
       Record<"$sub", (string|number)[]> |
@@ -294,17 +296,23 @@ collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
 collection.find(
   {},
   {
-    project: {
+    aggregate: {
       total: { $add: ["$math", "$english", "$science"] },
       average: { $div: ["$total", 3] },
+    },
+    project: {
+      math: 1,
+      english: 1,
+      science: 1,
+      average: 1,
     },
   }
 );
 
 // [
-//   { math: 72, english: 82, science: 92, total: 246, average: 82 },
-//   { math: 60, english: 70, science: 80, total: 210, average: 70 },
-//   { math: 90, english: 72, science: 84, total: 246, average: 82 },
+//   { math: 72, english: 82, science: 92, average: 82 },
+//   { math: 60, english: 70, science: 80, average: 70 },
+//   { math: 90, english: 72, science: 84, average: 82 },
 // ]
 ```
 
