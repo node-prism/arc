@@ -6,6 +6,7 @@ import { $lt } from "./boolean/lt";
 import { $lte } from "./boolean/lte";
 import { $and } from "./boolean/and";
 import { $or } from "./boolean/or";
+import { $xor } from "./boolean/xor";
 import { $fn } from "./boolean/fn";
 import { $re } from "./boolean/re";
 import { $includes } from "./boolean/includes";
@@ -28,6 +29,7 @@ export const booleanOperators = {
   $lte,
   $and,
   $or,
+  $xor,
   $includes,
   $oneOf,
   $fn,

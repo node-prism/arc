@@ -5,6 +5,7 @@ export default testSuite(async ({ describe }) => {
     runTestSuite(import("./includes.test.js"));
     runTestSuite(import("./and.test.js"));
     runTestSuite(import("./or.test.js"));
+    runTestSuite(import("./xor.test.js"));
     runTestSuite(import("./fn.test.js"));
     runTestSuite(import("./re.test.js"));
     runTestSuite(import("./oneOf.test.js"));
