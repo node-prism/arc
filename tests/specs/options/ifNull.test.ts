@@ -34,5 +34,13 @@ export default testSuite(async ({ describe }) => {
       const found = nrml(collection.find({ a: { $gt: 0 } }, { ifNull: { d: null } }));
       expect(found).toEqual([{ a: 1, b: 1, c: 1, d: null }, { a: 2, b: 2, c: 2, d: null }]);
     });
+
+    test("ifnull receives a function which is passed the document", () => {
+      const collection = testCollection();
+      collection.insert({ a: 1, b: 1, c: 1 });
+      collection.insert({ a: 2, b: 2, c: 2 });
+      const found = nrml(collection.find({ a: { $gt: 0 } }, { ifNull: { d: (doc) => doc.a } }));
+      expect(found).toEqual([{ a: 1, b: 1, c: 1, d: 1 }, { a: 2, b: 2, c: 2, d: 2 }]);
+    });
   });
 });

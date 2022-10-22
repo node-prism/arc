@@ -215,7 +215,11 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
   function ifNull(item: any, opts: Record<string, any>) {
     for (const key in opts) {
       if (item[key] === null || item[key] === undefined) {
-        item[key] = opts[key];
+        if (typeof opts[key] === "function") {
+          item[key] = opts[key](item);
+        } else {
+          item[key] = opts[key];
+        }
       }
     }
 
@@ -225,15 +229,27 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
   function ifEmpty(item: any, opts: Record<string, any>) {
     for (const key in opts) {
       if (Array.isArray(item[key]) && item[key].length === 0) {
-        item[key] = opts[key];
+        if (typeof opts[key] === "function") {
+          item[key] = opts[key](item);
+        } else {
+          item[key] = opts[key];
+        }
       }
 
       if (typeof item[key] === "string" && item[key].trim().length === 0) {
-        item[key] = opts[key];
+        if (typeof opts[key] === "function") {
+          item[key] = opts[key](item);
+        } else {
+          item[key] = opts[key];
+        }
       }
 
       if (typeof item[key] === "object" && Object.keys(item[key]).length === 0) {
-        item[key] = opts[key];
+        if (typeof opts[key] === "function") {
+          item[key] = opts[key](item);
+        } else {
+          item[key] = opts[key];
+        }
       }
     }
 
