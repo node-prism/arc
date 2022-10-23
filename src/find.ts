@@ -76,14 +76,12 @@ export default function find<T>(
     res.push(...r);
   }
 
-  res = applyQueryOptions(res, options);
   const distinct = makeDistinctByKey(res, ID_KEY);
+  res = applyQueryOptions(distinct, options);
 
-  if (!options.clonedData) {
-    return distinct;
-  }
+  if (!options.clonedData) return res;
 
   const cloned = [];
-  for (const obj of distinct) cloned.push(_.cloneDeep(obj));
+  for (const obj of res) cloned.push(_.cloneDeep(obj));
   return cloned;
 }
