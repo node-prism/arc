@@ -1,5 +1,5 @@
 {
-  "name": "@prsm/db",
+  "name": "@prsm/arcdb",
   "version": "1.7.1",
   "description": "",
   "main": "lib/src/index.js",
