@@ -58,10 +58,18 @@ export default testSuite(async ({ describe }) => {
       collection.insert({ a: 1, b: 1, c: 1 });
       collection.insert({ a: 2, b: 2, c: 2 });
       collection.insert({ a: 3, b: 3, c: 3 });
-      const foundWithId = collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
+      const foundWithId = collection.find(
+        { a: 1 },
+        {
+          project: {
+            b: 1,
+            c: 0,
+            _created_at: 0,
+            _updated_at: 0,
+          },
+        }
+      );
       const id = foundWithId[0][ID_KEY];
-      delete foundWithId[0][CREATED_AT_KEY];
-      delete foundWithId[0][UPDATED_AT_KEY];
       expect(foundWithId).toEqual([{ [`${ID_KEY}`]: id, a: 1, b: 1 }]);
     });
 
@@ -71,26 +79,29 @@ export default testSuite(async ({ describe }) => {
         collection.insert({ a: 1, b: 1, c: 5.6 });
         collection.insert({ a: 2, b: 2, c: 2 });
         collection.insert({ a: 3, b: 3, c: 3 });
-        const foundWithId = collection.find(
+
+        const found = collection.find(
           { a: 1 },
           {
             aggregate: {
-              flooredC: { $floor: "$c" },
-              ceiledC: { $ceil: "$c" },
-              subbed1: { $sub: ["$c", "$a"] },
-              subbed2: { $sub: [15, "$flooredC", 0, 1] },
-              mult1: { $mult: ["$c", 2, "$subbed2"] },
-              div1: { $div: ["$subbed2", 2, "$a", 2] },
-              add1: { $add: ["$c", 2, "$subbed2"] },
+              flooredC: { $floor: "c" },
+              ceiledC: { $ceil: "c" },
+              subbed1: { $sub: ["c", "a"] },
+              subbed2: { $sub: [15, "flooredC", 0, 1] },
+              mult1: { $mult: ["c", 2, "subbed2"] },
+              div1: { $div: ["subbed2", 2, "a", 2] },
+              add1: { $add: ["c", 2, "subbed2"] },
             },
-            project: { b: 0, },
+            project: {
+              b: 0,
+              _created_at: 0,
+              _updated_at: 0,
+              _id: 0,
+            },
           }
         );
-        const id = foundWithId[0][ID_KEY];
-        delete foundWithId[0][CREATED_AT_KEY];
-        delete foundWithId[0][UPDATED_AT_KEY];
-        expect(foundWithId).toEqual([{
-          [`${ID_KEY}`]: id,
+
+        expect(found).toEqual([{
           a: 1,
           c: 5.6,
           flooredC: 5,
@@ -113,8 +124,8 @@ export default testSuite(async ({ describe }) => {
           { $has: ["math", "english", "science"] },
           {
             aggregate: {
-              total: { $add: ["$math", "$english", "$science"] },
-              average: { $div: ["$total", 3] },
+              total: { $add: ["math", "english", "science"] },
+              average: { $div: ["total", 3] },
             },
           }
         ));
@@ -136,8 +147,8 @@ export default testSuite(async ({ describe }) => {
           { $has: ["math", "english", "science"] },
           {
             aggregate: {
-              total: { $add: ["$math", "$english", "$science"] }, // <-- projected out
-              average: { $div: ["$total", 3] },
+              total: { $add: ["math", "english", "science"] }, // <-- projected out
+              average: { $div: ["total", 3] },
             },
             project: {
               math: 1,
@@ -154,6 +165,31 @@ export default testSuite(async ({ describe }) => {
           { math: 90, english: 72, science: 84, average: 82 },
         ]);
       });
+
+      test("accessing properties with dot notation", () => {
+        const collection = testCollection();
+        collection.insert({ a: { b: { c: 1 } } });
+        collection.insert({ a: { b: { c: 2 } } });
+        collection.insert({ a: { b: { c: 3 } } });
+
+        const found = collection.find(
+          { a: { b: { c: 1 } } },
+          {
+            aggregate: {
+              d: { $add: ["a.b.c", 1] },
+            },
+            project: {
+              a: 0,
+              _created_at: 0,
+              _updated_at: 0,
+              _id: 0,
+            },
+          }
+        );
+
+        expect(found).toEqual([{ d: 2 }]);
+      });
+
       test("$fn", () => {
         const collection = testCollection();
         collection.insert({ first: "John", last: "Doe" });
