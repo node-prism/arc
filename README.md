@@ -1,10 +1,12 @@
+# arc
+
 A lightweight, in-memory document database for smaller projects.
 You can think of this as MongoDB's little brother.
 
 # Installation
 
 ```bash
-npm i @prsm/db
+npm i @prsm/arcdb
 ```
 
 # API overview
