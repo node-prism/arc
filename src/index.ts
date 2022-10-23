@@ -368,17 +368,16 @@ export class Collection<T> {
     return this.data.__private.next_id++;
   }
 
-  /**
-   * Starts a new transaction.
-   *
-   * @throws {Error} If a transaction is already in progress.
-   */
-  transaction(): Transaction<T> {
-    if (this._transaction) {
-      throw new Error("Cannot start a transaction while another is already in progress.");
+  transaction(fn: (transaction: Transaction<T>) => void): void {
+    this._transaction = new Transaction<T>(this);
+
+    try {
+      fn(this._transaction);
+    } catch (e) {
+      this._transaction.rollback();
+      throw e;
     }
 
-    this._transaction = new Transaction<T>(this);
-    return this._transaction;
+    this._transaction.commit();
   }
 }

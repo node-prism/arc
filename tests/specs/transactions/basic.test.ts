@@ -11,16 +11,14 @@ export default testSuite(async ({ describe, test }) => {
       collection.insert({ a: 3 });
       const original = collection.find();
 
-      const tx = collection.transaction();
-      tx.insert({ a: 4 });
-
-      const found = nrml(collection.find({ a: 4 }));
-      expect(found).toEqual([{ a: 4 }]);
-
-      tx.rollback();
-
-      const found2 = nrml(collection.find({ a: 4 }));
-      expect(found2).toEqual([]);
+      collection.transaction((t) => {
+        t.insert({ a: 4 });
+        const found = nrml(collection.find({ a: 4 }));
+        expect(found).toEqual([{ a: 4 }]);
+        t.rollback();
+        const found2 = nrml(collection.find({ a: 4 }));
+        expect(found2).toEqual([]);
+      });
 
       const latest = collection.find();
       expect(latest).toEqual(original);
@@ -33,16 +31,16 @@ export default testSuite(async ({ describe, test }) => {
       collection.insert({ a: 3 });
       const original = collection.find();
 
-      const tx = collection.transaction();
-      tx.insert([{ a: 4 }, { a: 5 }]);
+      collection.transaction((t) => {
+        t.insert([{ a: 4 }, { a: 5 }]);
+        const found = nrml(collection.find({ a: { $gt: 3 } }));
+        expect(found).toEqual([{ a: 4 }, { a: 5 }]);
 
-      const found = nrml(collection.find({ a: { $gt: 3 } }));
-      expect(found).toEqual([{ a: 4 }, { a: 5 }]);
+        t.rollback();
 
-      tx.rollback();
-
-      const found2 = nrml(collection.find({ a: { $gt: 3 } }));
-      expect(found2).toEqual([]);
+        const found2 = nrml(collection.find({ a: { $gt: 3 } }));
+        expect(found2).toEqual([]);
+      });
 
       const latest = collection.find();
       expect(latest).toEqual(original);
@@ -57,19 +55,20 @@ export default testSuite(async ({ describe, test }) => {
       collection.insert({ a: 3 });
       const original = collection.find();
 
-      const tx = collection.transaction();
-      tx.update({ a: 1 }, { $set: { a: 4 } });
+      collection.transaction((t) => {
+        t.update({ a: 1 }, { $set: { a: 4 } });
 
-      const found = nrml(collection.find({ a: 4 }));
-      expect(found).toEqual([{ a: 4 }]);
+        const found = nrml(collection.find({ a: 4 }));
+        expect(found).toEqual([{ a: 4 }]);
 
-      tx.rollback();
+        t.rollback();
 
-      const found2 = nrml(collection.find({ a: 4 }));
-      expect(found2).toEqual([]);
+        const found2 = nrml(collection.find({ a: 4 }));
+        expect(found2).toEqual([]);
 
-      const found3 = nrml(collection.find({ a: 1 }));
-      expect(found3).toEqual([{ a: 1 }]);
+        const found3 = nrml(collection.find({ a: 1 }));
+        expect(found3).toEqual([{ a: 1 }]);
+      });
 
       const latest = collection.find();
       expect(latest).toEqual(original);
@@ -82,19 +81,20 @@ export default testSuite(async ({ describe, test }) => {
       collection.insert({ a: 3 });
       const original = collection.find();
 
-      const tx = collection.transaction();
-      tx.update({ a: { $gt: 1 } }, { $inc: 5 });
+      collection.transaction((t) => {
+        t.update({ a: { $gt: 1 } }, { $inc: 5 });
 
-      const found = nrml(collection.find({ a: { $gt: 1 } }));
-      expect(found).toEqual([{ a: 7 }, { a: 8 }]);
+        const found = nrml(collection.find({ a: { $gt: 1 } }));
+        expect(found).toEqual([{ a: 7 }, { a: 8 }]);
 
-      tx.rollback();
+        t.rollback();
 
-      const found2 = nrml(collection.find({ a: { $gt: 3 } }));
-      expect(found2).toEqual([]);
+        const found2 = nrml(collection.find({ a: { $gt: 3 } }));
+        expect(found2).toEqual([]);
 
-      const found3 = nrml(collection.find({ a: { $gt: 0 } }));
-      expect(found3).toEqual([{ a: 1 }, { a: 2 }, { a: 3 }]);
+        const found3 = nrml(collection.find({ a: { $gt: 0 } }));
+        expect(found3).toEqual([{ a: 1 }, { a: 2 }, { a: 3 }]);
+      });
 
       const latest = collection.find();
       expect(latest).toEqual(original);
@@ -109,16 +109,17 @@ export default testSuite(async ({ describe, test }) => {
       collection.insert({ a: 3 });
       const original = collection.find();
 
-      const tx = collection.transaction();
-      tx.remove({ a: 3 });
+      collection.transaction((t) => {
+        t.remove({ a: 3 });
 
-      const found = nrml(collection.find({ a: 3 }));
-      expect(found).toEqual([]);
+        const found = nrml(collection.find({ a: 3 }));
+        expect(found).toEqual([]);
 
-      tx.rollback();
+        t.rollback();
 
-      const found2 = nrml(collection.find({ a: 3 }));
-      expect(found2).toEqual([{ a: 3 }]);
+        const found2 = nrml(collection.find({ a: 3 }));
+        expect(found2).toEqual([{ a: 3 }]);
+      });
 
       const latest = collection.find();
       expect(latest).toEqual(original);
@@ -131,16 +132,17 @@ export default testSuite(async ({ describe, test }) => {
       collection.insert({ a: 3 });
       const original = collection.find();
 
-      const tx = collection.transaction();
-      tx.remove({ a: { $gt: 1 } });
+      collection.transaction((t) => {
+        t.remove({ a: { $gt: 1 } });
 
-      const found = nrml(collection.find({ a: { $gt: 1 } }));
-      expect(found).toEqual([]);
+        const found = nrml(collection.find({ a: { $gt: 1 } }));
+        expect(found).toEqual([]);
 
-      tx.rollback();
+        t.rollback();
 
-      const found2 = nrml(collection.find({ a: { $gt: 1 } }));
-      expect(found2).toEqual([{ a: 2 }, { a: 3 }]);
+        const found2 = nrml(collection.find({ a: { $gt: 1 } }));
+        expect(found2).toEqual([{ a: 2 }, { a: 3 }]);
+      });
 
       const latest = collection.find();
       expect(latest).toEqual(original);
@@ -149,15 +151,10 @@ export default testSuite(async ({ describe, test }) => {
 
   test("throws if already in a transaction", () => {
     const collection = testCollection();
-    const tx = collection.transaction();
 
-    // Cannot start a new transaction when one is already in progress.
-    expect(collection.transaction).toThrow();
-    tx.commit();
-
-    // Test that we're able to start a new transaction
-    // now that the previous one has been committed.
-    expect(collection.transaction()).toBeInstanceOf(Transaction);
+    collection.transaction((tx) => {
+      expect(collection.transaction).toThrow();
+    });
   });
 
 });
