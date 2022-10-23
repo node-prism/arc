@@ -97,7 +97,9 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
         }
       }
       return res;
-    }
+    $fn: (item: object, fn: (i: any) => unknown) => {
+      return fn(item);
+    },
   };
 
 

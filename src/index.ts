@@ -75,7 +75,8 @@ export type QueryOptions = Partial<{
       Record<"$sub", (string|number)[]> |
       Record<"$mult", (string|number)[]> |
       Record<"$div", (string|number)[]> |
-      Record<"$add", (string|number)[]>;
+      Record<"$add", (string|number)[]> |
+      Record<"$fn", (document) => unknown>;
   };
 
   join: Array<{

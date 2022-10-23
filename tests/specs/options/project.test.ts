@@ -154,6 +154,25 @@ export default testSuite(async ({ describe }) => {
           { math: 90, english: 72, science: 84, average: 82 },
         ]);
       });
+      test("$fn", () => {
+        const collection = testCollection();
+        collection.insert({ first: "John", last: "Doe" });
+        collection.insert({ first: "Jane", last: "Doe" });
+
+        const found = nrml(collection.find(
+          { $has: ["first", "last"] },
+          {
+            aggregate: {
+              fullName: { $fn: (doc) => `${doc.first} ${doc.last}` },
+            },
+          }
+        ));
+
+        expect(found).toEqual([
+          { first: "John", last: "Doe", fullName: "John Doe" },
+          { first: "Jane", last: "Doe", fullName: "Jane Doe" },
+        ]);
+      });
     });
   });
 });
