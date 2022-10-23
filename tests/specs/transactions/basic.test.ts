@@ -157,4 +157,24 @@ export default testSuite(async ({ describe, test }) => {
     });
   });
 
+  test("throwing inside a transaction rolls it back", () => {
+    const collection = testCollection();
+    collection.insert({ a: 1 });
+    collection.insert({ a: 2 });
+    collection.insert({ a: 3 });
+    const original = collection.find();
+
+    try {
+      collection.transaction((t) => {
+        t.insert({ a: 4 });
+        throw new Error("test");
+      });
+    } catch (e) {
+      // ignore
+    }
+
+    const latest = collection.find();
+    expect(latest).toEqual(original);
+  });
+
 });
