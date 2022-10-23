@@ -297,14 +297,12 @@ collection.find(
   {},
   {
     aggregate: {
-      total: { $add: ["$math", "$english", "$science"] },
-      average: { $div: ["$total", 3] },
+      total: { $add: ["math", "english", "science"] },
+      average: { $div: ["total", 3] },
     },
     project: {
-      math: 1,
-      english: 1,
-      science: 1,
-      average: 1,
+      _id: 0,
+      total: 0,
     },
   }
 );
