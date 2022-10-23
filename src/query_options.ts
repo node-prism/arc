@@ -16,23 +16,19 @@ const getSortFunctions = (keys: string[]) =>
 const getSortDirections = (nums: number[]) =>
   nums.map((num) => num === 1 ? "asc" : "desc");
 
-const stripSign = (str: string) => str[0] === "$" ? str.slice(1) : str;
-
 function applyAggregation(data: any[], options: QueryOptions): any[] {
   const ops = {
     $floor: (item: object, str: string) => {
-      if (!str.startsWith("$")) return;
-      const stripped = str.slice(1);
-      if (Ok(item).includes(stripped)) {
-        return Math.floor(item[stripped]);
+      const prop = dot.get(item, str);
+      if (typeof prop === "number") {
+        return Math.floor(prop);
       }
       return 0;
     },
     $ceil: (item: object, str: string) => {
-      if (!str.startsWith("$")) return;
-      const stripped = str.slice(1);
-      if (Ok(item).includes(stripped)) {
-        return Math.ceil(item[stripped]);
+      const prop = dot.get(item, str);
+      if (typeof prop === "number") {
+        return Math.ceil(prop);
       }
       return 0;
     },
@@ -46,9 +42,9 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
             res -= a;
           }
         } else if (res === undefined) {
-          res = Number(item?.[stripSign(a)] ?? 0);
+          res = Number(dot.get(item, a) ?? 0);
         } else {
-          res -= Number(item?.[stripSign(a)] ?? 0);
+          res -= Number(dot.get(item, a) ?? 0);
         }
       }
       return res;
@@ -63,40 +59,41 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
             res += a;
           }
         } else if (res === undefined) {
-          res = Number(item?.[stripSign(a)] ?? 0);
+          res = Number(dot.get(item, a) ?? 0);
         } else {
-          res += Number(item?.[stripSign(a)] ?? 0);
+          res += Number(dot.get(item, a) ?? 0);
         }
       }
       return res;
     },
     $mult: (item: object, arr: (string|number)[]) => {
       let res = 1;
-      for (const el of arr) {
-        if (typeof el === "number") {
-          res *= el;
+      for (const a of arr) {
+        if (typeof a === "number") {
+          res *= a;
         } else {
-          res *= Number(item?.[stripSign(el)] ?? 1);
+          res *= Number(dot.get(item, a) ?? 1);
         }
       }
       return res;
     },
     $div: (item: object, arr: (string|number)[]) => {
       let res = undefined;
-      for (const el of arr) {
-        if (typeof el === "number") {
+      for (const a of arr) {
+        if (typeof a === "number") {
           if (res === undefined) {
-            res = el;
+            res = a;
           } else {
-            res /= el;
+            res /= a;
           }
         } else if (res === undefined) {
-          res = Number(item?.[stripSign(el)] ?? 1);
+          res = Number(dot.get(item, a) ?? 1);
         } else {
-          res /= Number(item?.[stripSign(el)] ?? 1);
+          res /= Number(dot.get(item, a) ?? 1);
         }
       }
       return res;
+    },
     $fn: (item: object, fn: (i: any) => unknown) => {
       return fn(item);
     },
