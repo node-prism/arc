@@ -40,10 +40,8 @@ export function checkAgainstQuery(source: object, query: object): boolean {
       // Operators are sometimes a subkey:
       // find({ number: { $gt: 100 } })
       // $not is a special case: it calls `returnFound` so will handle subkey mods itself.
-      if (key !== "$not") {
-        if (isObject(query[key]) && !isEmptyObject(query[key])) {
-          mods = mods.concat(Ok(query[key]).filter((k) => k.startsWith("$")));
-        }
+      if (key !== "$not" && (isObject(query[key]) && !isEmptyObject(query[key]))) {
+        mods = mods.concat(Ok(query[key]).filter((k) => k.startsWith("$")));
       }
 
       if (mods.length) {
@@ -51,7 +49,7 @@ export function checkAgainstQuery(source: object, query: object): boolean {
           if (mod === "$not") {
             return !booleanOperators[mod](source, query);
           }
-          return booleanOperators[mod](source, query)
+          return booleanOperators[mod](source, query);
         });
       }
 
@@ -88,9 +86,7 @@ export function returnFound(
     result = ensureArray(result);
 
     // ensure unique on returnKey
-    if (Array.isArray(result)) {
-      if (result.some((r) => r[options.returnKey] === item[options.returnKey])) return;
-    }
+    if (Array.isArray(result) && result.some((r) => r[options.returnKey] === item[options.returnKey])) return;
 
     result = result.concat(item);
   }
@@ -104,9 +100,7 @@ export function returnFound(
     if (options.deep) {
       Ok(item).forEach((key) => {
         if (isObject(item[key]) || Array.isArray(item[key])) {
-          appendResult(
-            returnFound(item[key], query, options, parentDocument)
-          );
+          appendResult(returnFound(item[key], query, options, parentDocument));
         }
       });
     }

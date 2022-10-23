@@ -99,7 +99,6 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
     },
   };
 
-
   Ok(options.aggregate).forEach((key) => {
     if (typeof options.aggregate[key] !== "object") return;
     Ok(options.aggregate[key]).forEach((operation) => {

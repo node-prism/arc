@@ -24,7 +24,7 @@ export const changeProps = (
         } else if (safeHasOwnProperty(itemClone, key)) {
           itemClone = {
             ...itemClone,
-           [key]: replaceProps[key],
+            [key]: replaceProps[key],
           };
         }
       });
