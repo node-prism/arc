@@ -106,10 +106,5 @@ export declare class Collection<T> {
     drop(): void;
     getId(): string;
     nextIntegerId(): number;
-    /**
-     * Starts a new transaction.
-     *
-     * @throws {Error} If a transaction is already in progress.
-     */
-    transaction(): Transaction<T>;
+    transaction(fn: (transaction: Transaction<T>) => void): void;
 }
