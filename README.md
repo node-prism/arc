@@ -18,7 +18,7 @@ For a more thorough API reference, please look at the tests in this repository.
 A collection is just a `.json` file.
 
 ```typescript
-import { Collection } from "@prism/db";
+import { Collection } from "@prsm/arcdb";
 
 type Planet = {
   planet: string;
@@ -396,7 +396,7 @@ The default property names for document ID (default `_id`), "created at"
 (default `_created_at`) and "updated at" (default `_updated_at`) timestamps can all be changed.
 
 ```typescript
-import { ID_KEY, CREATED_AT_KEY, UPDATED_AT_KEY } from "@prism/db";
+import { ID_KEY, CREATED_AT_KEY, UPDATED_AT_KEY } from "@prsm/arcdb";
 
 ID_KEY = "id";
 CREATED_AT_KEY = "createdAt";
