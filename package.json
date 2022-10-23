@@ -1,6 +1,6 @@
 {
   "name": "@prsm/db",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "",
   "main": "lib/src/index.js",
   "type": "module",

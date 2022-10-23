@@ -52,7 +52,7 @@ export declare type QueryOptions = Partial<{
         [property: string]: 0 | 1;
     };
     aggregate: {
-        [property: string]: Record<"$floor", string> | Record<"$ceil", string> | Record<"$sub", (string | number)[]> | Record<"$mult", (string | number)[]> | Record<"$div", (string | number)[]> | Record<"$add", (string | number)[]>;
+        [property: string]: Record<"$floor", string> | Record<"$ceil", string> | Record<"$sub", (string | number)[]> | Record<"$mult", (string | number)[]> | Record<"$div", (string | number)[]> | Record<"$add", (string | number)[]> | Record<"$fn", (document: any) => unknown>;
     };
     join: Array<{
         /** The collection to join on. */
