@@ -32,14 +32,32 @@ export class Transaction<T> {
   }
 
   update(query: object, operations: object, options: QueryOptions = {}): T[] {
-    const documents = this.collection.find(query, options);
+    // Given the query, find the documents without any projection or joining applied
+    // so we can store the original documents in the transaction.
+    const documents = this.collection.find(query, {
+      ...options,
+      project: undefined,
+      join: undefined,
+    });
+
+    // Store the original documents in the transaction.
     this.updated.push({ documents, operations, options });
+
     this.operations.push(OpType.UPDATE);
+
+    // Then, run the update using the original query, operations, and options.
     return this.collection.update(query, operations, options);
   }
 
   remove(query: object, options: QueryOptions = {}): T[] {
-    const removed = this.collection.remove(query, options);
+    // Following similar logic to update, find the original documents
+    // using the query and options, but without any projection or joining.
+    const removed = this.collection.find(query, {
+      ...options,
+      project: undefined,
+      join: undefined,
+    });
+    this.collection.remove(query, options);
     this.removed.push(removed);
     this.operations.push(OpType.REMOVE);
     return removed;
@@ -74,8 +92,8 @@ export class Transaction<T> {
       });
     };
 
-    this.operations.reverse().forEach((opType) => {
-      switch (opType) {
+    this.operations.reverse().forEach((op) => {
+      switch (op) {
         case OpType.INSERT:
           uninsert(this.inserted.pop() as T[]);
           break;
