@@ -6,23 +6,23 @@ export function $and(source: object, query: object): boolean {
 
   if (isObject(query)) {
     Ok(query).forEach((pk) => {
-      if (pk === "$and") {
-        let ands = query[pk];
-        ands = ensureArray(ands);
-        ands.forEach((and: object) => {
-          Ok(and).forEach((_andKey) => {
-            // case: { num: (n) => n%2===0 }
-            if (
-              typeof and[_andKey] === "function" &&
-              source[_andKey] !== undefined
-            ) {
-              matches.push(and[_andKey](source[_andKey]));
-            } else {
-              matches.push(checkAgainstQuery(source, and));
-            }
-          });
+      if (pk !== "$and") return;
+
+      let ands = query[pk];
+      ands = ensureArray(ands);
+      ands.forEach((and: object) => {
+        Ok(and).forEach((_andKey) => {
+          // case: { num: (n) => n%2===0 }
+          if (
+            typeof and[_andKey] === "function" &&
+            source[_andKey] !== undefined
+          ) {
+            matches.push(and[_andKey](source[_andKey]));
+          } else {
+            matches.push(checkAgainstQuery(source, and));
+          }
         });
-      }
+      });
     });
   }
 
