@@ -109,7 +109,5 @@ function encrypt(text: string) {
 function decrypt(encrypted: { content: string, iv: string, tag: string }) {
   const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(encrypted.iv, "hex"));
   decipher.setAuthTag(Buffer.from(encrypted.tag, "hex"));
-  const decrpyted = decipher.update(encrypted.content, "base64", "utf8") + decipher.final("utf8");
-
-  return decrpyted;
+  return decipher.update(encrypted.content, "base64", "utf8") + decipher.final("utf8");
 }
