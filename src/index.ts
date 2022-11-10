@@ -113,21 +113,21 @@ export function defaultQueryOptions(): QueryOptions {
 // becomes
 // { name: "Jean-Luc" }.
 function stripBooleanModifiers(query: object): object {
-  const ops = Ok(booleanOperators);
+  const ops = new Set(Ok(booleanOperators));
   if (!isObject(query)) return query;
 
   Object.keys(query).forEach((key) => {
-    if (Ok(query[key]).every((value) => ops.includes(value))) {
+    if (Ok(query[key]).every((value) => ops.has(value))) {
       delete query[key];
       return;
     }
     if (!isObject(query[key])) return;
-    if (Ok(query[key]).every((value) => ops.includes(value))) {
+    if (Ok(query[key]).every((value) => ops.has(value))) {
       delete query[key];
       return;
     }
     Ok(query[key]).forEach((k) => {
-      if (!ops.includes(k)) {
+      if (!ops.has(k)) {
         stripBooleanModifiers(query[key][k]);
       } else {
         delete query[key][k];
