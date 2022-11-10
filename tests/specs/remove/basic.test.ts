@@ -13,5 +13,12 @@ export default testSuite(async ({ describe }) => {
       expect(removed).toEqual([{ a: 2 }]);
       expect(found).toEqual([{ a: 1 }, { a: 3 }]);
     });
+    test("normalizes __private id_map", () => {
+      const collection = testCollection({ integerIds: true });
+      collection.insert({ a: 1 });
+      expect(collection.data["__private"]["id_map"][3]).toBeDefined();
+      collection.remove({ a: 1 });
+      expect(collection.data["__private"]["id_map"][3]).toBeUndefined();
+    });
   });
 });
