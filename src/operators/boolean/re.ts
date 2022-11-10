@@ -19,9 +19,6 @@ export function $re(source: object, query: object): boolean {
     });
   }
 
-  if (match !== undefined) {
-    return match;
-  }
-
+  if (match !== undefined) return match;
   return false;
 }
