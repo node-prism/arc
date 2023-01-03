@@ -117,7 +117,11 @@ function stripBooleanModifiers(query: object): object {
   if (!isObject(query)) return query;
 
   Object.keys(query).forEach((key) => {
-    if (Ok(query[key]).every((value) => ops.has(value))) {
+    if (isObject(key) && Ok(query[key]).every((value) => ops.has(value))) {
+      delete query[key];
+      return;
+    }
+    if (!isObject(key) && ops.has(key)) {
       delete query[key];
       return;
     }
