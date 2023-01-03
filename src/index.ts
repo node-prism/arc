@@ -290,18 +290,13 @@ export class Collection<T> {
     if (!Array.isArray(documents)) documents = [documents];
     if (!documents.length) return [];
 
-    // handle timestamps
-    if (this.options.timestamps) {
-      documents = documents.map((document) => ({
-        ...document,
-        [CREATED_AT_KEY]: Date.now(),
-        [UPDATED_AT_KEY]: Date.now(),
-      }));
-    }
-
-    // handle ids
     documents = documents.map((document) => {
       const cuid = this.getId();
+
+      if (this.options.timestamps) {
+        document[CREATED_AT_KEY] = Date.now();
+        document[UPDATED_AT_KEY] = Date.now();
+      }
 
       // only assign an id if it's not already there
       // support explicit ids, e.g.: { _id: 0, ... }
