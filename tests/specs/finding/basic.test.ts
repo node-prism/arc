@@ -103,7 +103,7 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ a: { b: [ {c: 1}, {c: 2}, {c: 3} ] } }]);
     });
 
-    test("multiple queries, multiple results", () => {
+    test("multiple queries, merged result set", () => {
       const collection = testCollection();
       collection.insert({ x: { a: 1 } });
       collection.insert({ y: { b: 1 } });
