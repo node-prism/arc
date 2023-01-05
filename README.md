@@ -4,6 +4,28 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
 
 *This library is under active development and the API is likely to evolve as features are expanded, however it's unlikely that there will be any breaking changes.*
 
+* [Installation](#installation)
+* [API overview](#api-overview)
+  * [Creating a collection](#creating-a-collection)
+  * [Inserting](#inserting)
+  * [Finding](#finding)
+  * [Updating](#updating)
+  * [Removing](#removing)
+  * [Query options](#query-options)
+    * [ifNull](#ifnull)
+    * [ifEmpty](#ifempty)
+    * [Sorting](#sorting)
+    * [Skip & take (i.e. LIMIT)](#skip--take-ie-limit)
+    * [Projection](#projection)
+      * [Implicit exclusion](#implicit-exclusion)
+      * [Implicit inclusion](#implicit-inclusion)
+      * [Explicit](#explicit)
+      * [Aggregation](#aggregation)
+    * [Joining](#joining)
+  * [Misc](#misc)
+    * [Renaming builtin property names](#renaming-builtin-property-names)
+    * [Documents](#documents)
+
 # Installation
 
 ```bash
