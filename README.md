@@ -127,7 +127,8 @@ collection.remove({ $not: { planet: "Earth" } });
       Record<"$sub", (string|number)[]> |
       Record<"$mult", (string|number)[]> |
       Record<"$div", (string|number)[]> |
-      Record<"$add", (string|number)[]>;
+      Record<"$add", (string|number)[]> |
+      Record<"$fn", (document) => unknown>;
   };
 
   join: Array<{
@@ -289,6 +290,8 @@ collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
 
 #### Aggregation
 
+You can use aggregation to create intermediate properties derived from other document properties, and then project those intermediate properties out of the result set.
+
 ```typescript
 // [
 //   { math: 72, english: 82, science: 92 },
@@ -315,6 +318,29 @@ collection.find(
 //   { math: 60, english: 70, science: 80, average: 70 },
 //   { math: 90, english: 72, science: 84, average: 82 },
 // ]
+```
+
+You can also use dot notation to reference deeply-nested properties, e.g.:
+
+```typescript
+aggregate: {
+  // ...
+  total: { $add: ["scores.math", "scores.english", "scores.science" ] },
+  // ...
+}
+```
+
+Define arbitrary functions to be used as the aggregation handler:
+
+```typescript
+collection.find(
+  { $has: ["first", "last"] },
+  {
+    aggregate: {
+      fullName: { $fn: (doc) => `${doc.first} ${doc.last}` },
+    },
+  }
+);
 ```
 
 ### Joining
