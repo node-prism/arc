@@ -1,6 +1,6 @@
 {
-  "name": "@prsm/arcdb",
-  "version": "1.7.3",
+  "name": "@prsm/arc",
+  "version": "1.8.0",
   "description": "",
   "main": "lib/src/index.js",
   "type": "module",
