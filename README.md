@@ -1,12 +1,13 @@
 # arc
 
-A lightweight, in-memory document database for smaller projects.
-You can think of this as MongoDB's little brother.
+Lightweight, in-memory, optionally persistent, 100% JavaScript document database with no binary dependencies.
+
+*This library is under active development and the API is likely to evolve as features are expanded, however it's unlikely that there will be any breaking changes.*
 
 # Installation
 
 ```bash
-npm i @prsm/arcdb
+npm i @prsm/arc
 ```
 
 # API overview
@@ -18,7 +19,7 @@ For a more thorough API reference, please look at the tests in this repository.
 A collection is just a `.json` file.
 
 ```typescript
-import { Collection } from "@prsm/arcdb";
+import { Collection } from "@prsm/arc";
 
 type Planet = {
   planet: string;
@@ -396,7 +397,7 @@ The default property names for document ID (default `_id`), "created at"
 (default `_created_at`) and "updated at" (default `_updated_at`) timestamps can all be changed.
 
 ```typescript
-import { ID_KEY, CREATED_AT_KEY, UPDATED_AT_KEY } from "@prsm/arcdb";
+import { ID_KEY, CREATED_AT_KEY, UPDATED_AT_KEY } from "@prsm/arc";
 
 ID_KEY = "id";
 CREATED_AT_KEY = "createdAt";
