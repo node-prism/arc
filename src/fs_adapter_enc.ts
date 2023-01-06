@@ -35,8 +35,8 @@ export default class EncryptedFilesystemAdapter<T> implements StorageAdapter<T> 
   read(): { [key: string]: T } {
     try {
       const data = fs.readFileSync(this.filePath, "utf8");
-      const parsed = JSON.parse(data) as { content: string, iv: string, tag: string };
-      const decrypted = decrypt(parsed);
+      /* const parsed = JSON.parse(data) as { content: string, iv: string, tag: string }; */
+      const decrypted = decrypt(data);
 
       return Object.assign(
         {},
@@ -50,7 +50,7 @@ export default class EncryptedFilesystemAdapter<T> implements StorageAdapter<T> 
   write(data: { [key: string]: T }) {
     this.queue.push([
       (d: { [key: string]: T }) => {
-        writeJSONEncrypted(d, this.filePath);
+        encryptAndWrite(d, this.filePath);
       },
       data,
     ]);
@@ -62,52 +62,41 @@ export default class EncryptedFilesystemAdapter<T> implements StorageAdapter<T> 
   }
 }
 
-const key = crypto
-  .createHash('sha256')
-  .update(String(process.env.ENCRYPTION_KEY || "79bad2023354bebe53d946ca6c6e067c5fd034f9e2deacabf15ce388a39de5bd"))
-  .digest('base64')
-  .substr(0, 32);
+const ENCRYPTION_KEY = String(process.env.ENCRYPTION_KEY || "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7")
 
-function writeJSONEncrypted(data: any, ...args: any[]) {
+const encryptAndWrite = (data: any, ...args: any[]) => {
   const env = process.env.NODE_ENV || "development";
-  const indent = env === "development" ? 2 : 0;
-  const json = JSON.stringify(data, null, indent);
-  const out = encrypt(json);
-  
-  return write(out, ...args);
-}
+  const json = JSON.stringify(data, null, 0);
+  return write(encrypt(json), ...args);
+};
 
-function write(data: { content: string, iv: string, tag: string }, ...args: any) {
-  const pth = path.join(...args);
-  return fs.writeFileSync(pth, JSON.stringify(data));
-}
+const write = (data: string, ...args: any) => {
+  return fs.writeFileSync(path.join(...args), data);
+};
 
 /**
   * This function takes a string and encrypts it using the
-  * AES-256-GCM algorithm. It returns a base64 encoded string
+  * aes-256-cbc algorithm. It returns a base64 encoded string
   * containing the encrypted data, the initialization vector
   * and the authentication tag.
   */
-function encrypt(text: string) {
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
-
-  return {
-    content: encrypted.toString("base64"),
-    iv: iv.toString("hex"),
-    tag: cipher.getAuthTag().toString("hex")
-  };
-} 
+const encrypt = (text: string) => {
+  const iv = Buffer.from(crypto.randomBytes(16)).toString("hex").slice(0, 16);
+  const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY), iv);
+  const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+  return `${iv}:${encrypted.toString("hex")}`;
+};
 
 /**
  * This function takes a base64 encoded string
  * containing the encrypted data, the initialization
  * vector and the authentication tag and decrypts it    
- * using the AES-256-GCM algorithm. 
+ * using the aes-256-cbc algorithm. 
  */
-function decrypt(encrypted: { content: string, iv: string, tag: string }) {
-  const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(encrypted.iv, "hex"));
-  decipher.setAuthTag(Buffer.from(encrypted.tag, "hex"));
-  return decipher.update(encrypted.content, "base64", "utf8") + decipher.final("utf8");
-}
+const decrypt = (text: string) => {
+  const textParts = text.includes(":") ? text.split(":") : [];
+  const iv = Buffer.from(textParts.shift() || "", "binary");
+  const encryptedtext = Buffer.from(textParts.join(":"), "hex");
+  const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(ENCRYPTION_KEY), iv);
+  return Buffer.concat([decipher.update(encryptedtext), decipher.final()]).toString();
+};
