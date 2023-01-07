@@ -65,7 +65,6 @@ export default class EncryptedFilesystemAdapter<T> implements StorageAdapter<T> 
 const ENCRYPTION_KEY = String(process.env.ENCRYPTION_KEY || "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7")
 
 const encryptAndWrite = (data: any, ...args: any[]) => {
-  const env = process.env.NODE_ENV || "development";
   const json = JSON.stringify(data, null, 0);
   return write(encrypt(json), ...args);
 };
