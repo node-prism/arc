@@ -40,7 +40,7 @@ export function update<T>(
    *
    * This is where mutated items have their `_updated_at` properties updated.
    */
-  if (options.returnKey === ID_KEY) {
+  if (options.returnKey === ID_KEY && collectionOptions.timestamps) {
     mutated.forEach((item) => {
       item[UPDATED_AT_KEY] = Date.now();
       collection.merge(item[ID_KEY], item);
