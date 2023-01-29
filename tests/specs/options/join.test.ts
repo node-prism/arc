@@ -192,29 +192,34 @@ export default testSuite(async ({ describe }) => {
       inventory.insert({
         name: "Jonathan",
         items: [
-          { id: 3, quantity: 1 },
-          { id: 5, quantity: 2 },
+          { itemId: 3, quantity: 1 },
+          { itemId: 5, quantity: 2 },
         ],
       });
 
-      items.insert({ title: "Item 0" });
-      items.insert({ title: "Item 1" });
-      items.insert({ title: "Item 2" });  
+      items.insert({ name: "The Unstoppable Force", atk: 100 }); // id 3
+      items.insert({ name: "Sneakers", agi: 100 });              // id 4
+      items.insert({ name: "The Immovable Object", def: 100 });  // id 5
 
       const res = nrml(inventory.find({ name: "Jonathan" }, {
         join: [{
           collection: items,
-          from: "items.*.id",
+          from: "items.*.itemId",
           on: "_id",
-          as: "userItems",
+          as: "items.*.meta",
+          options: {
+            project: { _id: 0, _created_at: 0, _updated_at: 0 },
+          }
         }],
       }))[0];
 
-      const its = items.find({ _id: { $oneOf: [3, 5] } });
-
-      expect(res).toHaveProperty("userItems");
-
-      expect((res as any).userItems).toEqual(its);
+      expect(res).toEqual({
+        name: "Jonathan",
+        items: [
+          { itemId: 3, quantity: 1, meta: { name: "The Unstoppable Force", atk: 100 } },
+          { itemId: 5, quantity: 2, meta: { name: "The Immovable Object", def: 100 } },
+        ],
+      })
     });
   });
 });

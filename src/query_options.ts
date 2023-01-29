@@ -183,22 +183,42 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
       const qo = join?.options || {};
       const db = join.collection;
       const tmp = cuid();
+      let asDotStar = false;
       data = data.map((item) => {
-        item[join.as] = ensureArray(item[join.as]);
+        if (join.as.includes(".")) {
+          if (!join.as.includes("*")) {
+            throw new Error("as field must include * when using dot notation, e.g. items.*.meta");
+          }
+
+          asDotStar = true;
+        }
+
+        if (!asDotStar) item[join.as] = ensureArray(item[join.as]);
+
         item[tmp] = [];
 
         const from = join.from.includes(".") ? dot.get(item, join.from) : item[join.from];
         if (from === undefined) return item;
 
         if (Array.isArray(from)) {
-          from.forEach((key: unknown) => {
+          from.forEach((key: unknown, index: number) => {
             const query = { [`${join.on}`]: key };
-            item[tmp] = item[tmp].concat(
-              db.find(query, qo)
-            );
+
+            if (asDotStar) {
+              item = dot.set(
+                item,
+                join.as.replaceAll("*", index.toString()),
+                db.find(query, qo)[0]
+              );
+            } else {
+              item[tmp] = item[tmp].concat(
+                db.find(query, qo)
+              );
+            }
           });
 
-          item[join.as] = item[tmp];
+          if (!asDotStar) item[join.as] = item[tmp];
+
           delete item[tmp];
 
           return item;
@@ -206,8 +226,11 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
         const query = { [`${join.on}`]: from };
 
-        item[tmp] = db.find(query, qo);
-        item[join.as] = item[tmp];
+        if (!asDotStar) {
+          item[tmp] = db.find(query, qo);
+          item[join.as] = item[tmp];
+        }
+
         delete item[tmp];
 
         return item;
