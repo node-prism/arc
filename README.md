@@ -58,6 +58,8 @@ const collection = new Collection<Planet>(".data", "planets");
 
 ## Inserting
 
+See [inserting tests](tests/specs/insert/basic.test.ts) for more examples.
+
 ```typescript
 collection.insert({ planet: "Mercury", diameter: 4880, temp: { avg: 475 } });
 collection.insert([
@@ -67,6 +69,8 @@ collection.insert([
 ```
 
 ## Finding
+
+See [finding tests](tests/specs/finding/basic.test.ts) for more examples.
 
 ```typescript
 // finds Earth document
@@ -85,6 +89,8 @@ collection.find({ $and: [{ avg: { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
 
 ## Updating
 
+See [mutation tests](tests/specs/operators/mutation/index.ts) for more examples.
+
 Any queries that work with `.find` work with `.update`.
 
 ```typescript
@@ -93,6 +99,8 @@ collection.update({ planet: "Earth" }, { $inc: { population: 1 } });
 ```
 
 ## Removing
+
+See [remove tests](tests/specs/remove/basic.test.ts) for more examples.
 
 Any queries that work with `.find` work with `.remove`.
 
@@ -174,6 +182,8 @@ collection.remove({ $not: { planet: "Earth" } });
 
 ### ifNull
 
+See [ifNull.test.ts](tests/specs/options/ifNull.test.ts) for more examples.
+
 ```typescript
 // [
 //   { a: 1, b: 2, c: 3 },
@@ -187,6 +197,8 @@ collection.find({ a: 1 }, { ifNull: { d: 4 } });
 ```
 
 ### ifEmpty
+
+See [ifEmpty.test.ts](tests/specs/options/ifEmpty.test.ts) for more examples.
 
 ```typescript
 // [
@@ -205,6 +217,8 @@ collection.find({ a: 1 }, { ifEmpty: { d: 4 } });
 ```
 
 ### Sorting
+
+See [sort.test.ts](tests/specs/options/sort.test.ts) for more examples.
 
 ```typescript
 // [
@@ -231,6 +245,8 @@ collection.find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
 
 ### Skip & take (i.e. LIMIT)
 
+See [skip_take.test.ts](tests/specs/options/skip_take.test.ts) for more examples.
+
 Mostly useful when paired with `sort`.
 
 ```typescript
@@ -248,6 +264,8 @@ collection.find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
 ```
 
 ### Projection
+
+See [project.test.ts](tests/specs/options/project.test.ts) for more examples.
 
 The ID property of a document is always included unless explicitly excluded.
 
@@ -312,6 +330,8 @@ collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
 
 #### Aggregation
 
+See [project.test.ts](tests/specs/options/project.test.ts) for more examples.
+
 You can use aggregation to create intermediate properties derived from other document properties, and then project those intermediate properties out of the result set.
 
 ```typescript
@@ -367,6 +387,10 @@ collection.find(
 
 ### Joining
 
+See [join.test.ts](tests/specs/options/join.test.ts) for more examples.
+
+Joining allows you to join data from other collections.
+
 ```typescript
 // "users" collection
 
@@ -412,9 +436,57 @@ users.find(
 // ];
 ```
 
-`join` allows for `QueryOptions` which in turn alows for `join`.
-This means that joins can be chained for more complex relationships
-between collections.
+You can also use dot notation when defining the `from` or `as` fields:
+
+```typescript
+// "inventory" collection
+
+// {
+//   name: "Bob",
+//   items: [
+//     { itemId: 3, quantity: 1 }, <-- we want to join on these `id` properties
+//     { itemId: 5, quantity: 2 },
+//   ],
+// }
+
+// "items" collection
+
+// [
+//   { _id: 3, name: "The Unstoppable Force", atk: 100 },
+//   { _id: 4, name: "Sneakers", agi: 100 },
+//   { _id: 5, name: "The Immovable Object", def: 100 },
+// ]
+
+users.find(
+  { name: "Bob" },
+  {
+    join: [
+      {
+        collection: items,
+        from: "items.*.itemId",
+        on: "_id",
+        as: "items.*.meta", // creates a new `meta` property for each item in `from`
+        options: {
+          project: { _id: 0, _created_at: 0, _updated_at: 0 },
+        }
+      },
+    ],
+  }
+);
+
+// [
+//   {
+//     name: "Bob",
+//     items: [
+//       { itemId: 3, quantity: 1, meta: { name: "The Unstoppable Force", atk: 100 } },
+//       { itemId: 5, quantity: 2, meta: { name: "The Immovable Object", def: 100 } },
+//     ],
+//   }
+// ]
+```
+
+`join` allows for `options` (type `QueryOptions`) which in turn allows for `join`.
+Said another way, joins can be nested infinitely for more hierarchical relationships between collections.
 
 ```typescript
 users.find(
