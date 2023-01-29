@@ -109,10 +109,10 @@ export function defaultQueryOptions(): QueryOptions {
 }
 
 // before inserting, strip any boolean modifiers from the query, e.g.
-// { name: "Jean-Luc", title: { $in: ["Captain", "Commander"] } }
+// { name: "Jean-Luc", title: { $oneOf: ["Captain", "Commander"] } }
 // becomes
 // { name: "Jean-Luc" }.
-function stripBooleanModifiers(query: object): object {
+export function stripBooleanModifiers(query: object): object {
   const ops = new Set(Ok(booleanOperators));
   if (!isObject(query)) return query;
 
