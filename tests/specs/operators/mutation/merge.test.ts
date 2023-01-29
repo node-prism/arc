@@ -23,7 +23,7 @@ export default testSuite(async ({ describe }) => {
       const collection = testCollection();
       collection.insert({ a: 1, b: { c: 5 } });
       collection.update(
-        { a: 1, b: { c: 5 } },
+        { a: 1 },
         { $merge: { a: 2, b: { d: 6 } } }
       );
       const found = nrml(collection.find({ d: 6 }));
