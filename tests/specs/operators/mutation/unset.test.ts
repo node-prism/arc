@@ -19,7 +19,7 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ a: { b: { d: 2, e: 3 } } }]);
     });
 
-    test("array", () => {
+    test("dot notation array", () => {
       const collection = testCollection();
       collection.insert({ a: 1, b: { c: 1, d: 2 }, e: 3 });
       collection.update({ a: 1 }, { $unset: ["e", "b.c"] });
@@ -27,12 +27,20 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ a: 1, b: { d: 2 } }]);
     });
 
-    test("array, nested query", () => {
+    test("dot notation nested query", () => {
       const collection = testCollection();
       collection.insert({ a: 1, b: { c: 1, d: 2 }, e: 3 });
       collection.update({ b: { d: 2 } }, { $unset: "b.d" });
       const found = nrml(collection.find({ a: 1 }));
       expect(found).toEqual([{ a: 1, b: { c: 1 }, e: 3 }]);
     });
+
+    test("dot notation, remove all items from array", () => {
+      const collection = testCollection();
+      collection.insert({ a: 1, b: [{ c: 1, d: 1 }, { c: 2, d: 2 }] });
+      collection.update({ a: 1 }, { $unset: "b.*.c" });
+      const found = nrml(collection.find({ a: 1 }));
+      expect(found).toEqual([{ a: 1, b: [{ d: 1 }, { d: 2 }] }]);
+    })
   });
 });
