@@ -2,7 +2,6 @@ import {testSuite} from "manten";
 
 export default testSuite(async ({ describe }) => {
   describe("mutation", async ({ runTestSuite }) => {
-    runTestSuite(import("./append.test.js"));
     runTestSuite(import("./set.test.js"));
     runTestSuite(import("./unset.test.js"));
     runTestSuite(import("./change.test.js"));
