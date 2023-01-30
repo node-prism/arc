@@ -20,7 +20,7 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
       * [Implicit exclusion](#implicit-exclusion)
       * [Implicit inclusion](#implicit-inclusion)
       * [Explicit](#explicit)
-      * [Aggregation](#aggregation)
+    * [Aggregation](#aggregation)
     * [Joining](#joining)
   * [Misc](#misc)
     * [Renaming builtin property names](#renaming-builtin-property-names)
@@ -38,7 +38,7 @@ For a more thorough API reference, please look at the tests in this repository.
 
 ## Creating a collection
 
-A collection is just a `.json` file.
+A collection is just a `.json` file when you're using the default `FilesystemAdapter`.
 
 ```typescript
 import { Collection } from "@prsm/arc";
@@ -61,8 +61,8 @@ const collection = new Collection<Planet>(".data", "planets");
 See [inserting tests](tests/specs/insert/basic.test.ts) for more examples.
 
 ```typescript
-collection.insert({ planet: "Mercury", diameter: 4880, temp: { avg: 475 } });
-collection.insert([
+insert({ planet: "Mercury", diameter: 4_880, temp: { avg: 475 } });
+insert([
   { planet: "Venus", diameter: 12_104, temp: { avg: 737_000 } },
   { planet: "Earth", diameter: 12_742, temp: { avg: 288 } },
 ]);
@@ -74,29 +74,113 @@ See [finding tests](tests/specs/finding/basic.test.ts) for more examples.
 
 ```typescript
 // finds Earth document
-collection.find({ avg: 288 });
-collection.find({ planet: "Earth" });
+find({ avg: 288 }); // implicit deep searching
+find({ planet: "Earth" });
 
 // finds Venus and Earth documents
-collection.find({ diameter: { $gt: 12_000 } });
+find({ diameter: { $gt: 12_000 } });
 
 // finds Mercury and Earth documents
-collection.find({ temp: { avg: { $lt: 1_000 } } });
+find({ temp: { avg: { $lt: 1_000 } } });
 
 // finds Mercury and Earth documents
-collection.find({ $and: [{ avg: { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
+find({ $and: [{ avg: { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
+
+// etc.
+find({ $not: { a: 1, b: 2 } });
+find({ $and: [{ $not: { a: { $lte: 2 }}}, { $not: { a: { $gte: 5 }}}] });
+find({ $xor: [{ a: { $includes: "ba" } }, { num: { $lt: 9 } }] });
+find({ a: { $oneOf: [2, 3] } });
+find({ a: { $length: 3 } }); // string length, array length
 ```
 
 ## Updating
 
-See [mutation tests](tests/specs/operators/mutation/index.ts) for more examples.
+Any queries that work with `Collection.find` will also work with `Collection.update`.
 
-Any queries that work with `.find` work with `.update`.
+Updating documents involves applying various mutation operators to whichever documents match the provided query, i.e.: `update(query, mutations)`.
 
-```typescript
-// increase population, creating the property if it doesn't exist.
-collection.update({ planet: "Earth" }, { $inc: { population: 1 } });
-```
+The following mutation operators are available, and should support most, if not all, use cases:
+
+- [$set](tests/specs/operators/mutation/set.test.ts)
+
+  ```typescript
+  // given
+  // { a: 1 }
+  update({ a: 1 }, { $set: { a: 2 }}) // -> { a: 2 }
+  update({ a: 1 }, { $set: { b: 2 }}) // -> { a: 1, b: 2 }
+  update({ a: 1 }, { $set: { ...someObject }}) // -> { a: 1, ...someObject }
+  ```
+
+- [$unset](tests/specs/operators/mutation/unset.test.ts)
+
+  ```typescript
+  // given
+  // { a: 1, b: { c: 2 } }
+  update({ a: 1 }, { $unset: "b.c" }) // -> { a: 1 }
+  update({ a: 1 }, { $unset: ["a", "b.c"] }) // -> {}
+  // given
+  // { a: 1, b: [{ c: 1, d: 1 }, { c: 2, d: 2 }] }
+  update({ a: 1 }, { $unset: "b.*.c" }) // -> { a: 1, b: [{ d: 1 }, { d: 2 }] }
+  ```
+
+- [$change](tests/specs/operators/mutation/change.test.ts)
+
+  `$set`, but refuses to create new properties.
+
+  ```typescript
+  // given
+  // { a: 1 }
+  update({ a: 1 }, { $change: { a: 2 }}) // -> { a: 2 }
+  update({ a: 1 }, { $change: { b: 2 }}) // -> { a: 1 }, no property created
+  ```
+
+- [$push](tests/specs/operators/mutation/push.test.ts)
+
+  Push will concat an item or items to an array. It refuses to create the target array if it does not exist.
+
+  ```typescript
+  // given
+  // { a: 1, b: [1] }
+  update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1, b: [1, 2] }
+  update({ a: 1 }, { $push: { b: [2, 3] }}) // -> { a: 1, b: [1, 2, 3] }
+  // given
+  // { a: 1 }
+  update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1 }, no property created
+  // given
+  // { a: 1, b: { c: [] } }
+  update({ $has: "b.c" }, { $push: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
+  ```
+
+- [$merge](tests/specs/operators/mutation/merge.test.ts)
+
+  Merge the provided object into the documents that match the query.
+
+  ```typescript
+  // given
+  // { a: 1, b: { c: 5 }}
+  update({ a: 1 }, { $merge: { a: 2, b: { d: 6 }}}) // -> { a: 2, b: { c: 5, d: 6 } }
+  update({ c: 5 }, { $merge: { a: 2 }}) // -> { a: 1, b: { c: 5, a: 2 }}
+  update({ c: 5 }, { $merge: { ...someObject }}) // -> { a: 1, b: { c: 5, ...someObject }}
+  ```
+
+- [$map](tests/specs/operators/mutation/map.test.ts)
+
+  Effectively `Array.map` against only the documents that match the query.
+
+  ```typescript
+  // given
+  // { a: 1 }
+  // { a: 2 }
+  update({ a: 1 }, { $map: (doc) => ({ ...doc, d: 1 }) }) // -> { a: 1, d: 1 }, { a: 2 }
+  ```
+
+- [$inc, $dec, $mult, $div](tests/specs/operators/mutation/math.test.ts)
+
+  ```typescript
+  // increase population, creating the property if it doesn't exist.
+  update({ planet: "Earth" }, { $inc: { population: 1 } });
+  ```
 
 ## Removing
 
@@ -106,7 +190,7 @@ Any queries that work with `.find` work with `.remove`.
 
 ```typescript
 // remove every planet except Earth
-collection.remove({ $not: { planet: "Earth" } });
+remove({ $not: { planet: "Earth" } });
 ```
 
 ## Query options
@@ -189,7 +273,7 @@ See [ifNull.test.ts](tests/specs/options/ifNull.test.ts) for more examples.
 //   { a: 1, b: 2, c: 3 },
 // ];
 
-collection.find({ a: 1 }, { ifNull: { d: 4 } });
+find({ a: 1 }, { ifNull: { d: 4 } });
 
 // [
 //   { a: 1, b: 2, c: 3, d: 4 },
@@ -207,7 +291,7 @@ See [ifEmpty.test.ts](tests/specs/options/ifEmpty.test.ts) for more examples.
 //   { a: 1, b: 2, c: 3, d: {} },
 // ];
 
-collection.find({ a: 1 }, { ifEmpty: { d: 4 } });
+find({ a: 1 }, { ifEmpty: { d: 4 } });
 
 // [
 //   { a: 1, b: 2, c: 3, d: 4 },
@@ -230,7 +314,7 @@ See [sort.test.ts](tests/specs/options/sort.test.ts) for more examples.
 //   { name: "William Riker", age: 29 },
 // ];
 
-collection.find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
+find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
 //                                                  └─ asc    └─ desc
 
 // [
@@ -256,7 +340,7 @@ Mostly useful when paired with `sort`.
 //   { a: 3, b: 3, c: 3 },
 // ];
 
-collection.find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
+find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
 
 // [
 //   { a: 2, b: 2, c: 2 },
@@ -282,7 +366,7 @@ in the projection are excluded from the result document.
 //   { a: 1, b: 1, c: 1 },
 // ];
 
-collection.find({ a: 1 }, { project: { b: 1 } });
+find({ a: 1 }, { project: { b: 1 } });
 
 // [
 //   { _id: .., b: 1 },
@@ -302,7 +386,7 @@ in the projection are included from the result document.
 //   { a: 1, b: 1, c: 1 },
 // ];
 
-collection.find({ a: 1 }, { project: { b: 0 } });
+find({ a: 1 }, { project: { b: 0 } });
 
 // [
 //   { _id: .., a: 1, c: 1 },
@@ -321,14 +405,14 @@ This is effectively the same behavior as implicit inclusion.
 //   { a: 1, b: 1, c: 1 },
 // ];
 
-collection.find({ a: 1 }, { project: { b: 1, c: 0 } });
+find({ a: 1 }, { project: { b: 1, c: 0 } });
 
 // [
 //   { _id: .., a: 1, b: 1 },
 // ];
 ```
 
-#### Aggregation
+### Aggregation
 
 See [project.test.ts](tests/specs/options/project.test.ts) for more examples.
 
@@ -341,7 +425,7 @@ You can use aggregation to create intermediate properties derived from other doc
 //   { math: 90, english: 72, science: 84 }
 // ]
 
-collection.find(
+find(
   {},
   {
     aggregate: {
@@ -365,17 +449,20 @@ collection.find(
 You can also use dot notation to reference deeply-nested properties, e.g.:
 
 ```typescript
-aggregate: {
-  // ...
-  total: { $add: ["scores.math", "scores.english", "scores.science" ] },
-  // ...
-}
+find(
+  {},
+  aggregate: {
+    // ...
+    total: { $add: ["scores.math", "scores.english", "scores.science" ] },
+    // ...
+  }
+);
 ```
 
 Define arbitrary functions to be used as the aggregation handler:
 
 ```typescript
-collection.find(
+find(
   { $has: ["first", "last"] },
   {
     aggregate: {
