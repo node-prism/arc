@@ -33,7 +33,7 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ foo: [1, 2, 3] }, { foo: [1, 2, 4] }]);
     });
 
-    test("simply array deep", () => {
+    test("simple array deep", () => {
       const collection = testCollection();
       collection.insert({ a: { b: [1, 2, 3] }});
       collection.insert({ a: { b: [1, 2, 4] }});
