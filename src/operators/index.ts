@@ -19,7 +19,6 @@ import { $set } from "./mutation/set";
 import { $unset } from "./mutation/unset";
 import { $change } from "./mutation/change";
 import { $inc, $dec, $mult, $div } from "./mutation/math";
-import { $append } from "./mutation/append";
 import { $merge } from "./mutation/merge";
 import { $map } from "./mutation/map";
 
@@ -42,7 +41,6 @@ export const booleanOperators = {
 };
 
 const mutationOperators = {
-  $append,
   $merge,
   $map,
   $set,
