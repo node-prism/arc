@@ -43,15 +43,6 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ a: { b: [1, 2, 3] } }, { a: { b: [1, 2, 4] } }]);
     });
 
-    test("asdf", () => {
-      const collection = testCollection();
-      collection.insert({ foo: "bar", number: 1 });
-      collection.insert({ foo: "bar", number: 2 });
-      collection.insert({ foo: "bar", number: 3 });
-      const found = nrml(collection.find({ foo: "bar", number: { $lte: 2 } }));
-      expect(found).toEqual([{ foo: "bar", number: 1 }, { foo: "bar", number: 2 }]);
-    });
-
     test("includes array", () => {
       const collection = testCollection();
       collection.insert({ a: { b: [1, 2, 3] }});
