@@ -1,4 +1,5 @@
-import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
+import { ensureArray, isObject, Ok } from "../../utils";
+import dot from "dot-wild";
 
 /**
  * @example
@@ -20,7 +21,7 @@ export function $has(source: object, query: object): boolean {
       qry = ensureArray(qry);
 
       match = qry.every((q: any) => {
-        return safeHasOwnProperty(source, q);
+        return dot.get(source, q) !== undefined;
       });
     });
   }
