@@ -206,7 +206,7 @@ export default testSuite(async ({ describe }) => {
           collection: items,
           from: "items.*.itemId",
           on: "_id",
-          as: "items.*.meta",
+          as: "items.*.itemData",
           options: {
             project: { _id: 0, _created_at: 0, _updated_at: 0 },
           }
@@ -216,8 +216,8 @@ export default testSuite(async ({ describe }) => {
       expect(res).toEqual({
         name: "Jonathan",
         items: [
-          { itemId: 3, quantity: 1, meta: { name: "The Unstoppable Force", atk: 100 } },
-          { itemId: 5, quantity: 2, meta: { name: "The Immovable Object", def: 100 } },
+          { itemId: 3, quantity: 1, itemData: { name: "The Unstoppable Force", atk: 100 } },
+          { itemId: 5, quantity: 2, itemData: { name: "The Immovable Object", def: 100 } },
         ],
       })
     });
