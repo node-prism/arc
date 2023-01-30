@@ -1,4 +1,4 @@
-import _ from "lodash";
+import dot from "dot-wild";
 import { Collection } from "../..";
 import { ensureArray } from "../../utils";
 
@@ -16,9 +16,9 @@ export function $unset<T>(
       return $unset(source, mod, query, collection);
     }
 
-    // { $unset: "a" } or { $unset: "a.b.c" }
+    // { $unset: "a" } or { $unset: "a.b.c" } or { $unset: "a.*.c" }
     source = source.map((document) => {
-      return _.set<T>(document as any, mod, undefined);
+      return dot.set(document, mod, undefined);
     });
   });
 
