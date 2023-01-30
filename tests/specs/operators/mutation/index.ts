@@ -9,5 +9,6 @@ export default testSuite(async ({ describe }) => {
     runTestSuite(import("./math.test.js"));
     runTestSuite(import("./map.test.js"));
     runTestSuite(import("./push.test.js"));
+    runTestSuite(import("./filter.test.js"));
   });
 });
