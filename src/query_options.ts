@@ -1,5 +1,5 @@
 import cuid from "cuid";
-import * as dot from "dot-wild";
+import dot from "dot-wild";
 import _ from "lodash";
 import { ID_KEY, QueryOptions } from ".";
 import { ensureArray, Ok, Ov } from "./utils";
