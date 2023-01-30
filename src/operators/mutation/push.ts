@@ -1,8 +1,6 @@
 import dot from "dot-wild";
 import { Collection } from "../..";
-import { appendProps } from "../../append_props";
-import { returnFound } from "../../return_found";
-import { ensureArray, isObject, safeHasOwnProperty } from "../../utils";
+import { ensureArray, isObject } from "../../utils";
 
 // { $push: { b: 2, c: 3 } }
 // { $push: { b: [2, 3] } }
