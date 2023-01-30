@@ -10,7 +10,7 @@ import {
 import { processMutationOperators } from "./operators";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
-import { ensureArray, Ov } from "./utils";
+import { ensureArray, Ov, safeHasOwnProperty } from "./utils";
 
 export function update<T>(
   data: CollectionData,
@@ -42,6 +42,28 @@ export function update<T>(
    */
   if (options.returnKey === ID_KEY && collectionOptions.timestamps) {
     mutated.forEach((item) => {
+
+      let cuid: string;
+
+      if (collectionOptions.integerIds) {
+        let intid = item[ID_KEY];
+        cuid = data.__private.id_map[intid];
+      } else {
+        cuid = item[ID_KEY];
+      }
+
+      Object.keys(collection.indices).forEach((key) => {
+        if (safeHasOwnProperty(item, key)) {
+          const oldValue = data.__private.index.cuidToValues[key][cuid];
+          data.__private.index.valuesToCuid[key][oldValue] = data.__private.index.valuesToCuid[key][oldValue].filter((c) => c !== cuid);
+
+          data.__private.index.valuesToCuid[key][item[key]] = data.__private.index.valuesToCuid[key][item[key]] || [];
+          data.__private.index.valuesToCuid[key][item[key]].push(cuid);
+
+          data.__private.index.cuidToValues[key][cuid] = item[key];
+        }
+      });
+
       item[UPDATED_AT_KEY] = Date.now();
       collection.merge(item[ID_KEY], item);
     });

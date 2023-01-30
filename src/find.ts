@@ -1,12 +1,15 @@
 import _ from "lodash";
+import dot from "dot-wild";
 import {
+    Collection,
   CollectionData, CollectionOptions, defaultQueryOptions,
   ID_KEY,
-  QueryOptions
+  QueryOptions,
+  stripBooleanModifiers
 } from ".";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
-import { ensureArray, isObject, Ov } from "./utils";
+import { ensureArray, isObject, Ov, safeHasOwnProperty } from "./utils";
 
 const makeDistinctByKey = (arr: any[], key: string) => {
   const map = new Map();
@@ -33,7 +36,8 @@ export default function find<T>(
   data: CollectionData,
   query: any,
   options: QueryOptions,
-  collectionOptions: CollectionOptions<T>
+  collectionOptions: CollectionOptions<T>,
+  collection: Collection<T>
 ): T[] {
   options = { ...defaultQueryOptions(), ...options };
   query = ensureArray(query);
@@ -57,20 +61,40 @@ export default function find<T>(
     return applyQueryOptions([...Ov(data)], options);
   }
 
-  // we have a query
+  const withoutPrivate = [...Ov(data)].slice(1);
   let res = [];
+
   for (const q of query) {
     let r = [];
     if (q[ID_KEY] && !isObject(q[ID_KEY]) && !collectionOptions.integerIds) {
       r.push(data[q[ID_KEY]]);
     } else if (q[ID_KEY] && !isObject(q[ID_KEY]) && collectionOptions.integerIds) {
       const f = data.__private.id_map[q[ID_KEY]];
-      // If we have `f`, it's a uuid.
+      // If we have `f`, it's a cuid.
       if (f) r.push(data[f])
     } else {
-      r = returnFound([...Ov(data)], q, options, null);
-      if (r === undefined) r = [];
-      r = ensureArray(r);
+      const strippedQuery = stripBooleanModifiers(_.cloneDeep(q));
+      const flattened = Object.fromEntries(Object.entries(dot.flatten(strippedQuery)).map(([k, v]) => [k.replace(/\\./g, "."), v]));
+
+      if (Object.keys(flattened).some((key) => collection.indices[key])) {
+        Object.keys(collection.indices).forEach((key) => {
+          const queryPropertyValue = key.includes(".") ? flattened[key] : q[key];
+          if (queryPropertyValue) {
+            const cuids = data.__private.index.valuesToCuid?.[key]?.[queryPropertyValue];
+            if (cuids) {
+              cuids.forEach((c) => {
+                r.push(data[c]);
+              });
+            } else {
+              r.push(returnFound(withoutPrivate, q, options, collection));
+            }
+          }
+        });
+      } else {
+        r = returnFound(withoutPrivate, q, options, null);
+        if (r === undefined) r = [];
+        r = ensureArray(r);
+      }
     }
 
     res.push(...r);

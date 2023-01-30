@@ -1,4 +1,5 @@
 import { QueryOptions } from ".";
+import dot from "dot-wild";
 import { booleanOperators } from "./operators";
 import {
   ensureArray,
@@ -51,6 +52,10 @@ export function checkAgainstQuery(source: object, query: object): boolean {
           }
           return booleanOperators[mod](source, query);
         });
+      }
+
+      if (key.includes(".")) {
+        return dot.get(source, key) === query[key];
       }
 
       return (

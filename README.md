@@ -11,6 +11,7 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
     * [Storage adapters](#storage-adapters)
     * [Using another adapter](#using-another-adapter)
     * [Auto sync](#auto-sync)
+  * [Indexing](#indexing)
   * [Inserting](#inserting)
   * [Finding](#finding)
   * [Updating](#updating)
@@ -89,6 +90,39 @@ new Collection(".data", "planets", { autosync: false });
 ```
 
 When `autosync` is disabled, you must call `collection.sync()` to persist, which calls the in-use adapter's `write` method.
+
+## Indexing
+
+- Indexes can be deeply nested properties, e.g.: `createIndex({ key: "planet.composition.type" })`
+
+  When defining indexes using dot notation, the performance benefit of using indexes is the same whether you choose to find documents by using dot notation syntax or object syntax. In other words, the queries below provide the same performance benefit.
+
+  ```typescript
+  find({ "planet.composition.type": "gas" });
+  find({ planet: { composition: { type: "gas" }}});
+  ```
+
+- The value of the key ***must*** be either number or string.
+- Indexes can optionally enforce a unique constraint, e.g.: `createIndex({ key: "planet.life.dominant_species", unique: true })`
+- You can create an index at any time, even if your database has existing records with the index key provided, although ideally they are defined at the point of database creation.
+
+In large databases, ***especially*** with complex documents, you will see a noticeable performance boost when making practical use of indexes:
+
+In a collection made up of 1,000,000 documents of moderately complex shape:
+
+```typescript
+{
+  name: string
+  age: number,
+  thing: number[],
+  things: { a: { b: number }, b: { stuff: number[] } },
+}
+```
+
+- With an index on `age`, a `find({ age: 350_000 })` takes an average of 25ms.
+- Without an index on `age`, a `find({ age: 350_000 })` takes an average of 2s.
+
+YMMV.
 
 ## Inserting
 

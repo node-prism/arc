@@ -1,4 +1,5 @@
 import cuid from "cuid";
+import dot from "dot-wild";
 import find from "./find";
 import fs_adapter from "./fs_adapter";
 import { booleanOperators } from "./operators";
@@ -23,6 +24,11 @@ export type CollectionOptions<T> = Partial<{
 
   /** The storage adapter to use. By default, uses a filesystem adapter. */
   adapter: StorageAdapter<T>;
+}>;
+
+export type CreateIndexOptions = Partial<{
+  key: string;
+  unique: boolean;
 }>;
 
 export type QueryOptions = Partial<{
@@ -149,6 +155,10 @@ export let UPDATED_AT_KEY = "_updated_at";
 export type PrivateData = {
   next_id: number;
   id_map: { [id: string]: string };
+  index: { 
+    valuesToCuid: { [key: string]: { [value: string]: string[] } };
+    cuidToValues: { [key: string]: { [cuid: string]: string | number } };
+  };
 };
 
 export type CollectionData = {
@@ -156,12 +166,17 @@ export type CollectionData = {
   __private?: PrivateData;
 };
 
+const isValidIndexValue = (value: unknown) =>
+  value !== undefined && (typeof value === "string" || typeof value === "number");
+
 export class Collection<T> {
   storagePath: string;
   name: string;
   options: CollectionOptions<T>;
   data: CollectionData = {};
   _transaction: Transaction<T> = null;
+  indices: { [key: string]: { unique: boolean } } = {};
+
 
   constructor(
     storagePath: string = ".data",
@@ -183,6 +198,10 @@ export class Collection<T> {
       __private: {
         next_id: 0,
         id_map: {},
+        index: {
+          valuesToCuid: {},
+          cuidToValues: {},
+        },
       },
     });
 
@@ -232,7 +251,7 @@ export class Collection<T> {
   }
 
   find(query?: object, options: QueryOptions = {}): T[] {
-    return find<T>(this.data, query, options, this.options);
+    return find<T>(this.data, query, options, this.options, this);
   }
 
   update(query: object, operations: object, options: QueryOptions = {}): T[] {
@@ -269,14 +288,27 @@ export class Collection<T> {
     const cloned = found.map((doc) => Object.assign({}, doc));
 
     found.forEach((document) => {
+      let cuid: string;
+
       if (this.options.integerIds) {
         const intid = document[ID_KEY];
-        const cuid = this.data.__private.id_map[intid];
+        cuid = this.data.__private.id_map[intid];
 
         delete this.data.__private.id_map[intid];
         delete this.data[cuid];
         return;
       }
+
+      Object.keys(this.indices).forEach((key) => {
+        const value = dot.get(document, key);
+        if (isValidIndexValue(value)) {
+          this.data.__private.index.valuesToCuid[key][value] = this.data.__private.index.valuesToCuid[key][value].filter((c) => c !== cuid);
+          if (this.data.__private.index.valuesToCuid[key][value].length === 0) {
+            delete this.data.__private.index.valuesToCuid[key][value];
+          }
+          delete this.data.__private.index.cuidToValues[cuid];
+        }
+      });
 
       delete this.data[document[ID_KEY]];
     });
@@ -311,6 +343,25 @@ export class Collection<T> {
       }
 
       this.data[cuid] = document;
+
+      Object.keys(this.indices).forEach((key) => {
+        const value = dot.get(document, key);
+        if (isValidIndexValue(value)) {
+
+          if (this.indices[key].unique) {
+            if (this.data.__private.index.valuesToCuid?.[key]?.[value] !== undefined) {
+              throw new Error(`Unique index violation for key "${key}" and value "${value}"`);
+            }
+          }
+
+          this.data.__private.index.valuesToCuid[key] = this.data.__private.index.valuesToCuid[key] || {};
+          this.data.__private.index.valuesToCuid[key][value] = this.data.__private.index.valuesToCuid[key][value] || [];
+          this.data.__private.index.valuesToCuid[key][value].push(cuid);
+
+          this.data.__private.index.cuidToValues[cuid] = this.data.__private.index.cuidToValues[cuid] || {};
+          this.data.__private.index.cuidToValues[cuid][key] = value;
+        }
+      });
 
       return document;
     });
@@ -355,12 +406,65 @@ export class Collection<T> {
       __private: {
         next_id: 0,
         id_map: {},
+        index: {
+          valuesToCuid: {},
+          cuidToValues: {},
+        },
       },
     };
   }
 
   getId() {
     return cuid();
+  }
+
+  // Creates a new index. If data exists and the index has not been recorded in PrivateData,
+  // then we iterate over all data to create index references.
+  // This calls sync when it's done so that the index is persisted.
+  createIndex(options: CreateIndexOptions = {}) {
+    if (!options.key) throw new Error(`createIndex requires a key`);
+
+    options = {
+      key: options.key,
+      unique: options.unique ?? false,
+    };
+
+    const { key, unique } = options;
+
+    this.indices[key] = { unique };
+
+    // If __private.index.valuesToCuid[key] exists, stop.
+    if (this.data.__private.index.valuesToCuid[key]) {
+      return;
+    }
+
+    // Create index references for all existing data.
+    Object.keys(this.data).forEach((cuid) => {
+      if (cuid === "__private") return;
+
+      const value = dot.get(this.data[cuid], key);
+
+      if (isValidIndexValue(value)) {
+        if (unique) {
+          if (this.data.__private.index.valuesToCuid?.[key]?.[value] !== undefined) {
+            throw new Error(`Unique index violation for key "${key}" and value "${value}"`);
+          }
+        }
+
+        this.data.__private.index.valuesToCuid[key] = this.data.__private.index.valuesToCuid[key] || {};
+        this.data.__private.index.valuesToCuid[key][value] = this.data.__private.index.valuesToCuid[key][value] || [];
+        this.data.__private.index.valuesToCuid[key][value].push(cuid);
+
+        this.data.__private.index.cuidToValues[cuid] = this.data.__private.index.cuidToValues[cuid] || {};
+        this.data.__private.index.cuidToValues[cuid][key] = value;
+      } else {
+        throw new Error(`Invalid index value for property ${key}: ${value}`);
+      }
+    });
+
+    this.sync();
+
+    return this;
   }
 
   nextIntegerId() {
