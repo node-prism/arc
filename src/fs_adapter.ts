@@ -18,7 +18,7 @@ export class SimpleFIFO {
   }
 }
 
-export default class FilesystemAdapter<T> implements StorageAdapter<T> {
+export default class FSAdapter<T> implements StorageAdapter<T> {
   storagePath: string;
   name: string;
   filePath: string;
