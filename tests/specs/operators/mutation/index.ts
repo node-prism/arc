@@ -7,5 +7,6 @@ export default testSuite(async ({ describe }) => {
     runTestSuite(import("./change.test.js"));
     runTestSuite(import("./merge.test.js"));
     runTestSuite(import("./math.test.js"));
+    runTestSuite(import("./map.test.js"));
   });
 });
