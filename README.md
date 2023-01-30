@@ -1,6 +1,6 @@
 # arc
 
-Lightweight, in-memory, optionally persistent, 100% JavaScript document database with no binary dependencies.
+Lightweight, in-memory, optionally persistent, 100% JavaScript document database. Use it in node. Use it in the browser with the localStorage adapter. Use it as the embedded database solution for your electron app.
 
 *This library is under active development and the API is likely to evolve as features are expanded, however it's unlikely that there will be any breaking changes.*
 
@@ -38,7 +38,7 @@ For a more thorough API reference, please look at the tests in this repository.
 
 ## Creating a collection
 
-A collection is just a `.json` file when you're using the default `FilesystemAdapter`.
+A collection is just a `.json` file when you're using the default `FSAdapter`.
 
 ```typescript
 import { Collection } from "@prsm/arc";
@@ -56,9 +56,39 @@ type Planet = {
 const collection = new Collection<Planet>(".data", "planets");
 ```
 
+## Persistence
+
+### Storage adapters
+
+How data is read and written depends on which `StorageAdapter` the collection is using. The default storage adapter is the `FSAdapter` and, unsurprisingly, it reads and writes to a file. For persistence in a browser environment, you can use the provided `LocalStorageAdapter`, or create your own adapter by implementing the `StorageAdapter` interface. There is also an `EncryptedFSAdapter`, which encrypts before writing and decrypts before reading.
+
+### Using another adapter
+
+```typescript
+import { EncryptedFSAdapter } from "@prsm/arc";
+
+process.env.ARC_ENCFS_KEY = "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7";
+
+const path = ".data";
+const name = "planets";
+
+const adapter = new EncryptedFSAdapter(path, name);
+new Collection(path, name, { adapter });
+```
+
+### Auto sync
+
+By default, any operation that mutates data is followed by a sync using whichever adapter the collection was initialized with. You can disable this `autosync` feature when creating the collection:
+
+```typescript
+new Collection(".data", "planets", { autosync: false });
+```
+
+When `autosync` is disabled, you must call `collection.sync()` to persist, which calls the in-use adapter's `write` method.
+
 ## Inserting
 
-See [inserting tests](tests/specs/insert/basic.test.ts) for more examples.
+See the [inserting tests](tests/specs/insert/basic.test.ts) for more examples.
 
 ```typescript
 insert({ planet: "Mercury", diameter: 4_880, temp: { avg: 475 } });
@@ -70,7 +100,7 @@ insert([
 
 ## Finding
 
-See [finding tests](tests/specs/finding/basic.test.ts) for more examples.
+See the [finding tests](tests/specs/finding/basic.test.ts) for more examples.
 
 ```typescript
 // finds Earth document
@@ -152,6 +182,23 @@ The following mutation operators are available, and should support most, if not 
   update({ $has: "b.c" }, { $push: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
   ```
 
+- [$unshift](tests/specs/operators/mutation/unshift.test.ts)
+
+  Unshift will insert new elements to the start of the target array. It refuses to create the target array if it does not exist.
+
+  ```typescript
+  // given
+  // { a: 1, b: [1] }
+  update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1, b: [2, 1] }
+  update({ a: 1 }, { $unshift: { b: [2, 3] }}) // -> { a: 1, b: [2, 3, 1] }
+  // given
+  // { a: 1 }
+  update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1 }, no property created
+  // given
+  // { a: 1, b: { c: [] } }
+  update({ $has: "b.c" }, { $unshift: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
+  ```
+
 - [$merge](tests/specs/operators/mutation/merge.test.ts)
 
   Merge the provided object into the documents that match the query.
@@ -184,7 +231,7 @@ The following mutation operators are available, and should support most, if not 
 
 ## Removing
 
-See [remove tests](tests/specs/remove/basic.test.ts) for more examples.
+See the [remove tests](tests/specs/remove/basic.test.ts) for more examples.
 
 Any queries that work with `.find` work with `.remove`.
 
@@ -266,7 +313,7 @@ remove({ $not: { planet: "Earth" } });
 
 ### ifNull
 
-See [ifNull.test.ts](tests/specs/options/ifNull.test.ts) for more examples.
+See the [ifNull tests](tests/specs/options/ifNull.test.ts) for more examples.
 
 ```typescript
 // [
@@ -282,7 +329,7 @@ find({ a: 1 }, { ifNull: { d: 4 } });
 
 ### ifEmpty
 
-See [ifEmpty.test.ts](tests/specs/options/ifEmpty.test.ts) for more examples.
+See the [ifEmpty tests](tests/specs/options/ifEmpty.test.ts) for more examples.
 
 ```typescript
 // [
@@ -302,7 +349,7 @@ find({ a: 1 }, { ifEmpty: { d: 4 } });
 
 ### Sorting
 
-See [sort.test.ts](tests/specs/options/sort.test.ts) for more examples.
+See the [sort tests](tests/specs/options/sort.test.ts) for more examples.
 
 ```typescript
 // [
@@ -329,7 +376,7 @@ find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
 
 ### Skip & take (i.e. LIMIT)
 
-See [skip_take.test.ts](tests/specs/options/skip_take.test.ts) for more examples.
+See the [skip & take tests](tests/specs/options/skip_take.test.ts) for more examples.
 
 Mostly useful when paired with `sort`.
 
@@ -349,7 +396,7 @@ find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
 
 ### Projection
 
-See [project.test.ts](tests/specs/options/project.test.ts) for more examples.
+See the [project tests](tests/specs/options/project.test.ts) for more examples.
 
 The ID property of a document is always included unless explicitly excluded.
 
@@ -414,7 +461,7 @@ find({ a: 1 }, { project: { b: 1, c: 0 } });
 
 ### Aggregation
 
-See [project.test.ts](tests/specs/options/project.test.ts) for more examples.
+See the [project tests](tests/specs/options/project.test.ts) for more examples.
 
 You can use aggregation to create intermediate properties derived from other document properties, and then project those intermediate properties out of the result set.
 
@@ -474,7 +521,7 @@ find(
 
 ### Joining
 
-See [join.test.ts](tests/specs/options/join.test.ts) for more examples.
+See the [join.test.ts](tests/specs/options/join.test.ts) for more examples.
 
 Joining allows you to join data from other collections.
 
@@ -552,7 +599,7 @@ users.find(
         collection: items,
         from: "items.*.itemId",
         on: "_id",
-        as: "items.*.meta", // creates a new `meta` property for each item in `from`
+        as: "items.*.itemData", // creates a new `itemData` property for each item in `from`
         options: {
           project: { _id: 0, _created_at: 0, _updated_at: 0 },
         }
@@ -565,8 +612,8 @@ users.find(
 //   {
 //     name: "Bob",
 //     items: [
-//       { itemId: 3, quantity: 1, meta: { name: "The Unstoppable Force", atk: 100 } },
-//       { itemId: 5, quantity: 2, meta: { name: "The Immovable Object", def: 100 } },
+//       { itemId: 3, quantity: 1, itemData: { name: "The Unstoppable Force", atk: 100 } },
+//       { itemId: 5, quantity: 2, itemData: { name: "The Immovable Object", def: 100 } },
 //     ],
 //   }
 // ]
@@ -598,7 +645,7 @@ users.find(
 
 ## Misc
 
-### Renaming builtin property names
+### Builtin property name defaults
 
 The default property names for document ID (default `_id`), "created at"
 (default `_created_at`) and "updated at" (default `_updated_at`) timestamps can all be changed.
@@ -615,5 +662,5 @@ If you do this, make sure to do it at the beginning of collection creation.
 
 ### Documents
 
-The returned value from `find`, `update` and `remove` is always an array, even when there
+The returned value from `find`, `update` and `remove` is always an `Array<T>`, even when there
 are no results.
