@@ -7,6 +7,10 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
 * [Installation](#installation)
 * [API overview](#api-overview)
   * [Creating a collection](#creating-a-collection)
+  * [Persistence](#persistence)
+    * [Storage adapters](#storage-adapters)
+    * [Using another adapter](#using-another-adapter)
+    * [Auto sync](#auto-sync)
   * [Inserting](#inserting)
   * [Finding](#finding)
   * [Updating](#updating)
@@ -23,7 +27,7 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
     * [Aggregation](#aggregation)
     * [Joining](#joining)
   * [Misc](#misc)
-    * [Renaming builtin property names](#renaming-builtin-property-names)
+    * [Builtin property name defaults](#builtin-property-name-defaults)
     * [Documents](#documents)
 
 # Installation
