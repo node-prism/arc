@@ -194,21 +194,24 @@ export class Collection<T> {
 
     this.options = options;
 
-    this.data = Object.assign(this.data, {
-      __private: {
-        next_id: 0,
-        id_map: {},
-        index: {
-          valuesToCuid: {},
-          cuidToValues: {},
-        },
+    const defaultPrivateData = (): PrivateData => ({
+      next_id: 0,
+      id_map: {},
+      index: {
+        valuesToCuid: {},
+        cuidToValues: {},
       },
     });
 
-    this.initializeData();
+    this.adapterRead();
+
+    // Ensure we have the __private map after adapter read.
+    if (!this.data.__private) {
+      this.data.__private = defaultPrivateData();
+    }
   }
 
-  initializeData() {
+  adapterRead() {
     this.data = this.options.adapter.read();
   }
 
