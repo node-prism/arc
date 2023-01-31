@@ -470,6 +470,27 @@ export class Collection<T> {
     return this;
   }
 
+  removeIndex(key: string): boolean {
+    if (!this.indices[key]) return false;
+
+    delete this.indices[key];
+
+    if (this.data.__private.index.valuesToCuid[key]) {
+      delete this.data.__private.index.valuesToCuid[key];
+    }
+
+    this.data.__private.index.cuidToValues = Object.keys(this.data.__private.index.cuidToValues).reduce((acc, cuid) => {
+      if (this.data.__private.index.cuidToValues[cuid][key] === undefined) {
+        acc[cuid] = this.data.__private.index.cuidToValues[cuid];
+      }
+      return acc;
+    }, {});
+
+    this.sync();
+
+    return true;
+  }
+
   nextIntegerId() {
     return this.data.__private.next_id++;
   }
