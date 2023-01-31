@@ -421,9 +421,6 @@ export class Collection<T> {
     return cuid();
   }
 
-  // Creates a new index. If data exists and the index has not been recorded in PrivateData,
-  // then we iterate over all data to create index references.
-  // This calls sync when it's done so that the index is persisted.
   createIndex(options: CreateIndexOptions = {}) {
     if (!options.key) throw new Error(`createIndex requires a key`);
 
@@ -436,12 +433,10 @@ export class Collection<T> {
 
     this.indices[key] = { unique };
 
-    // If __private.index.valuesToCuid[key] exists, stop.
     if (this.data.__private.index.valuesToCuid[key]) {
       return;
     }
 
-    // Create index references for all existing data.
     Object.keys(this.data).forEach((cuid) => {
       if (cuid === "__private") return;
 
