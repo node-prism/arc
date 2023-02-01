@@ -56,7 +56,7 @@ export function update<T>(
       Object.keys(collection.indices).forEach((key) => {
         if (dot.get(item, key)) {
           const oldValue = data.__private.index.cuidToValues[cuid][key];
-          const newValue = dot.get(item, key);
+          const newValue = String(dot.get(item, key));
 
           if (oldValue !== newValue) {
             data.__private.index.valuesToCuid[key][newValue] = data.__private.index.valuesToCuid[key][newValue] || [];

@@ -360,7 +360,7 @@ export class Collection<T> {
       this.data[cuid] = document;
 
       Object.keys(this.indices).forEach((key) => {
-        const value = dot.get(document, key);
+        const value = String(dot.get(document, key));
         if (isValidIndexValue(value)) {
 
           if (this.indices[key].unique) {
@@ -452,7 +452,7 @@ export class Collection<T> {
     Object.keys(this.data).forEach((cuid) => {
       if (cuid === "__private") return;
 
-      const value = dot.get(this.data[cuid], key);
+      const value = String(dot.get(this.data[cuid], key));
 
       if (isValidIndexValue(value)) {
         if (unique) {

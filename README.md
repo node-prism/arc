@@ -102,7 +102,7 @@ When `autosync` is disabled, you must call `collection.sync()` to persist, which
   find({ planet: { composition: { type: "gas" }}});
   ```
 
-- The value of the key ***must*** be either number or string.
+- The value of the key must be something that can be converted to a string with `String(value)`.
 - Indexes can optionally enforce a unique constraint, e.g.: `createIndex({ key: "planet.life.dominant_species", unique: true })`
 - You can create an index at any time, even if your database has existing records with the index key provided, although ideally they are defined at the point of database creation.
 
