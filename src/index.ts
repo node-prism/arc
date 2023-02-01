@@ -296,10 +296,9 @@ export class Collection<T> {
       if (this.options.integerIds) {
         const intid = document[ID_KEY];
         cuid = this.data.__private.id_map[intid];
-
         delete this.data.__private.id_map[intid];
-        delete this.data[cuid];
-        return;
+      } else {
+        cuid = document[ID_KEY];
       }
 
       Object.keys(this.indices).forEach((key) => {
@@ -311,9 +310,22 @@ export class Collection<T> {
           }
           delete this.data.__private.index.cuidToValues[cuid];
         }
+
+        if (value === undefined) {
+          // This is a bit annoying, but it needs to be done.
+          // If the value for this document's indexed property is undefined,
+          // it might have been removed accidentally by an update mutation or something.
+          // We need to make sure we clean up any dangling indexes.
+          Object.keys(this.data.__private.index.valuesToCuid[key]).forEach((value) => {
+            this.data.__private.index.valuesToCuid[key][value] = this.data.__private.index.valuesToCuid[key][value].filter((c) => c !== cuid);
+            if (this.data.__private.index.valuesToCuid[key][value].length === 0) {
+              delete this.data.__private.index.valuesToCuid[key][value];
+            }
+          });
+        }
       });
 
-      delete this.data[document[ID_KEY]];
+      delete this.data[cuid];
     });
 
     this.sync();
