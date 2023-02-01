@@ -3,7 +3,7 @@ import {
   CollectionData, CollectionOptions, defaultQueryOptions,
   ID_KEY,
   QueryOptions
-} from ".";
+} from "./collection";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
 import { ensureArray, isObject, Ov } from "./utils";

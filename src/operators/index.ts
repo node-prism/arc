@@ -1,4 +1,4 @@
-import { Collection } from "..";
+import { Collection } from "../collection";
 import { Ok } from "../utils";
 import { $gt } from "./boolean/gt";
 import { $gte } from "./boolean/gte";

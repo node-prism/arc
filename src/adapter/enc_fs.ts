@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { StorageAdapter } from ".";
-import { SimpleFIFO } from "./fs_adapter";
+import { SimpleFIFO } from "./fs";
 import crypto from "crypto";
 
 export default class EncryptedFSAdapter<T> implements StorageAdapter<T> {

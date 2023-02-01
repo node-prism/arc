@@ -1,5 +1,5 @@
 import dot from "dot-wild";
-import { Collection, ID_KEY } from "../..";
+import { Collection, ID_KEY } from "../../collection";
 import { isFunction, isObject } from "../../utils";
 
 export function $filter<T>(
