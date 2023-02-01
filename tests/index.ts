@@ -40,3 +40,7 @@ await describe("encrypted adapter", ({ runTestSuite }) => {
 await describe("utils", ({ runTestSuite }) => {
   runTestSuite(import("./specs/utils"));
 });
+
+await describe("indexes", ({ runTestSuite}) => {
+  runTestSuite(import("./specs/index.test.js"));
+});
