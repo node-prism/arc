@@ -486,12 +486,15 @@ export class Collection<T> {
       delete this.data.__private.index.valuesToCuid[key];
     }
 
-    this.data.__private.index.cuidToValues = Object.keys(this.data.__private.index.cuidToValues).reduce((acc, cuid) => {
-      if (this.data.__private.index.cuidToValues[cuid][key] === undefined) {
-        acc[cuid] = this.data.__private.index.cuidToValues[cuid];
+    Object.keys(this.data.__private.index.cuidToValues).forEach((cuid) => {
+      if (this.data.__private.index.cuidToValues[cuid][key] !== undefined) {
+        delete this.data.__private.index.cuidToValues[cuid][key];
       }
-      return acc;
-    }, {});
+
+      if (isEmptyObject(this.data.__private.index.cuidToValues[cuid])) {
+        delete this.data.__private.index.cuidToValues[cuid];
+      }
+    });
 
     this.sync();
 
