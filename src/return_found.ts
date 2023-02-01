@@ -91,7 +91,15 @@ export function returnFound(
     result = ensureArray(result);
 
     // ensure unique on returnKey
-    if (Array.isArray(result) && result.some((r) => r[options.returnKey] === item[options.returnKey])) return;
+    if (Array.isArray(result) && !Array.isArray(item)) {
+      if (result.some((r) => r[options.returnKey] === item[options.returnKey])) return;
+    }
+
+    if (Array.isArray(result) && Array.isArray(item)) {
+      // If any ids are already in the result, don't add them again.
+      const resultIds = result.map((r) => r[options.returnKey]);
+      if (item.some((i) => resultIds.includes(i[options.returnKey]))) return;
+    }
 
     result = result.concat(item);
   }
