@@ -1,7 +1,7 @@
 import cuid from "cuid";
 import dot from "dot-wild";
 import _ from "lodash";
-import { ID_KEY, QueryOptions } from ".";
+import { ID_KEY, QueryOptions } from "./collection";
 import { ensureArray, Ok, Ov } from "./utils";
 
 enum ProjectionMode {

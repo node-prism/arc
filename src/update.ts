@@ -7,7 +7,7 @@ import {
   QueryOptions,
   ID_KEY,
   UPDATED_AT_KEY,
-} from ".";
+} from "./collection";
 import { processMutationOperators } from "./operators";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";

@@ -1,4 +1,4 @@
-import { Collection, ID_KEY, QueryOptions } from ".";
+import { Collection, ID_KEY, QueryOptions } from "./collection";
 
 enum OpType {
   INSERT = "insert",

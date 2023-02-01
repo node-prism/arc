@@ -1,5 +1,5 @@
 import { testSuite, expect } from "manten";
-import { Collection } from "../../src";
+import { Collection } from "../../src/collection";
 import { nrml, testCollection } from "../common";
 
 const getCollection = () => {

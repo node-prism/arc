@@ -1,5 +1,5 @@
 import { testSuite, expect } from "manten";
-import { ID_KEY } from "../../../src";
+import { ID_KEY } from "../../../src/collection";
 import { nrml, testCollection } from "../../common";
 
 export default testSuite(async ({ describe }) => {

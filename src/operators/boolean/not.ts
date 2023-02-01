@@ -1,4 +1,4 @@
-import { ID_KEY } from "../..";
+import { ID_KEY } from "../../collection";
 import { returnFound } from "../../return_found";
 import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
 

@@ -1,12 +1,12 @@
 import _ from "lodash";
 import dot from "dot-wild";
 import {
-    Collection,
+  Collection,
   CollectionData, CollectionOptions, defaultQueryOptions,
   ID_KEY,
   QueryOptions,
   stripBooleanModifiers
-} from ".";
+} from "./collection";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
 import { ensureArray, isObject, Ov, safeHasOwnProperty } from "./utils";

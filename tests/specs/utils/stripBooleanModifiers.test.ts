@@ -1,5 +1,5 @@
 import { testSuite, expect } from "manten";
-import { stripBooleanModifiers } from "../../../src";
+import { stripBooleanModifiers } from "../../../src/collection";
 
 export default testSuite(async ({ test }) => {
   test("should strip boolean modifiers", () => {
