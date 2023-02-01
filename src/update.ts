@@ -1,3 +1,4 @@
+import dot from "dot-wild";
 import {
   Collection,
   CollectionOptions,
@@ -53,14 +54,21 @@ export function update<T>(
       }
 
       Object.keys(collection.indices).forEach((key) => {
-        if (safeHasOwnProperty(item, key)) {
-          const oldValue = data.__private.index.cuidToValues[key][cuid];
-          data.__private.index.valuesToCuid[key][oldValue] = data.__private.index.valuesToCuid[key][oldValue].filter((c) => c !== cuid);
+        if (dot.get(item, key)) {
+          const oldValue = data.__private.index.cuidToValues[cuid][key];
+          const newValue = dot.get(item, key);
 
-          data.__private.index.valuesToCuid[key][item[key]] = data.__private.index.valuesToCuid[key][item[key]] || [];
-          data.__private.index.valuesToCuid[key][item[key]].push(cuid);
+          if (oldValue !== newValue) {
+            data.__private.index.valuesToCuid[key][newValue] = data.__private.index.valuesToCuid[key][newValue] || [];
+            data.__private.index.valuesToCuid[key][newValue].push(cuid);
+            data.__private.index.valuesToCuid[key][oldValue] = data.__private.index.valuesToCuid[key][oldValue].filter((cuid) => cuid !== cuid);
 
-          data.__private.index.cuidToValues[key][cuid] = item[key];
+            if (data.__private.index.valuesToCuid[key][oldValue].length === 0) {
+              delete data.__private.index.valuesToCuid[key][oldValue];
+            }
+
+            data.__private.index.cuidToValues[cuid][key] = newValue;
+          }
         }
       });
 
