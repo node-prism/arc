@@ -1,4 +1,5 @@
-import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
+import dot from "dot-wild";
+import { ensureArray, isObject, Ok } from "../../utils";
 
 export function $gte(source: object, query: object): boolean {
   let match = false;
@@ -8,9 +9,11 @@ export function $gte(source: object, query: object): boolean {
       let qry = query[k]["$gte"];
       qry = ensureArray(qry);
 
-      if (safeHasOwnProperty(source, k)) {
+      const targetValue = dot.get(source, k);
+
+      if (targetValue !== undefined) {
         qry.forEach((q: any) => {
-          if (source[k] >= q) {
+          if (targetValue >= q) {
             match = true;
           }
         });

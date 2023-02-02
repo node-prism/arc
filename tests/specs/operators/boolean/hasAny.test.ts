@@ -28,5 +28,24 @@ export default testSuite(async ({ describe }) => {
         { c: 5 }
       ]);
     });
+
+    test("works with dot notation", () => {
+      const collection = testCollection();
+      collection.insert([{ a: { b: 2 } }, { b: 4 }, { c: 5 }, { a: { b: 6 } }]);
+      const found = nrml(collection.find({ $hasAny: "a.b" }));
+      expect(found).toEqual([{ a: { b: 2 } }, { a: { b: 6 } }]);
+    });
+
+    test("works with leading dot notation to narrowly scope $hasAny", () => {
+      const collection = testCollection();
+      collection.insert([
+        { a: { b: { c: { d: 2 } } } },
+        { b: 4 },
+        { c: 5 },
+        { a: { b: { c: { e: 6 } } } }
+      ]);
+      const found = nrml(collection.find({ "a.b.c": { $hasAny: "d"} }));
+      expect(found).toEqual([{ a: { b: { c: { d: 2 } } } }]);
+    });
   });
 });

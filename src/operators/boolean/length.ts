@@ -1,4 +1,5 @@
-import { isObject, Ok, safeHasOwnProperty } from "../../utils";
+import dot from "dot-wild";
+import { isObject, Ok } from "../../utils";
 
 /**
  * $length asserts the length of an array or string.
@@ -13,10 +14,11 @@ export function $length(source: object, query: object): boolean {
   if (isObject(query)) {
     Ok(query).forEach((k) => {
       const qry = query[k]["$length"];
+      const targetValue = dot.get(source, k);
 
-      if (safeHasOwnProperty(source, k)) {
-        if (Array.isArray(source[k]) || typeof source[k] === "string") {
-          if (source[k].length === qry) {
+      if (targetValue !== undefined) {
+        if (Array.isArray(targetValue) || typeof targetValue === "string") {
+          if (targetValue.length === qry) {
             matched = true;
           }
         }

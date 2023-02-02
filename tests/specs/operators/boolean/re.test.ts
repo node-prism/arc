@@ -14,5 +14,17 @@ export default testSuite(async ({ describe }) => {
       const found = nrml(collection.find({ ip: { $re: ip } }));
       expect(found).toEqual([ { ip: "192.168.0.1" }, { ip: "192.168.0.254" } ]);
     });
+
+    test("works with dot notation", () => {
+      const collection = testCollection();
+      collection.insert([
+        { ip: { a: "192.168.0.1" } },
+        { ip: { a: "192.168.0.254" } },
+        { ip: { a: "19216801" } }
+      ]);
+      const ip = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/;
+      const found = nrml(collection.find({ "ip.a": { $re: ip } }));
+      expect(found).toEqual([ { ip: { a: "192.168.0.1" } }, { ip: { a: "192.168.0.254" } } ]);
+    })
   });
 });

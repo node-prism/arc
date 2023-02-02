@@ -28,5 +28,12 @@ export default testSuite(async ({ describe }) => {
         { b: 4 }, { c: 5 }
       ]);
     });
+
+    test("works with dot notation", () => {
+      const collection = testCollection();
+      collection.insert([{ a: { b: 2 } }, { a: { c: 4 } }, { a: { d: 5 } }, { a: { b: 6 } }]);
+      const found = nrml(collection.find({ $has: "a.b" }));
+      expect(found).toEqual([{ a: { b: 2 } }, { a: { b: 6 } }]);
+    });
   });
 });

@@ -1,3 +1,4 @@
+import dot from "dot-wild";
 import { checkAgainstQuery } from "../../return_found";
 import { ensureArray, isObject, Ok } from "../../utils";
 
@@ -20,11 +21,15 @@ export function $xor(source: object, query: object): boolean {
       ors.forEach((or: object) => {
         Ok(or).forEach((orKey) => {
           // case: { num: (n) => n%2===0 }
+
+          const orKeyValue = dot.get(or, orKey);
+          const sourceOrKeyValue = dot.get(source, orKey);
+
           if (
-            typeof or[orKey] === "function" &&
-            source[orKey] !== undefined
+            typeof orKeyValue === "function" &&
+            sourceOrKeyValue !== undefined
           ) {
-            matches.push(or[orKey](source[orKey]));
+            matches.push(orKeyValue(sourceOrKeyValue));
           } else {
             matches.push(checkAgainstQuery(source, or));
           }

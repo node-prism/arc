@@ -7,7 +7,7 @@ export default testSuite(async ({ describe }) => {
       const collection = testCollection();
       collection.insert([
         { a: 1, b: 1, c: 1 },
-        { a: 1, b: 2, c: 2 },
+        { a: 1, b: 2, c: 2 }, // not included because a is 1 and b is 2, which matches the query exactly
         { a: 2, b: 2, c: 3 },
       ]);
       const found = nrml(collection.find({ $xor: [{ a: 1 }, { b: 2 }] }));
@@ -23,7 +23,7 @@ export default testSuite(async ({ describe }) => {
         { a: 1 },
         { b: 2 },
         { c: 3 },
-        { a: 1, b: 2 },
+        { a: 1, b: 2 }, // not included, because both properties exist in the query
         { a: 1, c: 3 },
         { b: 2, c: 3 },
       ]);
@@ -39,15 +39,30 @@ export default testSuite(async ({ describe }) => {
     test("nested operators", () => {
       const collection = testCollection();
       collection.insert([
-        { foo: "bar", num: 5 },
+        { foo: "bar", num: 5 }, // not included, because properties both match the query
         { foo: "bee", num: 8 },
         { foo: "baz", num: 10 },
-        { foo: "boo", num: 20 },
+        { foo: "boo", num: 20 }, // not included, because neither property matches the query
       ]);
       const found = nrml(collection.find({ $xor: [{ foo: { $includes: "ba" } }, { num: { $lt: 9 } }] }));
       expect(found).toEqual([
         { foo: "bee", num: 8 }, // <-- foo does not include "ba", but num is less than 9
-        { foo: "baz", num: 10 }, // <-- foo includes "ba", but num is not less than 9 
+        { foo: "baz", num: 10 }, // <-- foo includes "ba", but num is not less than 9
+      ]);
+    });
+
+    test("nested operators, dot notation, deep", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { foo: "bar", num: 5 } } } }, // not included, because properties both match the query
+        { a: { b: { c: { foo: "bee", num: 8 } } } },
+        { a: { b: { c: { foo: "baz", num: 10 } } } },
+        { a: { b: { c: { foo: "boo", num: 20 } } } }, // not included, because neither property matches the query
+      ]);
+      const found = nrml(collection.find({ $xor: [{ "a.b.c.foo": { $includes: "ba" } }, { "a.b.c.num": { $lt: 9 } }] }));
+      expect(found).toEqual([
+        { a: { b: { c: { foo: "bee", num: 8 } } } }, // <-- foo does not include "ba", but num is less than 9
+        { a: { b: { c: { foo: "baz", num: 10 } } } }, // <-- foo includes "ba", but num is not less than 9
       ]);
     });
 

@@ -1,21 +1,23 @@
 import { Collection, CREATED_AT_KEY, ID_KEY, UPDATED_AT_KEY } from "../src/collection";
 import EncryptedFSAdapter from "../src/adapter/fs";
 
-const getCollection = <T>({ name = "test", integerIds = false }): Collection<T> => {
+const getCollection = <T>({ name = "test", integerIds = false, populate = true }): Collection<T> => {
   const collection = new Collection<T>(".test", name, {
     autosync: false,
     integerIds,
   });
   collection.drop();
 
-  // Adding some items to ensure that result sets correctly
-  // ignore unmatched queries in all cases.
-  // @ts-ignore
-  collection.insert({ xxx: "xxx" });
-  // @ts-ignore
-  collection.insert({ yyy: "yyy" });
-  // @ts-ignore
-  collection.insert({ zzz: "zzz" });
+  if (populate) {
+    // Adding some items to ensure that result sets correctly
+    // ignore unmatched queries in all cases.
+    // @ts-ignore
+    collection.insert({ xxx: "xxx" });
+    // @ts-ignore
+    collection.insert({ yyy: "yyy" });
+    // @ts-ignore
+    collection.insert({ zzz: "zzz" });
+  }
 
   return collection;
 };
@@ -30,8 +32,8 @@ const getEncryptedCollection = <T>({ name = "test", integerIds = false }): Colle
   return collection;
 };
 
-export function testCollection<T>({ name = "test", integerIds = false } = {}): Collection<T> {
-  return getCollection({ name, integerIds });
+export function testCollection<T>({ name = "test", integerIds = false, populate = true } = {}): Collection<T> {
+  return getCollection({ name, integerIds, populate });
 }
 
 export function testCollectionEncrypted<T>({ name = "test", integerIds = false } = {}): Collection<T> {

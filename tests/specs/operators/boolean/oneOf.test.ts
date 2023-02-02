@@ -22,5 +22,15 @@ export default testSuite(async ({ describe }) => {
       expect(found.length).toEqual(2);
       expect(found).toEqual([{ a: { b: 2 } }, { a: { b: 3 } }]);
     });
+
+    test("works deeply without dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert({ a: { b: { c: 1 } } });
+      collection.insert({ a: { b: { c: 2 } } });
+      collection.insert({ a: { b: { c: 3 } } });
+      const found = nrml(collection.find({ a: { b: { c: { $oneOf: [2, 3] } } } }));
+      expect(found.length).toEqual(2);
+      expect(found).toEqual([{ a: { b: { c: 2 } } }, { a: { b: { c: 3 } } }]);
+    });
   });
 });

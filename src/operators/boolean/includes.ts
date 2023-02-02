@@ -1,3 +1,4 @@
+import dot from "dot-wild";
 import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
 
 /**
@@ -10,20 +11,22 @@ import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
  * { "nums": [1, 2, 3] }, { "nums": [4, 5, 6] }
  * find({ "nums": { $includes: 2 } })
  * find({ "nums": { $includes: [1, 2, 3] } })
+ *
+ * find({ "a.b.c": { $includes: 1 } })
  */
 export function $includes(source: object, query: object): boolean {
   const matches = [];
 
   if (isObject(query)) {
     Ok(query).forEach((k) => {
-      let qry = query[k]["$includes"];
-      qry = ensureArray(qry);
+        let qry = query[k]["$includes"];
+        qry = ensureArray(qry);
 
-      if (safeHasOwnProperty(source, k)) {
-        qry.forEach((q: any) => {
-          matches.push(source[k].includes(q));
-        });
-      }
+        if (dot.get(source, k)) {
+          qry.forEach((q: any) => {
+            matches.push(dot.get(source, k).includes(q));
+          });
+        }
     });
   }
 

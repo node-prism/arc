@@ -1,3 +1,4 @@
+import dot from "dot-wild";
 import { checkAgainstQuery } from "../../return_found";
 import { ensureArray, isObject, Ok } from "../../utils";
 
@@ -13,11 +14,15 @@ export function $and(source: object, query: object): boolean {
       ands.forEach((and: object) => {
         Ok(and).forEach((_andKey) => {
           // case: { num: (n) => n%2===0 }
+
+          const andKeyValue = dot.get(and, _andKey);
+          const sourceAndKeyValue = dot.get(source, _andKey);
+
           if (
-            typeof and[_andKey] === "function" &&
-            source[_andKey] !== undefined
+            typeof andKeyValue === "function" &&
+            sourceAndKeyValue !== undefined
           ) {
-            matches.push(and[_andKey](source[_andKey]));
+            matches.push(andKeyValue(sourceAndKeyValue));
           } else {
             matches.push(checkAgainstQuery(source, and));
           }

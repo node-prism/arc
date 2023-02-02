@@ -1,3 +1,4 @@
+import dot from "dot-wild";
 import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
 
 /**
@@ -6,8 +7,10 @@ import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
  * { $hasAny: ["a", "b"] } <-- source has properties "a" OR "b"
  * 
  * @related
- * $hasAny
- * $not (e.g. { $not: { $has: "a" } })
+ * $has
+ * $not
+ *   { $not: { $hasAny: "a" } })
+ *   { $not: { "a.b.c.d": { $hasAny: "e" } } }
  */
 export function $hasAny(source: object, query: object): boolean {
   let match = false;
@@ -20,7 +23,7 @@ export function $hasAny(source: object, query: object): boolean {
       qry = ensureArray(qry);
 
       match = qry.some((q: any) => {
-        return safeHasOwnProperty(source, q);
+        return dot.get(source, q);
       });
     });
   }

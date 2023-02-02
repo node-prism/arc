@@ -1,3 +1,4 @@
+import dot from "dot-wild";
 import { ensureArray, isObject, Ok } from "../../utils";
 
 export function $re(source: object, query: object): boolean {
@@ -6,12 +7,15 @@ export function $re(source: object, query: object): boolean {
   if (isObject(query)) {
     Ok(query).forEach((k) => {
       if (isObject(query[k])) {
-        if (source[k] === undefined) return;
+
+        const targetValue = dot.get(source, k);
+
+        if (targetValue === undefined) return;
         Ok(query[k]).forEach((j) => {
           if (j === "$re") {
             match = true;
             ensureArray(query[k][j]).forEach((re: RegExp) => {
-              if (!re.test(source[k])) match = false;
+              if (!re.test(targetValue)) match = false;
             });
           }
         });

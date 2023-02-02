@@ -92,5 +92,119 @@ export default testSuite(async ({ describe }) => {
       ]);
     });
 
+    test("works with leading properties", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: 1 } }, { a: { b: 2 } }
+      ]);
+      const found = nrml(collection.find({ a: { $not: { b: 1 }}}));
+      expect(found).toEqual([
+        { a: { b: 2 } },
+      ]);
+    });
+
+    test("works with leading properties very deeply", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { d: 1 } } } }, { a: { b: { c: { d: 2 } } } }
+      ]);
+      const found = nrml(collection.find({ a: { b: { c: { $not: { d: 1 }}}}}));
+      expect(found).toEqual([
+        { a: { b: { c: { d: 2 } } } },
+      ]);
+    });
+
+    test("works with $includes -> $not: { $includes: ... }", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: [1, 2, 3] }, { a: [2, 3, 4] }
+      ]);
+      const found = nrml(collection.find({ $not: { a: { $includes: 1 } } }));
+      expect(found).toEqual([
+        { a: [2, 3, 4] },
+      ]);
+    });
+
+    test("works with $includes, deeply", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: [1, 2, 3] } }, { a: { b: [2, 3, 4] } }
+      ]);
+      const found = nrml(collection.find({ $not: { a: { b: { $includes: 1 } } } }));
+      expect(found).toEqual([{ a: { b: [2, 3, 4] } }]);
+    });
+
+    test("works with $includes, very deeply", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { d: [1, 2, 3] } } } }, { a: { b: { c: { d: [2, 3, 4] } } } }
+      ]);
+      const found = nrml(collection.find({ $not: { a: { b: { c: { d: { $includes: 1 } } } } } }));
+      expect(found).toEqual([{ a: { b: { c: { d: [2, 3, 4] } } } }]);
+    });
+
+    test("works with $includes, deep, using dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: [1, 2, 3] } }, { a: { b: [2, 3, 4] } }
+      ]);
+      const found = nrml(collection.find({ $not: { "a.b": { $includes: 1 } } }));
+      expect(found).toEqual([{ a: { b: [2, 3, 4] } }]);
+    });
+
+    test("works with $includes, infinitely deep, using dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { d: [1, 2, 3] } } } }, { a: { b: { c: { d: [2, 3, 4] } } } }
+      ]);
+      const found = nrml(collection.find({ $not: { "a.b.c.d": { $includes: 1 } } }));
+      expect(found).toEqual([{ a: { b: { c: { d: [2, 3, 4] } } } }]);
+    });
+
+    test("works with $oneOf, infinitely deep, using dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { d: 1 } } } }, { a: { b: { c: { d: 2 } } } }
+      ]);
+      const found = nrml(collection.find({ $not: { "a.b.c.d": { $oneOf: [1, 2] } } }));
+      expect(found).toEqual([]);
+
+      const found2 = nrml(collection.find({ $not: { "a.b.c.d": { $oneOf: [1, 3] } } }));
+      expect(found2).toEqual([{ a: { b: { c: { d: 2 } } } }]);
+    });
+
+    test("works with $oneOf, infinitely deep, not dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { d: 1 } } } }, { a: { b: { c: { d: 2 } } } }
+      ]);
+      const found = nrml(collection.find({ $not: { a: { b: { c: { d: { $oneOf: [1, 2] } } } } } }));
+      expect(found).toEqual([]);
+
+      const found2 = nrml(collection.find({ $not: { a: { b: { c: { d: { $oneOf: [1, 3] } } } } } }));
+      expect(found2).toEqual([{ a: { b: { c: { d: 2 } } } }]);
+    });
+
+    test("works with $length, infinitely deep, using dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { d: [1, 2, 3] } } } }, { a: { b: { c: { d: [2, 3, 4, 5] } } } }
+      ]);
+      const found = nrml(collection.find({ $not: { "a.b.c.d": { $length: 3 } } }));
+      expect(found).toEqual([{ a: { b: { c: { d: [2, 3, 4, 5] } } } }]);
+    });
+
+    test("works with $hasAny, infinitely deep, using dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: { c: { d: { foo: "foo", bar: "bar", baz: "baz" } } } } },
+        { a: { b: { c: { d: { foo: "foo", bar: "bar" } } } } }
+      ]);
+      const found = nrml(collection.find({ $not: { "a.b.c.d": { $hasAny: ["foo", "bar"] } } }));
+      expect(found).toEqual([]);
+
+      const found2 = nrml(collection.find({ $not: { "a.b.c.d": { $hasAny: ["baz"] } } }));
+      expect(found2).toEqual([{ a: { b: { c: { d: { foo: "foo", bar: "bar" } } } } }]);
+    });
   });
 });
