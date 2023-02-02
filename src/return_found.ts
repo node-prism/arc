@@ -12,6 +12,41 @@ import {
 export function checkAgainstQuery(source: object, query: object): boolean {
   if (typeof source !== typeof query) return false;
 
+  const process = (src, key) => {
+    if (src[key] === query[key]) return true;
+
+    let mods = [];
+
+    // Operators are sometimes a toplevel key:
+    // find({ $and: [{ a: 1 }, { b: 2 }] })
+    if (key.startsWith("$")) mods.push(key);
+
+    // Operators are sometimes a subkey:
+    // find({ number: { $gt: 100 } })
+    // $not is a special case: it calls `returnFound` so will handle subkey mods itself.
+    if (key !== "$not" && (isObject(query[key]) && !isEmptyObject(query[key]))) {
+      mods = mods.concat(Ok(query[key]).filter((k) => k.startsWith("$")));
+    }
+
+    if (mods.length) {
+      return mods.every((mod) => {
+        if (mod === "$not") {
+          return !booleanOperators[mod](src, query);
+        }
+        return booleanOperators[mod](src, query);
+      });
+    }
+
+    if (key.includes(".")) {
+      return dot.get(src, key) === query[key];
+    }
+
+    return (
+      safeHasOwnProperty(src, key) &&
+      checkAgainstQuery(src[key], query[key])
+    );
+  };
+
   if (Array.isArray(source) && Array.isArray(query)) {
     // if any item in source OR query is either an object or an array, return
     // checkAgainstQuery(source, query) for each item in source and query
@@ -28,39 +63,16 @@ export function checkAgainstQuery(source: object, query: object): boolean {
     return [...source].map((i) => `${i}`).sort().join(",") === [...query].map((i) => `${i}`).sort().join(",");
   }
 
+  if (Array.isArray(source) && isObject(query)) {
+    // supports e.g. [1, 2, 3], { $includes: 1 }
+    return Object.keys(query).every((key) => {
+      return process(source, key);
+    });
+  }
+
   if (isObject(source) && isObject(query)) {
     return Ok(query).every((key) => {
-      if (source[key] === query[key]) return true;
-
-      let mods = [];
-
-      // Operators are sometimes a toplevel key:
-      // find({ $and: [{ a: 1 }, { b: 2 }] })
-      if (key.startsWith("$")) mods.push(key);
-
-      // Operators are sometimes a subkey:
-      // find({ number: { $gt: 100 } })
-      // $not is a special case: it calls `returnFound` so will handle subkey mods itself.
-      if (key !== "$not" && (isObject(query[key]) && !isEmptyObject(query[key]))) {
-        mods = mods.concat(Ok(query[key]).filter((k) => k.startsWith("$")));
-      }
-
-      if (mods.length) {
-        return mods.every((mod) => {
-          if (mod === "$not") {
-            return !booleanOperators[mod](source, query);
-          }
-          return booleanOperators[mod](source, query);
-        });
-      }
-
-      if (key.includes(".")) {
-        return dot.get(source, key) === query[key];
-      }
-      return (
-        safeHasOwnProperty(source, key) &&
-        checkAgainstQuery(source[key], query[key])
-      );
+      return process(source, key);
     });
   }
 
@@ -135,12 +147,19 @@ export function returnFound(
       }
 
       Ok(query).forEach((key) => {
-        if (isObject(sourceObject)) {
-          if (checkAgainstQuery(source[_index], query[key])) {
+        if (typeof key === "string" && key.includes(".")) {
+          const sourceValue = dot.get(sourceObject, key);
+          if (sourceValue !== undefined) {
+            appendResult(returnFound(sourceValue, query[key], options, parentDocument));
+          }
+        } else {
+          if (isObject(sourceObject)) {
+            if (checkAgainstQuery(source[_index], query[key])) {
+              appendResult(parentDocument);
+            }
+          } else if (checkAgainstQuery(source, query[key])) {
             appendResult(parentDocument);
           }
-        } else if (checkAgainstQuery(source, query[key])) {
-          appendResult(parentDocument);
         }
       });
     });
