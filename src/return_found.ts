@@ -112,8 +112,14 @@ export function returnFound(
     } else {
       if (options.deep && !queryHasMods) {
         Ok(item).forEach((key) => {
+          // If key exists within the current query level, then use query[key] as the new
+          // query for item[key].
           if (isObject(item[key]) || Array.isArray(item[key])) {
-            appendResult(returnFound(item[key], query, options, parentDocument));
+            if (safeHasOwnProperty(query, key)) {
+              appendResult(returnFound(item[key], query[key], options, parentDocument));
+            } else {
+              appendResult(returnFound(item[key], query, options, parentDocument));
+            }
           }
         });
       }
