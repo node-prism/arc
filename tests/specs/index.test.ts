@@ -10,6 +10,13 @@ const getCollection = () => {
 
 export default testSuite(async ({ describe }) => {
   describe("index", ({ test }) => {
+    test("createIndex throws if the key has a numeric property", () => {
+      const collection = getCollection();
+      expect(() => collection.createIndex({ key: "0" })).toThrow();
+      expect(() => collection.createIndex({ key: "a.0" })).toThrow();
+      expect(() => collection.createIndex({ key: "a.0.b" })).toThrow();
+    });
+
     test("can create and remove", () => {
       const collection = getCollection();
       collection.createIndex({ key: "name" });

@@ -443,6 +443,14 @@ export class Collection<T> {
 
     const { key, unique } = options;
 
+    const hasNumericProperty = key.split(".").some((key) => {
+      return !isNaN(Number(key));
+    });
+
+    if (hasNumericProperty) {
+      throw new Error(`Cannot use a numeric property as an index key: ${key}`);
+    }
+
     this.indices[key] = { unique };
 
     if (this.data.__private.index.valuesToCuid[key]) {

@@ -1,9 +1,12 @@
-import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
+import dot from "dot-wild";
+import { ensureArray, isObject, Ok } from "../../utils";
 
 /**
  * @example
  * { name: "Jean-Luc", friends: [1, 3, 4] }
  * users.find({ _id: { $oneOf: [1, 3, 4]  } })
+ * { a: b: { c: 1 } }
+ * find({ "a.b.c": { $oneOf: [1, 2] } })
  */
 export function $oneOf(source: object, query: object): boolean {
   const matches = [];
@@ -13,8 +16,10 @@ export function $oneOf(source: object, query: object): boolean {
       let qry = query[k]["$oneOf"];
       qry = ensureArray(qry);
 
-      if (safeHasOwnProperty(source, k)) {
-        matches.push(qry.includes(source[k]));
+      const val = dot.get(source, k);
+
+      if (val !== undefined) {
+        matches.push(qry.includes(val))
       }
     });
   }
