@@ -89,14 +89,10 @@ export function returnFound(
     if (!item || isEmptyObject(item)) return;
 
     result = ensureArray(result);
+    item = ensureArray(item);
 
-    // ensure unique on returnKey
-    if (Array.isArray(result) && !Array.isArray(item)) {
-      if (result.some((r) => r[options.returnKey] === item[options.returnKey])) return;
-    }
-
+    // Ensure unique on returnKey
     if (Array.isArray(result) && Array.isArray(item)) {
-      // If any ids are already in the result, don't add them again.
       const resultIds = result.map((r) => r[options.returnKey]);
       if (item.some((i) => resultIds.includes(i[options.returnKey]))) return;
     }
