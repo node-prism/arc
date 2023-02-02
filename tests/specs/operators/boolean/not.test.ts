@@ -80,5 +80,17 @@ export default testSuite(async ({ describe }) => {
         { a: 3, b: 3, c: 3 }, // <-- matches because a is not 1 AND b is not 2
       ]);
     });
+
+    test("works with dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+        { a: { b: 1 } }, { a: { b: 2 } }
+      ]);
+      const found = nrml(collection.find({ $not: { "a.b": 1 }}));
+      expect(found).toEqual([
+        { a: { b: 2 } },
+      ]);
+    });
+
   });
 });

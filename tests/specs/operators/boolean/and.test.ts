@@ -65,5 +65,16 @@ export default testSuite(async ({ describe }) => {
       const found = nrml(collection.find({ a: 2, $and: [{ num: { $gt: 0 } }, { num: { $lt: 100 } }]  }));
       expect(found).toEqual([{ a: 2, num: 10 }]);
     });
+
+    test("works with dot notation", () => {
+      const collection = testCollection();
+      collection.insert([
+        { a: { b: 1, c: 1 }, d: 1 },
+        { a: { b: 1, c: 1 }, d: 1 },
+        { a: { b: 1, c: 3 }, d: 3 },
+      ]);
+      const found = nrml(collection.find({ $and: [{ "a.b": 1 }, { "a.c": 3 }] }));
+      expect(found).toEqual([{ a: { b: 1, c: 3 }, d: 3 }]);
+    });
   });
 });

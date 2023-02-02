@@ -34,5 +34,20 @@ export default testSuite(async ({ describe }) => {
         { foo: "baz", num: 10 },
       ]);
     });
+
+    test("works with dot notation", () => {
+      const collection = testCollection();
+      collection.insert([
+        { a: { b: { c: 1, d: 1 } } },
+        { a: { b: { c: 1, d: 2 } } },
+        { a: { b: { c: 1, d: 3 } } },
+      ]);
+      const found = nrml(collection.find({ $or: [{ "a.b.c": 1 }, { "a.b.d": 3 }] }));
+      expect(found).toEqual([
+        { a: { b: { c: 1, d: 1 } } },
+        { a: { b: { c: 1, d: 2 } } },
+        { a: { b: { c: 1, d: 3 } } },
+      ]);
+    })
   });
 });
