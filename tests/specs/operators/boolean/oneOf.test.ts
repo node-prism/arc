@@ -14,7 +14,7 @@ export default testSuite(async ({ describe }) => {
     });
 
     test("works with dot notation", () => {
-      const collection = testCollection();
+      const collection = testCollection({ populate: false });
       collection.insert({ a: { b: 1 } });
       collection.insert({ a: { b: 2 } });
       collection.insert({ a: { b: 3 } });
