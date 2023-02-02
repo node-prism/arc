@@ -54,6 +54,9 @@ export function checkAgainstQuery(source: object, query: object): boolean {
         });
       }
 
+      if (key.includes(".")) {
+        return dot.get(source, key) === query[key];
+      }
       return (
         safeHasOwnProperty(source, key) &&
         checkAgainstQuery(source[key], query[key])
