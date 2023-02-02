@@ -108,14 +108,19 @@ export function returnFound(
     if (!item) return;
 
     if (safeHasOwnProperty(item, options.returnKey)) parentDocument = item;
-    if (checkAgainstQuery(item, query)) appendResult(parentDocument);
-
-    if (options.deep) {
-      Ok(item).forEach((key) => {
-        if (isObject(item[key]) || Array.isArray(item[key])) {
-          appendResult(returnFound(item[key], query, options, parentDocument));
-        }
-      });
+    if (checkAgainstQuery(item, query)) {
+      appendResult(parentDocument);
+    } else {
+      if (options.deep) {
+        Ok(item).forEach((key) => {
+          if (isObject(item[key]) || Array.isArray(item[key])) {
+            /* console.log(" ** deep search because checkAgainstQuery failed", item) */
+            /* const found = returnFound(item[key], query, options, parentDocument); */
+            /* if (found) appendResult(found); */
+            appendResult(returnFound(item[key], query, options, parentDocument));
+          }
+        });
+      }
     }
   }
 
