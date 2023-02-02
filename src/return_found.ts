@@ -32,10 +32,6 @@ export function checkAgainstQuery(source: object, query: object): boolean {
     return Ok(query).every((key) => {
       if (source[key] === query[key]) return true;
 
-      if (typeof key === "string" && key.includes(".")) {
-        return dot.get(source, key) === query[key];
-      }
-
       let mods = [];
 
       // Operators are sometimes a toplevel key:
