@@ -85,6 +85,10 @@ export function returnFound(
 
   let result = undefined;
 
+  // If the query included mods, then we defer to the result of those mods
+  // to determine if we should return a document.
+  const queryHasMods = Object.keys(query).some((key) => key.startsWith("$"));
+
   function appendResult(item: object) {
     if (!item || isEmptyObject(item)) return;
 
@@ -107,12 +111,9 @@ export function returnFound(
     if (checkAgainstQuery(item, query)) {
       appendResult(parentDocument);
     } else {
-      if (options.deep) {
+      if (options.deep && !queryHasMods) {
         Ok(item).forEach((key) => {
           if (isObject(item[key]) || Array.isArray(item[key])) {
-            /* console.log(" ** deep search because checkAgainstQuery failed", item) */
-            /* const found = returnFound(item[key], query, options, parentDocument); */
-            /* if (found) appendResult(found); */
             appendResult(returnFound(item[key], query, options, parentDocument));
           }
         });
@@ -121,10 +122,6 @@ export function returnFound(
   }
 
   source = ensureArray(source);
-
-  // If the query included mods, then we defer to the result of those mods
-  // to determine if we should return a document.
-  const queryHasMods = Object.keys(query).some((key) => key.startsWith("$"));
 
   if (isObject(query) && Array.isArray(source) && !queryHasMods) {
     source.forEach((sourceObject, _index) => {
