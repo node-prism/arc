@@ -31,5 +31,5 @@ export function $not(source: object, query: object): boolean {
     });
   }
 
-  return matches.every((m) => !m) ?? false;
+  return matches.every((m) => !m) || false;
 }
