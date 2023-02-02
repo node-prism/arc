@@ -81,12 +81,12 @@ export default function find<T>(
           const queryPropertyValue = key.includes(".") ? flattened[key] : q[key];
           if (queryPropertyValue) {
             const cuids = data.__private.index.valuesToCuid?.[key]?.[queryPropertyValue];
+
             if (cuids) {
-              cuids.forEach((c) => {
-                r.push(data[c]);
-              });
+              const sourceItems = cuids?.map((cuid) => data[cuid]);
+              r.push(...returnFound(sourceItems, q, options, collectionOptions));
             } else {
-              r.push(returnFound(withoutPrivate, q, options, collection));
+              r.push(...returnFound(withoutPrivate, q, options, collection));
             }
           }
         });
