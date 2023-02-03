@@ -51,7 +51,7 @@ export default testSuite(async ({ describe }) => {
       ]);
     });
 
-    test("nested operators, dot notation, deep", () => {
+    test("nested operators, dot notation, implicitly and explicitly deep", () => {
       const collection = testCollection({ populate: false });
       collection.insert([
         { a: { b: { c: { foo: "bar", num: 5 } } } }, // not included, because properties both match the query
@@ -59,7 +59,7 @@ export default testSuite(async ({ describe }) => {
         { a: { b: { c: { foo: "baz", num: 10 } } } },
         { a: { b: { c: { foo: "boo", num: 20 } } } }, // not included, because neither property matches the query
       ]);
-      const found = nrml(collection.find({ $xor: [{ "a.b.c.foo": { $includes: "ba" } }, { "a.b.c.num": { $lt: 9 } }] }));
+      const found = nrml(collection.find({ $xor: [{ "a.b.c.foo": { $includes: "ba" } }, { num: { $lt: 9 } }] }));
       expect(found).toEqual([
         { a: { b: { c: { foo: "bee", num: 8 } } } }, // <-- foo does not include "ba", but num is less than 9
         { a: { b: { c: { foo: "baz", num: 10 } } } }, // <-- foo includes "ba", but num is not less than 9

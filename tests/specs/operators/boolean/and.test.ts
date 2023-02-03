@@ -26,14 +26,14 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ foo: "baz", num: 10 }]);
     });
 
-    test("deep selectors", () => {
+    test("deep selectors, explicit and implicit", () => {
       const collection = testCollection();
       collection.insert([
         { a: { b: { c: 1, d: 1 } } },
         { a: { b: { c: 1, d: 1 } } },
         { a: { b: { c: 1, d: 3 } } },
       ]);
-      const found = nrml(collection.find({ $and: [{ a: { b: { c: { $lt: 2 } } } }, { a: { b: { d: 3 } } }] }));
+      const found = nrml(collection.find({ $and: [{ a: { b: { c: { $lt: 2 } } } }, { d: 3 }] }));
       expect(found).toEqual([{ a: { b: { c: 1, d: 3 } } }]);
     });
 
