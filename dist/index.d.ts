@@ -25,7 +25,7 @@ declare class Transaction<T> {
     commit(): void;
 }
 
-interface StorageAdapter<T> {
+interface StorageAdapter$1<T> {
     read: () => {
         [key: string]: T;
     };
@@ -41,7 +41,11 @@ declare type CollectionOptions<T> = Partial<{
     /** When true, document ids are integers that increment from 0. */
     integerIds: boolean;
     /** The storage adapter to use. By default, uses a filesystem adapter. */
-    adapter: StorageAdapter<T>;
+    adapter: StorageAdapter$1<T>;
+}>;
+declare type CreateIndexOptions = Partial<{
+    key: string;
+    unique: boolean;
 }>;
 declare type QueryOptions = Partial<{
     /** When true, attempts to deeply match the query against documents. */
@@ -93,14 +97,22 @@ declare type QueryOptions = Partial<{
         options?: QueryOptions;
     }>;
 }>;
-declare function defaultQueryOptions(): QueryOptions;
-declare let ID_KEY: string;
-declare let CREATED_AT_KEY: string;
-declare let UPDATED_AT_KEY: string;
 declare type PrivateData = {
     next_id: number;
     id_map: {
         [id: string]: string;
+    };
+    index: {
+        valuesToCuid: {
+            [key: string]: {
+                [value: string]: string[];
+            };
+        };
+        cuidToValues: {
+            [key: string]: {
+                [cuid: string]: string | number;
+            };
+        };
     };
 };
 declare type CollectionData = {
@@ -113,8 +125,13 @@ declare class Collection<T> {
     options: CollectionOptions<T>;
     data: CollectionData;
     _transaction: Transaction<T>;
+    indices: {
+        [key: string]: {
+            unique: boolean;
+        };
+    };
     constructor(storagePath?: string, name?: string, options?: CollectionOptions<T>);
-    initializeData(): void;
+    adapterRead(): void;
     /**
      * Given objects found by a query, assign `document` directly to these objects.
      * Does not add timestamps or anything else.
@@ -131,8 +148,66 @@ declare class Collection<T> {
     sync(): any;
     drop(): void;
     getId(): string;
+    createIndex(options?: CreateIndexOptions): this;
+    removeIndex(key: string): boolean;
     nextIntegerId(): number;
     transaction(fn: (transaction: Transaction<T>) => void): void;
 }
 
-export { CREATED_AT_KEY, Collection, CollectionData, CollectionOptions, ID_KEY, PrivateData, QueryOptions, StorageAdapter, UPDATED_AT_KEY, defaultQueryOptions };
+interface StorageAdapter<T> {
+    read: () => {
+        [key: string]: T;
+    };
+    write: (data: {
+        [key: string]: T;
+    }) => any;
+}
+
+declare class SimpleFIFO {
+    elements: any[];
+    push(...args: any[]): void;
+    shift(): any;
+    length(): number;
+}
+declare class FSAdapter<T> implements StorageAdapter<T> {
+    storagePath: string;
+    name: string;
+    filePath: string;
+    queue: SimpleFIFO;
+    constructor(storagePath: string, name: string);
+    prepareStorage(): void;
+    read(): {
+        [key: string]: T;
+    };
+    write(data: {
+        [key: string]: T;
+    }): void;
+}
+
+declare class EncryptedFSAdapter<T> implements StorageAdapter<T> {
+    storagePath: string;
+    name: string;
+    filePath: string;
+    queue: SimpleFIFO;
+    constructor(storagePath: string, name: string);
+    prepareStorage(): void;
+    read(): {
+        [key: string]: T;
+    };
+    write(data: {
+        [key: string]: T;
+    }): void;
+}
+
+declare class LocalStorageAdapter<T> implements StorageAdapter<T> {
+    storageKey: string;
+    constructor(storageKey: string);
+    read(): {
+        [key: string]: T;
+    };
+    write(data: {
+        [key: string]: T;
+    }): void;
+}
+
+export { Collection, CollectionOptions, EncryptedFSAdapter, FSAdapter, LocalStorageAdapter, QueryOptions };
