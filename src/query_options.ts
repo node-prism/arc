@@ -142,11 +142,6 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
         ? ProjectionMode.ImplicitInclusion
         : ProjectionMode.Explicit;
 
-    // Implicitly include ID_KEY when it's not explicitly excluded.
-    if (options.project[ID_KEY] === undefined) {
-      options.project[ID_KEY] = 1;
-    }
-
     if (projectionMode === ProjectionMode.ImplicitExclusion) {
       data = data.map((item) => _.pick(item, Ok(options.project)));
     } else if (projectionMode === ProjectionMode.ImplicitInclusion) {
