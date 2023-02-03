@@ -1,7 +1,7 @@
 import cuid from "cuid";
 import dot from "dot-wild";
 import _ from "lodash";
-import { ID_KEY, QueryOptions } from "./collection";
+import { QueryOptions } from "./collection";
 import { ensureArray, Ok, Ov } from "./utils";
 
 enum ProjectionMode {
@@ -130,7 +130,6 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     // 3. Explicit: { a: 0, b: 1 }
     const projectionTotal = Object.keys(options.project).reduce((acc, key) => {
       if (typeof options.project[key] === "number" && typeof acc === "number") {
-        // @ts-ignore
         return acc + options.project[key];
       }
     }, 0);

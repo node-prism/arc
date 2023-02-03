@@ -87,7 +87,6 @@ export function returnFound(
 ): any[] | undefined {
   if (source === undefined) return undefined;
 
-  // don't bother with private map
   source["__private"] && delete source["__private"];
 
   if (safeHasOwnProperty(source, options.returnKey)) {

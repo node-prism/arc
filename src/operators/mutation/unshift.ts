@@ -18,7 +18,7 @@ export function $unshift<T>(
       Object.keys(mod).forEach((key) => {
         source = source.map((document) => {
           if (dot.get(document, key) !== undefined) {
-            const original = dot.get(document, key); // [5, 7]
+            const original = dot.get(document, key);
             const value = mod[key];
             if (Array.isArray(value)) {
               const newValue = value.concat(original);

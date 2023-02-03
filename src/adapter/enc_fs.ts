@@ -35,7 +35,6 @@ export default class EncryptedFSAdapter<T> implements StorageAdapter<T> {
   read(): { [key: string]: T } {
     try {
       const data = fs.readFileSync(this.filePath, "utf8");
-      /* const parsed = JSON.parse(data) as { content: string, iv: string, tag: string }; */
       const decrypted = decrypt(data);
 
       return Object.assign(
