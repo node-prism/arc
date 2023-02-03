@@ -428,6 +428,8 @@ remove({ $not: { planet: "Earth" } });
 
 `find`, `update` and `remove` accept a `QueryOptions` object.
 
+When providing query options, the documents are not actually mutated in the database. The aggregation effect that they have is only applied to the returned documents. In other words, the primary function of query options is aggregation.
+
 ```typescript
 {
   /** When true, attempts to deeply match the query against documents. */
@@ -497,21 +499,29 @@ remove({ $not: { planet: "Earth" } });
 
 ### ifNull
 
+Given an object path or dot notation path, assigns a value to the property at that path, only if that property is null or undefined.
+
 See the [ifNull tests](tests/specs/options/ifNull.test.ts) for more examples.
 
 ```typescript
 // [
 //   { a: 1, b: 2, c: 3 },
+//   { a: 1, b: 2, c: 3, d: null },
 // ];
 
 find({ a: 1 }, { ifNull: { d: 4 } });
 
 // [
 //   { a: 1, b: 2, c: 3, d: 4 },
+//   { a: 1, b: 2, c: 3, d: 4 },
 // ];
 ```
 
 ### ifEmpty
+
+Given an object path or dot notation path, assigns a value to the property at that path, only if that property is "empty". "Empty" here means an empty string (""), an empty array ([]) or an empty object ({}).
+
+Does not create properties if they do not already exist.
 
 See the [ifEmpty tests](tests/specs/options/ifEmpty.test.ts) for more examples.
 
@@ -520,16 +530,22 @@ See the [ifEmpty tests](tests/specs/options/ifEmpty.test.ts) for more examples.
 //   { a: 1, b: 2, c: 3, d: "  " },
 //   { a: 1, b: 2, c: 3, d: [] },
 //   { a: 1, b: 2, c: 3, d: {} },
+//   { a: 1, b: 2, c: 3 },
 // ];
 
-find({ a: 1 }, { ifEmpty: { d: 4 } });
+find({}, { ifEmpty: { d: 4 } });
 
 // [
 //   { a: 1, b: 2, c: 3, d: 4 },
 //   { a: 1, b: 2, c: 3, d: 4 },
 //   { a: 1, b: 2, c: 3, d: 4 },
+//   { a: 1, b: 2, c: 3 },
 // ];
 ```
+
+### ifNullOrEmpty
+
+See the [ifNullOrEmpty tests](tests/specs/options/ifNullOrEmpty.test.ts) for more examples.
 
 ### Sorting
 
@@ -546,7 +562,7 @@ See the [sort tests](tests/specs/options/sort.test.ts) for more examples.
 // ];
 
 find({ age: { $gt: 1 } }, { sort: { age: 1, name: -1 } });
-//                                                  └─ asc    └─ desc
+//                                       └─ asc    └─ desc
 
 // [
 //   { name: "Zorf", age: 24 },
@@ -571,7 +587,7 @@ Mostly useful when paired with `sort`.
 //   { a: 3, b: 3, c: 3 },
 // ];
 
-find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
+find({}, { skip: 1, take: 1 });
 
 // [
 //   { a: 2, b: 2, c: 2 },
@@ -580,7 +596,7 @@ find({ a: { $gt: 0 } }, { skip: 1, take: 1 });
 
 ### Projection
 
-See the [project tests](tests/specs/options/project.test.ts) for more examples.
+See the [projection tests](tests/specs/options/project.test.ts) for more examples.
 
 The ID property of a document is always included unless explicitly excluded.
 
@@ -600,7 +616,7 @@ in the projection are excluded from the result document.
 find({ a: 1 }, { project: { b: 1 } });
 
 // [
-//   { _id: .., b: 1 },
+//   { b: 1 },
 // ];
 ```
 
@@ -626,7 +642,7 @@ find({ a: 1 }, { project: { b: 0 } });
 
 #### Explicit
 
-In the only remaining case, all document properties
+In the only remaining case (a mixture of 1s and 0s), all document properties
 are included unless explicitly removed with a `0`.
 
 This is effectively the same behavior as implicit inclusion.
@@ -647,7 +663,9 @@ find({ a: 1 }, { project: { b: 1, c: 0 } });
 
 See the [project tests](tests/specs/options/project.test.ts) for more examples.
 
-You can use aggregation to create intermediate properties derived from other document properties, and then project those intermediate properties out of the result set.
+You can use the `aggregate` object to create intermediate properties derived from other document properties, and then project those intermediate properties out of the result set.
+
+The provided `aggregate` helpers are: `$add`, `$sub`, `$mult`, `$div`, `$floor`, `$ceil` and `$fn`.
 
 ```typescript
 // [
@@ -660,13 +678,14 @@ find(
   {},
   {
     aggregate: {
+      // Create an intermediate property named `total`.
       total: { $add: ["math", "english", "science"] },
+      // Use the intermediate `total` to create an `average` property.
       average: { $div: ["total", 3] },
     },
-    project: {
-      _id: 0,
-      total: 0,
-    },
+    // Project out the intermediate `total` property, leaving
+    // only the original scores and the aggregate `average`.
+    project: { _id: 0, total: 0 },
   }
 );
 
@@ -690,13 +709,16 @@ find(
 );
 ```
 
-Define arbitrary functions to be used as the aggregation handler:
+Using `$fn`, you can provide a function which receives the document and returns some value which is then assigned to the intermediate aggregate property.
 
 ```typescript
 find(
   { $has: ["first", "last"] },
   {
     aggregate: {
+      // Create an aggregate `fullName` property by defining a function
+      // that receives the document and returns a string of
+      // `doc.first` + `doc.last`.
       fullName: { $fn: (doc) => `${doc.first} ${doc.last}` },
     },
   }
