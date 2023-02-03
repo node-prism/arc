@@ -5,47 +5,38 @@ import { nrml, testCollection } from "../../common";
 export default testSuite(async ({ describe }) => {
   describe("project", ({ test }) => {
     test("implicit exclusion", () => {
-      const collection = testCollection();
+      const collection = testCollection({ timestamps: false });
       collection.insert({ a: 1, b: 1, c: 1 });
       collection.insert({ a: 2, b: 2, c: 2 });
       collection.insert({ a: 3, b: 3, c: 3 });
-      const found = nrml(collection.find({ a: 1 }, { project: { b: 1 } }));
+      const found = collection.find({ a: 1 }, { project: { b: 1 } });
       expect(found).toEqual([{ b: 1 }]);
     });
 
-    test("implicit exclusion - ID_KEY implicitly included", () => {
-      const collection = testCollection();
-      collection.insert({ a: 1, b: 1, c: 1 });
-      collection.insert({ a: 2, b: 2, c: 2 });
-      collection.insert({ a: 3, b: 3, c: 3 });
-      const foundWithId = collection.find({ a: 1 }, { project: { b: 1 } });
-      const id = foundWithId[0][ID_KEY];
-      expect(foundWithId).toEqual([{ [`${ID_KEY}`]: id, b: 1 }]);
-    });
-
     test("implicit inclusion", () => {
-      const collection = testCollection();
+      const collection = testCollection({ timestamps: false });
       collection.insert({ a: 1, b: 1, c: 1 });
       collection.insert({ a: 2, b: 2, c: 2 });
       collection.insert({ a: 3, b: 3, c: 3 });
-      const found = nrml(collection.find({ a: 1 }, { project: { b: 0 } }));
-      expect(found).toEqual([{ a: 1, c: 1 }]);
+      const found = collection.find({ a: 1 }, { project: { b: 0 } });
+      const id = found[0][ID_KEY];
+      expect(id).toBeDefined();
+      expect(found).toEqual([{ _id: id, a: 1, c: 1 }]);
     });
 
-    test("implicit inclusion - ID_KEY implicitly included", () => {
-      const collection = testCollection();
+    test("implicit inclusion - _id implicitly included", () => {
+      const collection = testCollection({ timestamps: false });
       collection.insert({ a: 1, b: 1, c: 1 });
       collection.insert({ a: 2, b: 2, c: 2 });
       collection.insert({ a: 3, b: 3, c: 3 });
       const foundWithId = collection.find({ a: 1 }, { project: { b: 0 } });
       const id = foundWithId[0][ID_KEY];
-      delete foundWithId[0][CREATED_AT_KEY];
-      delete foundWithId[0][UPDATED_AT_KEY];
-      expect(foundWithId).toEqual([{ [`${ID_KEY}`]: id, a: 1, c: 1 }]);
+      expect(id).toBeDefined();
+      expect(foundWithId).toEqual([{ _id: id, a: 1, c: 1 }]);
     });
 
     test("explicit", () => {
-      const collection = testCollection();
+      const collection = testCollection({ timestamps: false });
       collection.insert({ a: 1, b: 1, c: 1 });
       collection.insert({ a: 2, b: 2, c: 2 });
       collection.insert({ a: 3, b: 3, c: 3 });
@@ -54,7 +45,7 @@ export default testSuite(async ({ describe }) => {
     });
 
     test("explicit - ID_KEY implicitly included", () => {
-      const collection = testCollection();
+      const collection = testCollection({ timestamps: false });
       collection.insert({ a: 1, b: 1, c: 1 });
       collection.insert({ a: 2, b: 2, c: 2 });
       collection.insert({ a: 3, b: 3, c: 3 });
@@ -70,12 +61,13 @@ export default testSuite(async ({ describe }) => {
         }
       );
       const id = foundWithId[0][ID_KEY];
-      expect(foundWithId).toEqual([{ [`${ID_KEY}`]: id, a: 1, b: 1 }]);
+      expect(id).toBeDefined();
+      expect(foundWithId).toEqual([{ _id: id, a: 1, b: 1 }]);
     });
 
     describe("aggregation", ({ test }) => {
       test("$floor, $ceil, $sub, $add, $mult, $div", () => {
-        const collection = testCollection();
+        const collection = testCollection({ timestamps: false });
         collection.insert({ a: 1, b: 1, c: 5.6 });
         collection.insert({ a: 2, b: 2, c: 2 });
         collection.insert({ a: 3, b: 3, c: 3 });
@@ -115,7 +107,7 @@ export default testSuite(async ({ describe }) => {
       });
 
       test("more realistic use-case", () => {
-        const collection = testCollection();
+        const collection = testCollection({ timestamps: false });
         collection.insert({ math: 72, english: 82, science: 92 });
         collection.insert({ math: 60, english: 70, science: 80 });
         collection.insert({ math: 90, english: 72, science: 84 });
@@ -210,5 +202,6 @@ export default testSuite(async ({ describe }) => {
         ]);
       });
     });
+
   });
 });
