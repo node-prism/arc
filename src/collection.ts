@@ -167,7 +167,7 @@ export type CollectionData = {
 };
 
 const isValidIndexValue = (value: unknown) =>
-  value !== undefined && (typeof value === "string" || typeof value === "number");
+  value !== undefined && (typeof value === "string" || typeof value === "number" || typeof value === "boolean");
 
 export class Collection<T> {
   storagePath: string;
