@@ -13,8 +13,14 @@ export function $lt(source: object, query: object): boolean {
 
       if (targetValue !== undefined) {
         qry.forEach((q: any) => {
-          if (targetValue < q) {
-            match = true;
+          if (typeof targetValue === "string" || typeof targetValue === "number") {
+            if (targetValue < q) {
+              match = true;
+            }
+          } else if (Array.isArray(targetValue)) {
+            if (targetValue.length < q) {
+              match = true;
+            }
           }
         });
       }

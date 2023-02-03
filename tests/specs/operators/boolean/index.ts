@@ -13,5 +13,6 @@ export default testSuite(async ({ describe }) => {
     runTestSuite(import("./not.test.js"));
     runTestSuite(import("./has.test.js"));
     runTestSuite(import("./hasAny.test.js"));
+    runTestSuite(import("./gtlt.test.js"));
   });
 });
