@@ -32,6 +32,7 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
   * [Query options](#query-options)
     * [ifNull](#ifnull)
     * [ifEmpty](#ifempty)
+    * [ifNullOrEmpty](#ifnullorempty)
     * [Sorting](#sorting)
     * [Skip & take (i.e. LIMIT)](#skip--take-ie-limit)
     * [Projection](#projection)
