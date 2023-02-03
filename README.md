@@ -39,7 +39,7 @@ npm i @prsm/arc
 
 # API overview
 
-For a more thorough API reference, please look at the tests in this repository.
+For a more thorough API reference, please look at the [tests](./tests/specs/) in this repository.
 
 ## Creating a collection
 
@@ -49,11 +49,16 @@ A collection is just a `.json` file when you're using the default `FSAdapter`.
 import { Collection } from "@prsm/arc";
 
 type Planet = {
-  planet: string;
-  diameter: number;
-  population?: number;
-  temp: {
-    avg: number;
+  planet: {
+    name: string;
+    population?: number;
+    moons: string[];
+    temp: {
+      avg: number;
+    };
+    composition: {
+      type: "gas" | "molten" | "ice";
+    };
   };
 };
 
@@ -108,58 +113,186 @@ When `autosync` is disabled, you must call `collection.sync()` to persist, which
 
 In large databases, ***especially*** with complex documents, you will see a noticeable performance boost when making practical use of indexes:
 
-In a collection made up of 1,000,000 documents of moderately complex shape:
+In a collection made up of 1,000,000 `Planet` documents:
+
+- Without an index on `planet.composition.type`, a `find({ "planet.composition.type": "gas" })` takes an average of 2s.
+- With an index on `planet.composition.type`, a `find({ "planet.composition.type": "gas" })` takes an average of 25ms, which is ***80x faster***.
+
+These numbers were seen while benchmarking on a 2022 M1. YMMV.
+
+### Index limitations
+
+You can't combine boolean expressions with indexes, because the result of the expression isn't known until the expression is evaluated, which defeats the purpose of an index entirely. In other words, the following would be true assuming you had an index key defined at "planet.composition.type":
 
 ```typescript
-{
-  name: string
-  age: number,
-  thing: number[],
-  things: { a: { b: number }, b: { stuff: number[] } },
-}
+// This bypasses known index records for the key "planet.composition.type",
+// because the documents that match the provided expression cannot be known
+// until the `$oneOf` expression is evaluated.
+find({ "planet.composition.type": { $oneOf: ["gas", "molten"]} });
+
+// Instead, if performance was a concern for this query, you'd be better off
+// doing something like this:
+const gas = find({ "planet.composition.type": "gas" }); // index hit
+const molten = find({ "planet.composition.type": "molten" }); // index hit
 ```
-
-- With an index on `age`, a `find({ age: 350_000 })` takes an average of 25ms.
-- Without an index on `age`, a `find({ age: 350_000 })` takes an average of 2s.
-
-YMMV.
 
 ## Inserting
 
 See the [inserting tests](tests/specs/insert/basic.test.ts) for more examples.
 
 ```typescript
-insert({ planet: "Mercury", diameter: 4_880, temp: { avg: 475 } });
+insert({ planet: { name: "Mercury", moons: [], temp: { avg: 475 }, composition: "molten" } });
 insert([
-  { planet: "Venus", diameter: 12_104, temp: { avg: 737_000 } },
-  { planet: "Earth", diameter: 12_742, temp: { avg: 288 } },
+  { planet: { name: "Venus", moons: [], temp: { avg: 737_000 } }, composition: "molten" },
+  { planet: { name: "Earth", population: 8_000_000_000, moons: ["Luna"], temp: { avg: 13 }, composition: "molten" } },
+  { planet: { name: "Jupiter", moons: ["Io", "Europa", "Ganymede"], temp: { avg: -145 }, composition: "molten" } },
 ]);
 ```
 
 ## Finding
 
+arc's query syntax is simple and, combined with its boolean operators, allows for wildly complex yet readable queries. These boolean operators, outlined below, may seem familiar if you've used either [MongoDB](https://www.mongodb.com) or [NeDB](https://github.com/louischatriot/nedb).
+
 See the [finding tests](tests/specs/finding/basic.test.ts) for more examples.
 
+Here's a brief overview:
+
 ```typescript
-// finds Earth document
-find({ avg: 288 }); // implicit deep searching
-find({ planet: "Earth" });
-
-// finds Venus and Earth documents
-find({ diameter: { $gt: 12_000 } });
-
-// finds Mercury and Earth documents
-find({ temp: { avg: { $lt: 1_000 } } });
-
-// finds Mercury and Earth documents
+find({ avg: -145 }); // implicit deep searching
+find({ planet: { temp: { avg: -154 }}}); // explicit deep searching
+find({ "planet.temp.avg": -154 }); // dot notation
+find({ avg: { $gt: 12_000 }});
+find({ temp: { avg: { $lt: 1_000 }}});
+find({ "planet.temp.avg": { $lt: 1_000 }});
 find({ $and: [{ avg: { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
+find({ $and: [{ "planet.temp.avg": { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
+find({ planet: { name: { $length: { $gt: 7 }}}}); // string length
+find({ "planet.moons": { $length: 1 }}); // array length
+find({ "planet.composition.type": { $oneOf: ["molten", "gas"] }});
 
 // etc.
-find({ $not: { a: 1, b: 2 } });
+find({ $not: { a: 1, b: 2 }});
+find({ $not: { "planet.temp.avg": { $gt: 10_000 }}})
 find({ $and: [{ $not: { a: { $lte: 2 }}}, { $not: { a: { $gte: 5 }}}] });
-find({ $xor: [{ a: { $includes: "ba" } }, { num: { $lt: 9 } }] });
-find({ a: { $oneOf: [2, 3] } });
-find({ a: { $length: 3 } }); // string length, array length
+find({ $xor: [{ "planet": { $includes: "art" }}, { num: { $lt: 9 }}] });
+```
+
+### Boolean operators
+
+#### $and
+
+[Read tests](tests/specs/operators/boolean/and.test.ts)
+
+```typescript
+find({ $and: [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }]});
+find({ $and: [{ "planet.name": { $includes: "Ea" } }, { population: { $gt: 1_000_000 } }] });
+find({ $and: [{ "planet.composition.type": "gas" }, { planet: { moons: { $length: { $gt: 5 }}}}]});
+```
+
+#### $or
+
+[Read tests](tests/specs/operators/boolean/or.test.ts)
+
+```typescript
+find({ $or: [{ planet: { temp: { avg: { $lt: 100 }}}}, { "planet.temp.avg": { $gt: 5_000 }} ]});
+find({ $or: [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }] });
+```
+
+#### $xor
+
+[Read tests](tests/specs/operators/boolean/xor.test.ts)
+
+```typescript
+find({ $xor: [{ a: 1 }, { b: 2 }] });
+find({ $xor: [{ $has: "planet.population" }, { "planet.moons": { $length: 0 } }]});
+```
+
+#### $has
+
+`$has` returns documents that have the provided properties, and expects property references to be provided in dot notation.
+
+[Read tests](tests/specs/operators/boolean/has.test.ts)
+
+```typescript
+find({ $has: "planet.population" });
+find({ $has: ["planet.population", "planet.temp.avg"] }); // documents that have BOTH of these properties
+```
+
+#### $hasAny
+
+`$hasAny` returns documents that have any of the provided properties, and expects property references to be provided in dot notation.
+
+[Read tests](tests/specs/operators/boolean/hasAny.test.ts)
+
+```typescript
+find({ $hasAny: ["planet.population", "planet.temp.avg"] }); // documents that have EITHER of these properties
+find({ planet: { $hasAny: ["population", "temp.avg"] }}); // effectively the same as above
+```
+
+#### $includes
+
+For an "excludes" query, prefix this with `$not`.
+
+[Read tests](tests/specs/operators/boolean/includes.test.ts)
+
+```typescript
+find({ planet: { moons: { $includes: "Io" }}}); // Array.includes, because planet.moons is an array
+find({ planet: { name: { $includes: "Ear" }}}); // String.includes, because planet.name is a string
+find({ "planet.moons": { $includes: ["Io", "Europa"] }}); // match when ALL of the provided values are included in the document array
+find({ $not: { "planet.moons": { $includes: "Io" }}}); // planets that do not have a moon named "Io"
+```
+
+#### $length
+
+[Read tests](tests/specs/operators/boolean/length.test.ts)
+
+```typescript
+find({ "planet.name": { $length: 5 }}); // String.length
+find({ "planet.moons": { $length: 0 }}); // Array.length
+```
+
+#### $oneOf
+
+[Read tests](tests/specs/operators/boolean/oneOf.test.ts)
+
+```typescript
+find({ "planet.composition.type": { $oneOf: ["gas", "molten", "rock"] }});
+```
+
+#### $re
+
+[Read tests](tests/specs/operators/boolean/re.test.ts)
+
+```typescript
+find({ "visitor.ip": { $re: IP_REGEX }});
+```
+
+#### $fn
+
+[Read tests](tests/specs/operators/boolean/fn.test.ts)
+
+```typescript
+const populated = (v) => v > 1_000_000;
+const notOverlyPopulated = (v) => v < 2_000_000;
+
+find({ planet: { population: { $fn: populated }}});
+find({ planet: { population: { $fn: [populated, notOverlyPopulated] }}});
+```
+
+
+#### $gt, $gte, $lt, $lte
+
+When used against a number, does a numeric comparison. When used against a string, does a lexicographical comparison. When used against an array, does an array length comparison.
+
+- [Read $gt tests](tests/specs/operators/boolean/gt.test.ts)
+- [Read $gte tests](tests/specs/operators/boolean/gte.test.ts)
+- [Read $lt tests](tests/specs/operators/boolean/lt.test.ts)
+- [Read $lte tests](tests/specs/operators/boolean/lte.test.ts)
+
+```typescript
+find({ "planet.temp.avg": { $lt: 500 }}); // numeric comparison
+find({ planet: { name: { $gt: "Earth" }}}); // lexicographical comparison
+find({ "planet.moons": { $gt: 2 }}); // array length comparison; planets with more than two moons
 ```
 
 ## Updating
