@@ -12,7 +12,7 @@ import {
 export function checkAgainstQuery(source: object, query: object): boolean {
   if (typeof source !== typeof query) return false;
 
-  const process = (src, key) => {
+  const process = (src: object | object[], key: string) => {
     if (src[key] === query[key]) return true;
 
     let mods = [];
