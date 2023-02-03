@@ -173,12 +173,13 @@ Here's a brief overview:
 
 ```typescript
 find({ avg: -145 }); // implicit deep searching
-find({ planet: { temp: { avg: -154 }}}); // explicit deep searching
-find({ "planet.temp.avg": -154 }); // dot notation
+find({ planet: { temp: { avg: -145 }}}); // explicit deep searching
+find({ "planet.temp.avg": -145 }); // dot notation
 find({ avg: { $gt: 12_000 }});
 find({ temp: { avg: { $lt: 1_000 }}});
 find({ "planet.temp.avg": { $lt: 1_000 }});
 find({ $and: [{ avg: { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
+find({ $and: [{ $not: { $has: "planet.population" } }, { moons: { $gt: 1 } }] });
 find({ $and: [{ "planet.temp.avg": { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
 find({ planet: { name: { $length: { $gt: 7 }}}}); // string length
 find({ "planet.moons": { $length: 1 }}); // array length
