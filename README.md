@@ -669,6 +669,8 @@ You can use the `aggregate` object to create intermediate properties derived fro
 
 The provided `aggregate` helpers are: `$add`, `$sub`, `$mult`, `$div`, `$floor`, `$ceil` and `$fn`.
 
+Aggregation happens before projection. This means that you can define as many intermediate properties during the aggregation step as you wish, before ultimately projecting them out of the result documents. In the example below, `total` is created and used by subsequent aggregation steps before being projected out of the result.
+
 ```typescript
 // [
 //   { math: 72, english: 82, science: 92 },
@@ -698,7 +700,7 @@ find(
 // ]
 ```
 
-You can also use dot notation to reference deeply-nested properties, e.g.:
+You can also use dot notation to reference deeply nested properties, e.g.:
 
 ```typescript
 find(
