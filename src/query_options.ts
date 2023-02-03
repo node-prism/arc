@@ -240,11 +240,12 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
   function ifNull(item: any, opts: Record<string, any>) {
     for (const key in opts) {
-      if (item[key] === null || item[key] === undefined) {
+      const itemValue = dot.get(item, key);
+      if (itemValue === null || itemValue === undefined) {
         if (typeof opts[key] === "function") {
-          item[key] = opts[key](item);
+          item = dot.set(item, key, opts[key](item));
         } else {
-          item[key] = opts[key];
+          item = dot.set(item, key, opts[key]);
         }
       }
     }
@@ -254,27 +255,28 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
   function ifEmpty(item: any, opts: Record<string, any>) {
     for (const key in opts) {
-      if (Array.isArray(item[key]) && item[key].length === 0) {
+      const itemValue = dot.get(item, key);
+      if (Array.isArray(itemValue) && itemValue.length === 0) {
         if (typeof opts[key] === "function") {
-          item[key] = opts[key](item);
+          item = dot.set(item, key, opts[key](item));
         } else {
-          item[key] = opts[key];
+          item = dot.set(item, key, opts[key]);
         }
       }
 
-      if (typeof item[key] === "string" && item[key].trim().length === 0) {
+      if (typeof itemValue === "string" && itemValue.trim().length === 0) {
         if (typeof opts[key] === "function") {
-          item[key] = opts[key](item);
+          item = dot.set(item, key, opts[key](item));
         } else {
-          item[key] = opts[key];
+          item = dot.set(item, key, opts[key]);
         }
       }
 
-      if (typeof item[key] === "object" && Object.keys(item[key]).length === 0) {
+      if (typeof itemValue === "object" && Object.keys(itemValue).length === 0) {
         if (typeof opts[key] === "function") {
-          item[key] = opts[key](item);
+          item = dot.set(item, key, opts[key](item));
         } else {
-          item[key] = opts[key];
+          item = dot.set(item, key, opts[key]);
         }
       }
     }
