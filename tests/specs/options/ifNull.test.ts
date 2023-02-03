@@ -6,17 +6,40 @@ export default testSuite(async ({ describe }) => {
     test("adds missing properties", () => {
       const collection = testCollection();
       collection.insert({ a: 1, b: 1, c: 1 });
-      collection.insert({ a: 2, b: 2, c: 2 });
+      collection.insert({ a: 2, b: 2, c: 2, d: null });
+      collection.insert({ a: 3, b: 3, c: 3, d: "test" });
       const found = nrml(collection.find({ a: { $gt: 0 } }, { ifNull: { d: 5 } }));
-      expect(found).toEqual([{ a: 1, b: 1, c: 1, d: 5 }, { a: 2, b: 2, c: 2, d: 5 }]);
+      expect(found).toEqual([
+        { a: 1, b: 1, c: 1, d: 5 },
+        { a: 2, b: 2, c: 2, d: 5 },
+        { a: 3, b: 3, c: 3, d: "test" },
+      ]);
+    });
+
+    test("adds missing properties using dot notation", () => {
+      const collection = testCollection();
+      collection.insert({ a: 1, b: 1, c: 1 });
+      collection.insert({ a: 2, b: 2, c: 2 });
+      collection.insert({ a: 3, b: 3, c: 3, d: { e: "test" } });
+      const found = nrml(collection.find({ a: { $gt: 0 } }, { ifNull: { "d.e": 5 } }));
+      expect(found).toEqual([
+        { a: 1, b: 1, c: 1, d: { e: 5 } },
+        { a: 2, b: 2, c: 2, d: { e: 5 } },
+        { a: 3, b: 3, c: 3, d: { e: "test" } },
+      ]);
     });
 
     test("doesn't overwrite properties", () => {
       const collection = testCollection();
       collection.insert({ a: 1, b: 1, c: 1 });
       collection.insert({ a: 2, b: 2, c: 2 });
+      collection.insert({ a: 3, b: 3, c: 3, d: { e: "test" } });
       const found = nrml(collection.find({ a: { $gt: 0 } }, { ifNull: { c: 5 } }));
-      expect(found).toEqual([{ a: 1, b: 1, c: 1 }, { a: 2, b: 2, c: 2 }]);
+      expect(found).toEqual([
+        { a: 1, b: 1, c: 1 },
+        { a: 2, b: 2, c: 2 },
+        { a: 3, b: 3, c: 3, d: { e: "test" } },
+      ]);
     });
 
     test("works when the new value is a complex object", () => {
@@ -42,5 +65,6 @@ export default testSuite(async ({ describe }) => {
       const found = nrml(collection.find({ a: { $gt: 0 } }, { ifNull: { d: (doc) => doc.a } }));
       expect(found).toEqual([{ a: 1, b: 1, c: 1, d: 1 }, { a: 2, b: 2, c: 2, d: 2 }]);
     });
+
   });
 });
