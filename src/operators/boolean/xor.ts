@@ -1,5 +1,6 @@
 import dot from "dot-wild";
-import { checkAgainstQuery } from "../../return_found";
+import { ID_KEY } from "../../collection";
+import { checkAgainstQuery, returnFound } from "../../return_found";
 import { ensureArray, isObject, Ok } from "../../utils";
 
 export function $xor(source: object, query: object): boolean {
@@ -22,7 +23,7 @@ export function $xor(source: object, query: object): boolean {
         Ok(or).forEach((orKey) => {
           // case: { num: (n) => n%2===0 }
 
-          const orKeyValue = dot.get(or, orKey);
+          const orKeyValue = dot.get(or, orKey) ?? or[orKey];
           const sourceOrKeyValue = dot.get(source, orKey);
 
           if (
@@ -31,7 +32,8 @@ export function $xor(source: object, query: object): boolean {
           ) {
             matches.push(orKeyValue(sourceOrKeyValue));
           } else {
-            matches.push(checkAgainstQuery(source, or));
+            const match = returnFound(source, or, { deep: true, returnKey: ID_KEY, clonedData: true }, source)
+            matches.push(Boolean(match && match.length));
           }
         });
       });

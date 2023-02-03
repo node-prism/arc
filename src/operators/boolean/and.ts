@@ -1,5 +1,6 @@
 import dot from "dot-wild";
-import { checkAgainstQuery } from "../../return_found";
+import { ID_KEY } from "../../collection";
+import { checkAgainstQuery, returnFound } from "../../return_found";
 import { ensureArray, isObject, Ok } from "../../utils";
 
 export function $and(source: object, query: object): boolean {
@@ -24,7 +25,8 @@ export function $and(source: object, query: object): boolean {
           ) {
             matches.push(andKeyValue(sourceAndKeyValue));
           } else {
-            matches.push(checkAgainstQuery(source, and));
+            const match = returnFound(source, and, { deep: true, returnKey: ID_KEY, clonedData: true }, source)
+            matches.push(Boolean(match && match.length));
           }
         });
       });
