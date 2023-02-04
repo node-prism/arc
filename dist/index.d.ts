@@ -98,6 +98,7 @@ declare type QueryOptions = Partial<{
     }>;
 }>;
 declare type PrivateData = {
+    current: number;
     next_id: number;
     id_map: {
         [id: string]: string;
@@ -130,6 +131,7 @@ declare class Collection<T> {
             unique: boolean;
         };
     };
+    createId: () => string;
     constructor(storagePath?: string, name?: string, options?: CollectionOptions<T>);
     adapterRead(): void;
     /**
