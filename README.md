@@ -51,6 +51,22 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
 npm i @prsm/arc
 ```
 
+# Quick note before you read on
+
+arc runs entirely in-process &mdash; not as a service.
+
+## arc-server
+
+https://github.com/node-prism/arc-server
+
+If you'd prefer to run this as a self-contained service as part of your stack that accepts connections over TCP, authenticates them, and receives and responds to queries in this manner, you may want to use [arc-server](https://github.com/node-prism/arc-server). It is somewhat opinionated in the way it handles authentication and messaging in general, so if it turns out to not be your cup of tea, you might consider rolling your own service-based solution.
+
+## arc-client
+
+https://github.com/node-prism/arc-client
+
+If you decide to use `arc-server`, you might also consider using [arc-client](https://github.com/node-prism/arc-client) as a means of simplifying communication with an `arc-server`.
+
 # API overview
 
 For a more thorough API reference, please look at the [tests](./tests/specs/) in this repository.
