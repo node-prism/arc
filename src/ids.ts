@@ -28,7 +28,7 @@ while (IDX--) HEX[IDX] = (IDX + 256).toString(16).substring(1);
 
 function pad(str: string, size: number) {
   let s = "000000" + str;
-  return s.substr(s.length - size);
+  return s.substring(s.length - size);
 }
 
 export function getCreateId(opts: { init: number; len: number }) {
