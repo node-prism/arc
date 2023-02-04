@@ -1,4 +1,3 @@
-import cuid from "cuid";
 import dot from "dot-wild";
 import find from "./find";
 import fs_adapter from "./adapter/fs";
@@ -6,6 +5,7 @@ import { booleanOperators } from "./operators";
 import { Transaction } from "./transaction";
 import { update } from "./update";
 import { deeplyRemoveEmptyObjects, isEmptyObject, isObject, Ok } from "./utils";
+import { getCreateId } from "./ids";
 
 export interface StorageAdapter<T> {
   read: () => { [key: string]: T };
@@ -153,6 +153,7 @@ export let CREATED_AT_KEY = "_created_at";
 export let UPDATED_AT_KEY = "_updated_at";
 
 export type PrivateData = {
+  current: number;
   next_id: number;
   id_map: { [id: string]: string };
   index: { 
@@ -176,6 +177,7 @@ export class Collection<T> {
   data: CollectionData = {};
   _transaction: Transaction<T> = null;
   indices: { [key: string]: { unique: boolean } } = {};
+  createId: () => string;
 
 
   constructor(
@@ -195,6 +197,7 @@ export class Collection<T> {
     this.options = options;
 
     const defaultPrivateData = (): PrivateData => ({
+      current: 0,
       next_id: 0,
       id_map: {},
       index: {
@@ -209,6 +212,8 @@ export class Collection<T> {
     if (!this.data.__private) {
       this.data.__private = defaultPrivateData();
     }
+
+    this.createId = getCreateId({ init: this.data.__private.current, len: 4 });
   }
 
   adapterRead() {
@@ -339,6 +344,7 @@ export class Collection<T> {
 
     documents = documents.map((document) => {
       const cuid = this.getId();
+      this.data.__private.current++;
 
       if (this.options.timestamps) {
         document[CREATED_AT_KEY] = Date.now();
@@ -419,6 +425,7 @@ export class Collection<T> {
   drop() {
     this.data = {
       __private: {
+        current: 0,
         next_id: 0,
         id_map: {},
         index: {
@@ -430,7 +437,7 @@ export class Collection<T> {
   }
 
   getId() {
-    return cuid();
+    return this.createId();
   }
 
   createIndex(options: CreateIndexOptions = {}) {
@@ -457,6 +464,7 @@ export class Collection<T> {
       if (cuid === "__private") return;
 
       const value = String(dot.get(this.data[cuid], key));
+      /* const value = String(key.split(".").reduce((acc, k) => acc[k], this.data[cuid])); */
 
       if (isValidIndexValue(value)) {
         if (unique) {

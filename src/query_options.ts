@@ -1,4 +1,3 @@
-import cuid from "cuid";
 import dot from "dot-wild";
 import _ from "lodash";
 import { QueryOptions } from "./collection";
@@ -176,7 +175,7 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
       const qo = join?.options || {};
       const db = join.collection;
-      const tmp = cuid();
+      const tmp = join.collection.createId();
       let asDotStar = false;
       data = data.map((item) => {
         if (join.as.includes(".")) {
