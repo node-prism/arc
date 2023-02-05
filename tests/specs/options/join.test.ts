@@ -145,9 +145,9 @@ export default testSuite(async ({ describe }) => {
     });
 
     test("nested joins", () => {
-      const users = testCollection();
-      const tickets = testCollection({ name: "tickets", integerIds: true });
-      const seats = testCollection({ name: "seats", integerIds: true });
+      const users = testCollection({ timestamps: false });
+      const tickets = testCollection({ name: "tickets", integerIds: true, timestamps: false });
+      const seats = testCollection({ name: "seats", integerIds: true, timestamps: false });
 
       users.insert({ name: "Jonathan", tickets: [3, 4] });
       tickets.insert({ title: "Ticket 0", seat: 3 });
@@ -164,25 +164,40 @@ export default testSuite(async ({ describe }) => {
           on: "_id",
           as: "userTickets",
           options: {
+            project: { _id: 0 },
             join: [{
               collection: seats,
               from: "seat",
               on: "_id",
-              as: "userSeats",
+              as: "ticketSeats",
+              options: {
+                project: { _id: 0 },
+              }
             }]
           },
         }],
+        project: { _id: 0 },
       }))[0];
 
       const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
       const sts = seats.find({ _id: { $oneOf: [3, 5] } });
 
-      expect(res).toHaveProperty("userTickets");
-      res["userTickets"].forEach((t: any) => {
-        expect(t).toHaveProperty("userSeats");
+      expect(res).toEqual({
+        name: "Jonathan",
+        tickets: [3, 4],
+        userTickets: [
+          {
+            title: "Ticket 0",
+            seat: 3,
+            ticketSeats: [{ seat: "S3" }],
+          },
+          {
+            title: "Ticket 1",
+            seat: 5,
+            ticketSeats: [{ seat: "S5" }],
+          },
+        ]
       });
-      expect((res as any).userTickets[0]).toEqual({ ...tks[0] as object, userSeats: [sts[0]] });
-      expect((res as any).userTickets[1]).toEqual({ ...tks[1] as object, userSeats: [sts[1]] });
     });
 
     test("with join.from and join.as dot notation, accessing array index on join.as", () => {
