@@ -1,5 +1,5 @@
 import { Collection, CREATED_AT_KEY, ID_KEY, UPDATED_AT_KEY } from "../src/collection";
-import EncryptedFSAdapter from "../src/adapter/fs";
+import EncryptedFSAdapter from "../src/adapter/enc_fs";
 
 const getCollection = <T>({ name = "test", integerIds = false, populate = true, timestamps = true }): Collection<T> => {
   const collection = new Collection<T>(".test", name, {
