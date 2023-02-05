@@ -179,9 +179,6 @@ export default testSuite(async ({ describe }) => {
         project: { _id: 0 },
       }))[0];
 
-      const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
-      const sts = seats.find({ _id: { $oneOf: [3, 5] } });
-
       expect(res).toEqual({
         name: "Jonathan",
         tickets: [3, 4],
