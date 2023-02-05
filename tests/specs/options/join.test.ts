@@ -185,7 +185,7 @@ export default testSuite(async ({ describe }) => {
       expect((res as any).userTickets[1]).toEqual({ ...tks[1] as object, userSeats: [sts[1]] });
     });
 
-    test("with from dot notation, accessing array of objects", () => {
+    test("with join.from and join.as dot notation, accessing array index on join.as", () => {
       const inventory = testCollection();
       const items = testCollection({ name: "items", integerIds: true });
 
@@ -221,5 +221,51 @@ export default testSuite(async ({ describe }) => {
         ],
       })
     });
+
+    test("with join.from and join.as dot notation, no array '*' on join.as", () => {
+      const inventory = testCollection();
+      const items = testCollection({ name: "items", integerIds: true });
+
+      inventory.insert({
+        name: "Jonathan",
+        items: [
+          { itemId: 3, quantity: 1 },
+          { itemId: 5, quantity: 2 },
+        ],
+        meta: {
+          data: [],
+        }
+      });
+
+      items.insert({ name: "The Unstoppable Force", atk: 100 }); // id 3
+      items.insert({ name: "Sneakers", agi: 100 });              // id 4
+      items.insert({ name: "The Immovable Object", def: 100 });  // id 5
+
+      const res = nrml(inventory.find({ name: "Jonathan" }, {
+        join: [{
+          collection: items,
+          from: "items.*.itemId",
+          on: "_id",
+          as: "meta.data",
+          options: {
+            project: { _id: 0, _created_at: 0, _updated_at: 0 },
+          }
+        }],
+      }))[0];
+
+      expect(res).toEqual({
+        name: "Jonathan",
+        items: [
+          { itemId: 3, quantity: 1 },
+          { itemId: 5, quantity: 2 },
+        ],
+        meta: {
+          data: [
+            { name: "The Unstoppable Force", atk: 100 },
+            { name: "The Immovable Object", def: 100 }
+          ],
+        },
+      });
+    })
   });
 });
