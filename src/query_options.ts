@@ -178,20 +178,18 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
       const tmp = join.collection.createId();
       let asDotStar = false;
       data = data.map((item) => {
-        if (join.as.includes(".")) {
-          if (!join.as.includes("*")) {
-            throw new Error("as field must include * when using dot notation, e.g. items.*.meta");
-          }
-
+        if (join.as.includes(".") && join.as.includes("*")) {
           asDotStar = true;
         }
 
-        if (!asDotStar) item[join.as] = ensureArray(item[join.as]);
+        if (!asDotStar) item = dot.set(item, join.as, ensureArray(dot.get(item, join.as)));
 
         item[tmp] = [];
 
         const from = join.from.includes(".") ? dot.get(item, join.from) : item[join.from];
         if (from === undefined) return item;
+
+        item = dot.set(item, join.as, []);
 
         if (Array.isArray(from)) {
           from.forEach((key: unknown, index: number) => {
@@ -210,7 +208,13 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
             }
           });
 
-          if (!asDotStar) item[join.as] = item[tmp];
+          if (!asDotStar) {
+            item = dot.set(
+              item,
+              join.as,
+              dot.get(item, join.as).concat(item[tmp]),
+            );
+          }
 
           delete item[tmp];
 
@@ -221,7 +225,13 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
 
         if (!asDotStar) {
           item[tmp] = db.find(query, qo);
-          item[join.as] = item[tmp];
+          /* item[join.as] = item[tmp]; */
+
+          item = dot.set(
+            item,
+            join.as,
+            dot.get(item, join.as).concat(item[tmp]),
+          );
         }
 
         delete item[tmp];
