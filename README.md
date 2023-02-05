@@ -53,7 +53,7 @@ npm i @prsm/arc
 
 # Quick note before you read on
 
-arc runs entirely in-process &mdash; not as a service.
+arc runs entirely in-process &mdash; not as a port-bound service.
 
 ## arc-server
 
