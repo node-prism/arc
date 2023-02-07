@@ -28,6 +28,15 @@ Lightweight, in-memory, optionally persistent, 100% JavaScript document database
       * [$fn](#fn)
       * [$gt, $gte, $lt, $lte](#gt-gte-lt-lte)
   * [Updating](#updating)
+    * [Mutation operators](#mutation-operators)
+      * [$set](#set)
+      * [$unset](#unset)
+      * [$change](#change)
+      * [$push](#push)
+      * [$unshift](#unshift)
+      * [$merge](#merge)
+      * [$map](#map)
+      * [$inc, $dev, $mult, $div](#inc-dev-mult-div)
   * [Removing](#removing)
   * [Query options](#query-options)
     * [ifNull](#ifnull)
@@ -318,108 +327,142 @@ Updating documents involves applying various mutation operators to whichever doc
 
 The following mutation operators are available, and should support most, if not all, use cases:
 
-- [$set](tests/specs/operators/mutation/set.test.ts)
+### Mutation operators
 
-  ```typescript
-  // given
-  // { a: 1 }
-  update({ a: 1 }, { $set: { a: 2 }}) // -> { a: 2 }
-  update({ a: 1 }, { $set: { b: 2 }}) // -> { a: 1, b: 2 }
-  update({ a: 1 }, { $set: { ...someObject }}) // -> { a: 1, ...someObject }
-  ```
+#### $set
 
-- [$unset](tests/specs/operators/mutation/unset.test.ts)
+[Read tests](tests/specs/operators/mutation/set.test.ts)
 
-  ```typescript
-  // given
-  // { a: 1, b: { c: 2 } }
-  update({ a: 1 }, { $unset: "b.c" }) // -> { a: 1 }
-  update({ a: 1 }, { $unset: ["a", "b.c"] }) // -> {}
-  // given
-  // { a: 1, b: [{ c: 1, d: 1 }, { c: 2, d: 2 }] }
-  update({ a: 1 }, { $unset: "b.*.c" }) // -> { a: 1, b: [{ d: 1 }, { d: 2 }] }
-  ```
+```typescript
+// given
+// { a: 1, b: { c: 2 } }
+update({ a: 1 }, { $set: { a: 2 }}) // -> { a: 2 }
+update({ c: 2 }, { $set: { d: 3 }}) // -> { a: 1, b: { c: 2 }, d: 3 }
+update({ c: 2 }, { $set: { b: { c: 3 }}) // -> { a: 1, b: { c: 3 } }
+update({ c: 2 }, { $set: { "b.c": 3 }}) // -> { a: 1, b: { c: 3 } }
+update({ a: 1 }, { $set: { ...someObject }}) // -> { a: 1, ...someObject }
+```
 
-- [$change](tests/specs/operators/mutation/change.test.ts)
+#### $unset
 
-  `$set`, but refuses to create new properties.
+[Read tests](tests/specs/operators/mutation/unset.test.ts)
 
-  ```typescript
-  // given
-  // { a: 1 }
-  update({ a: 1 }, { $change: { a: 2 }}) // -> { a: 2 }
-  update({ a: 1 }, { $change: { b: 2 }}) // -> { a: 1 }, no property created
-  ```
+```typescript
+// given
+// { a: 1, b: { c: 2 } }
+update({ a: 1 }, { $unset: "b.c" }) // -> { a: 1 }
+update({ a: 1 }, { $unset: ["a", "b.c"] }) // -> {}
+// given
+// { a: 1, b: [{ c: 1, d: 1 }, { c: 2, d: 2 }] }
+update({ a: 1 }, { $unset: "b.*.c" }) // -> { a: 1, b: [{ d: 1 }, { d: 2 }] }
+```
 
-- [$push](tests/specs/operators/mutation/push.test.ts)
+#### $change
 
-  Push will concat an item or items to an array. It refuses to create the target array if it does not exist.
+[Read tests](tests/specs/operators/mutation/change.test.ts)
 
-  ```typescript
-  // given
-  // { a: 1, b: [1] }
-  update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1, b: [1, 2] }
-  update({ a: 1 }, { $push: { b: [2, 3] }}) // -> { a: 1, b: [1, 2, 3] }
-  // given
-  // { a: 1 }
-  update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1 }, no property created
-  // given
-  // { a: 1, b: { c: [] } }
-  update({ $has: "b.c" }, { $push: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
-  ```
+Like `$set`, but refuses to create new properties.
 
-- [$unshift](tests/specs/operators/mutation/unshift.test.ts)
+```typescript
+// given
+// { a: 1 }
+update({ a: 1 }, { $change: { a: 2 }}) // -> { a: 2 }
+update({ a: 1 }, { $change: { b: 2 }}) // -> { a: 1 }, no property created
+```
 
-  Unshift will insert new elements to the start of the target array. It refuses to create the target array if it does not exist.
+#### $push
 
-  ```typescript
-  // given
-  // { a: 1, b: [1] }
-  update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1, b: [2, 1] }
-  update({ a: 1 }, { $unshift: { b: [2, 3] }}) // -> { a: 1, b: [2, 3, 1] }
-  // given
-  // { a: 1 }
-  update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1 }, no property created
-  // given
-  // { a: 1, b: { c: [] } }
-  update({ $has: "b.c" }, { $unshift: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
-  ```
+[Read tests](tests/specs/operators/mutation/push.test.ts)
 
-- [$merge](tests/specs/operators/mutation/merge.test.ts)
+Push will concat an item or items to an array. It refuses to create the target array if it does not exist.
 
-  Merge the provided object into the documents that match the query.
+```typescript
+// given
+// { a: 1, b: [1] }
+update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1, b: [1, 2] }
+update({ a: 1 }, { $push: { b: [2, 3] }}) // -> { a: 1, b: [1, 2, 3] }
+// given
+// { a: 1 }
+update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1 }, no property created
+// given
+// { a: 1, b: { c: [] } }
+update({ $has: "b.c" }, { $push: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
+```
 
-  ```typescript
-  // given
-  // { a: 1, b: { c: 5 }}
-  update({ a: 1 }, { $merge: { a: 2, b: { d: 6 }}}) // -> { a: 2, b: { c: 5, d: 6 } }
-  update({ c: 5 }, { $merge: { a: 2 }}) // -> { a: 1, b: { c: 5, a: 2 }}
-  update({ c: 5 }, { $merge: { ...someObject }}) // -> { a: 1, b: { c: 5, ...someObject }}
-  ```
+#### $unshift
 
-- [$map](tests/specs/operators/mutation/map.test.ts)
+[Read tests](tests/specs/operators/mutation/unshift.test.ts)
 
-  Effectively `Array.map` against only the documents that match the query.
+Unshift will insert new elements to the start of the target array. It refuses to create the target array if it does not exist.
 
-  ```typescript
-  // given
-  // { a: 1 }
-  // { a: 2 }
-  update({ a: 1 }, { $map: (doc) => ({ ...doc, d: 1 }) }) // -> { a: 1, d: 1 }, { a: 2 }
-  ```
+```typescript
+// given
+// { a: 1, b: [1] }
+update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1, b: [2, 1] }
+update({ a: 1 }, { $unshift: { b: [2, 3] }}) // -> { a: 1, b: [2, 3, 1] }
+// given
+// { a: 1 }
+update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1 }, no property created
+// given
+// { a: 1, b: { c: [] } }
+update({ $has: "b.c" }, { $unshift: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
+```
 
-- [$inc, $dec, $mult, $div](tests/specs/operators/mutation/math.test.ts)
+#### $merge
 
-  ```typescript
-  // increase population, creating the property if it doesn't exist.
-  update({ planet: "Earth" }, { $inc: { population: 1 } });
-  ```
+[Read tests](tests/specs/operators/mutation/merge.test.ts)
+
+Merge the provided object into the documents that match the query.
+
+```typescript
+// given
+// { a: 1, b: { c: 5 }}
+update({ a: 1 }, { $merge: { a: 2, b: { d: 6 }}}) // -> { a: 2, b: { c: 5, d: 6 } }
+update({ c: 5 }, { $merge: { a: 2 }}) // -> { a: 1, b: { c: 5, a: 2 }}
+update({ c: 5 }, { $merge: { ...someObject }}) // -> { a: 1, b: { c: 5, ...someObject }}
+```
+
+#### $map
+
+[Read tests](tests/specs/operators/mutation/map.test.ts)
+
+Effectively `Array.map` against only the documents that match the query.
+
+```typescript
+// given
+// { a: 1 }
+// { a: 2 }
+update({ a: 1 }, { $map: (doc) => ({ ...doc, d: 1 }) }) // -> { a: 1, d: 1 }, { a: 2 }
+```
+
+#### $inc, $dev, $mult, $div
+
+[Read tests](tests/specs/operators/mutation/math.test.ts)
+
+```typescript
+// increase population, creating the property if it doesn't exist.
+update({ planet: { name: "Earth" } }, { $inc: { planet: { population: 1 } } });
+update({ name: "Earth" }, { $inc: { "planet.population": 1 } });
+update({ planet: { population: { $gt: 0 }}}, { $inc: 1 });
+```
+
+When one of these operators is given in the format `{ $inc: 5 }` without a property specified, we implicitly apply the operator to the properties defined in the query that was used to find the document. For example:
+
+```typescript
+update({ planet: { name: { $includes: "a" }, $has: "population" }}, { $inc: 1 });
+// Implicitly increases the property "planet.population" by 1 if it exists.
+// Doesn't try to add `1` to "planet.name" because it is a string.
+// Doesn't increase the population of Mars, because it has no "planet.population" property.
+
+update({ a: { $hasAny: ["b", "c"] }}, { $inc: 1 });
+// If "a.b" or "a.c" exists, and it is a number, it has the modifier applied to it.
+```
 
 ## Removing
 
 See the [remove tests](tests/specs/remove/basic.test.ts) for more examples.
 
-Any queries that work with `.find` work with `.remove`.
+Any queries that work with `Collection.find` work with `Collection.remove`.
 
 ```typescript
 // remove every planet except Earth
