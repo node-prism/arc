@@ -11,7 +11,7 @@ import {
 import { processMutationOperators } from "./operators";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
-import { ensureArray, Ov, safeHasOwnProperty } from "./utils";
+import { ensureArray, Ov } from "./utils";
 
 export function update<T>(
   data: CollectionData,

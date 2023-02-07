@@ -1,5 +1,5 @@
 import dot from "dot-wild";
-import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
+import { ensureArray, isObject, Ok } from "../../utils";
 
 /**
  * $includes does a simple .includes().

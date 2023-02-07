@@ -9,7 +9,7 @@ import {
 } from "./collection";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
-import { ensureArray, isObject, Ov, safeHasOwnProperty } from "./utils";
+import { ensureArray, isObject, Ov } from "./utils";
 
 const makeDistinctByKey = (arr: any[], key: string) => {
   const map = new Map();
