@@ -15,7 +15,7 @@ export function $set<T>(
     if (!isObject(mod)) {
       const flattened = unescapedFlatten(query);
 
-      Object.keys(flattened).forEach((key) => {
+      Ok(flattened).forEach((key) => {
         source = source.map((doc: T) => dot.set(doc, key, mod));
       });
 
@@ -23,7 +23,7 @@ export function $set<T>(
     }
 
     if (isObject(mod)) {
-      Object.keys(mod).forEach((key) => {
+      Ok(mod).forEach((key) => {
         source = source.map((doc: T) => dot.set(doc, key, mod[key]));
       });
 
