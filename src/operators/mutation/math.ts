@@ -1,6 +1,6 @@
-import { Collection, ID_KEY } from "../../collection";
-import { returnFound } from "../../return_found";
-import { ensureArray, isObject, Ok, safeHasOwnProperty } from "../../utils";
+import dot from "dot-wild";
+import { Collection } from "../../collection";
+import { ensureArray, isObject, Ok, unescapedFlatten } from "../../utils";
 
 enum Op {
   Inc,
@@ -17,103 +17,121 @@ function math<T>(
   collection: Collection<T>
 ): T[] {
   const mods = ensureArray(modifiers);
-  const operable = returnFound(
-    source,
-    query,
-    {
-      deep: true,
-      returnKey: ID_KEY,
-      clonedData: false,
-    }
-  );
+  source = source.map((document) => {
 
-  mods.forEach((mod) => {
-    // update({ a: 1 }, { $inc: { visits: 1 } })
-    // in this case, a is not incremented, only `visits` is.
-    if (isObject(mod)) {
-      Ok(mod).forEach((target) => {
+    mods.forEach((mod) => {
+      if (isObject(mod)) {
+        // update({ a: 1 }, { $inc: { visits: 1 } })
+        // update({ a: 1 }, { $inc: { a: { b: { c: 5 }}, "d.e.f": 5 } })
+        const flattened = unescapedFlatten(mod);
 
-        operable.forEach((item) => {
-          // Operable items were found with returnKey ID_KEY, so they're top-level documents.
-          // Here, we specify a returnKey of the property defined by the operation so that we can
-          // target a specific property.
-          const z = returnFound([item], query, { returnKey: target, deep: true, clonedData: false });
-          const iterables = z?.length ? z : operable;
+        Ok(flattened).forEach((key) => {
+          const targetValue = dot.get(document, key);
+          const modValue = Number(mod[key]);
 
-          iterables.forEach((zz) => {
-            if (safeHasOwnProperty(zz, target)) {
-              if (op === Op.Inc) {
-                zz[target] += mod[target];
-              } else if (op === Op.Dec) {
-                zz[target] -= mod[target];
-              } else if (op === Op.Mult) {
-                zz[target] *= mod[target];
-              } else if (op === Op.Div) {
-                zz[target] /= mod[target];
+          switch (op) {
+            case Op.Inc:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, modValue);
+              } else {
+                document = dot.set(document, key, Number(targetValue) + modValue);
               }
-            } else {
-              // Search again against these iterables for the target property, because we don't know
-              // what level it's going to be at. We default to the first property of the query object as
-              // the returnKey.
-              const altReturnKey = Ok(query)[0];
-              const found = returnFound([zz], query, { returnKey: altReturnKey, deep: true, clonedData: false });
-
-              if (found) {
-                found.forEach((f) => {
-                  if (op === Op.Inc) {
-                    f[target] = mod[target];
-                  } else if (op === Op.Dec) {
-                    f[target] = -mod[target];
-                  } else if (op === Op.Mult) {
-                    f[target] = mod[target];
-                  } else if (op === Op.Div) {
-                    f[target] = 1 / mod[target];
-                  }
-                });
+              break;
+            case Op.Dec:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, -modValue);
+              } else {
+                document = dot.set(document, key, Number(targetValue) - modValue);
               }
-            }
-          });
+              break;
+            case Op.Mult:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, modValue);
+              } else {
+                document = dot.set(document, key, Number(targetValue) * modValue);
+              }
+              break;
+            case Op.Div:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, modValue);
+              } else {
+                document = dot.set(document, key, Number(targetValue) / modValue);
+              }
+              break;
+          }
         });
-      });
-    }
+      } else if (typeof mod === "number") {
+        // When the modifier is a number, we increment all numeric
+        // fields that are in the provided query.
+        // update({ a: 1 }, { $inc: 1 }) -> { a: 2 }
+        // update({ a: 1, b: 1 }, { $inc: 1 }) -> { a: 2, b: 2 }
+        // update({ "a.b.c": 1 }, { $inc: 1 }) -> { a: { b: { c: 2 } } }
+        // update({ a: { b: { c: 1 } } }, { $inc: 1 }) -> { a: { b: { c: 2 } } }
+        // update({ "b.c": { $gt: 1 } }, { $inc: 1 }) -> { b: { c: 3 } }
+        let flattened = unescapedFlatten(query);
 
-    // update({ a: 2, b: 2 }, { $inc: 1 })
-    // in this case, a and b are both incremented by 1.
-    if (!isObject(mod)) {
-      if (!operable || !operable.length) return;
+        // "a.b.c.$gt" => "a.b.c", assumes we want to mutate the value of 'c'.
+        flattened = Object.keys(flattened).reduce((acc, key) => {
+          const removed = key.replace(/\.\$.*$/, "");
+          acc[removed] = flattened[key];
+          return acc;
+        }, {});
 
-      // We want to operate on each property defined in the query.
-      Ok(query).forEach((target) => {
-
-        operable.forEach((item) => {
-          const z = returnFound([item], query, { returnKey: target, deep: true, clonedData: false });
-          const iterables = z?.length ? z : operable;
-          iterables.forEach((zz) => {
-            if (safeHasOwnProperty(zz, target)) {
-              if (op === Op.Inc) {
-                zz[target] += mod;
-              } else if (op === Op.Dec) {
-                zz[target] -= mod;
-              } else if (op === Op.Mult) {
-                zz[target] *= mod;
-              } else if (op === Op.Div) {
-                zz[target] /= mod;
+        Ok(flattened).forEach((key) => {
+          const targetValue = dot.get(document, key);
+          // It's possible that targetValue is undefined, for example
+          // if we deeply selected this document, e.g.
+          // Given document:
+          // { a: { b: { c: 1 } } }
+          // The operation:
+          // update({ c: 1 }, { $inc: 5 });
+          // Would find the above document, but create a new
+          // property `c` at the root level of the document:
+          // { a: { b: { c: 1 } }, c: 5 }
+          //
+          // To update the deep `c`, we'd do something like:
+          // update({ "a.b.c": 1 }, { $inc: 5 });
+          // or:
+          // update({ c: 1 }, { $inc: { "a.b.c": 5 } });
+          // or:
+          // update({ a: { b: { c: 1 } } }, { $inc: 5 });
+          switch (op) {
+            case Op.Inc:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, mod);
+              } else {
+                document = dot.set(document, key, Number(targetValue) + mod);
               }
-            } else {
-              if (op === Op.Inc) {
-                zz[target] = mod;
-              } else if (op === Op.Dec) {
-                zz[target] = -mod;
-              } else if (op === Op.Mult) {
-                zz[target] = mod;
-              } else if (op === Op.Div) {
-                zz[target] = 1 / mod;
+              break;
+            case Op.Dec:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, -mod);
+              } else {
+                document = dot.set(document, key, Number(targetValue) - mod);
               }
-            }
-          });
+              break;
+            case Op.Mult:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, mod);
+              } else {
+                document = dot.set(document, key, Number(targetValue) * mod);
+              }
+              break;
+            case Op.Div:
+              if (targetValue === undefined) {
+                document = dot.set(document, key, mod);
+              } else {
+                document = dot.set(document, key, Number(targetValue) / mod);
+              }
+              break;
+          }
+
+          return;
         });
-      });
-    }
+      }
+    });
+
+    return document;
   });
 
   return source;
