@@ -51,7 +51,7 @@ export default function find<T>(
       const out = [];
 
       for (const key in data) {
-        if (key === "__private") continue;
+        if (key === "internal") continue;
         out.push(_.cloneDeep(data[key]));
       }
 
@@ -69,7 +69,7 @@ export default function find<T>(
     if (q[ID_KEY] && !isObject(q[ID_KEY]) && !collectionOptions.integerIds) {
       r.push(data[q[ID_KEY]]);
     } else if (q[ID_KEY] && !isObject(q[ID_KEY]) && collectionOptions.integerIds) {
-      const f = data.__private.id_map[q[ID_KEY]];
+      const f = data.internal.id_map[q[ID_KEY]];
       // If we have `f`, it's a cuid.
       if (f) r.push(data[f])
     } else {
@@ -80,7 +80,7 @@ export default function find<T>(
         Object.keys(collection.indices).forEach((key) => {
           const queryPropertyValue = key.includes(".") ? flattened[key] : q[key];
           if (queryPropertyValue) {
-            const cuids = data.__private.index.valuesToCuid?.[key]?.[queryPropertyValue];
+            const cuids = data.internal.index.valuesToCuid?.[key]?.[queryPropertyValue];
 
             if (cuids) {
               const sourceItems = cuids?.map((cuid) => data[cuid]);

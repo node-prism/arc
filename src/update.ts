@@ -48,26 +48,26 @@ export function update<T>(
 
       if (collectionOptions.integerIds) {
         let intid = item[ID_KEY];
-        cuid = data.__private.id_map[intid];
+        cuid = data.internal.id_map[intid];
       } else {
         cuid = item[ID_KEY];
       }
 
       Object.keys(collection.indices).forEach((key) => {
         if (dot.get(item, key)) {
-          const oldValue = data.__private.index.cuidToValues[cuid][key];
+          const oldValue = data.internal.index.idToValues[cuid][key];
           const newValue = String(dot.get(item, key));
 
           if (oldValue !== newValue) {
-            data.__private.index.valuesToCuid[key][newValue] = data.__private.index.valuesToCuid[key][newValue] || [];
-            data.__private.index.valuesToCuid[key][newValue].push(cuid);
-            data.__private.index.valuesToCuid[key][oldValue] = data.__private.index.valuesToCuid[key][oldValue].filter((cuid) => cuid !== cuid);
+            data.internal.index.valuesToId[key][newValue] = data.internal.index.valuesToId[key][newValue] || [];
+            data.internal.index.valuesToId[key][newValue].push(cuid);
+            data.internal.index.valuesToId[key][oldValue] = data.internal.index.valuesToId[key][oldValue].filter((cuid) => cuid !== cuid);
 
-            if (data.__private.index.valuesToCuid[key][oldValue].length === 0) {
-              delete data.__private.index.valuesToCuid[key][oldValue];
+            if (data.internal.index.valuesToId[key][oldValue].length === 0) {
+              delete data.internal.index.valuesToId[key][oldValue];
             }
 
-            data.__private.index.cuidToValues[cuid][key] = newValue;
+            data.internal.index.idToValues[cuid][key] = newValue;
           }
         }
       });
