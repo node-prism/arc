@@ -97,19 +97,19 @@ declare type QueryOptions = Partial<{
         options?: QueryOptions;
     }>;
 }>;
-declare type PrivateData = {
+declare type InternalData = {
     current: number;
     next_id: number;
     id_map: {
         [id: string]: string;
     };
     index: {
-        valuesToCuid: {
+        valuesToId: {
             [key: string]: {
                 [value: string]: string[];
             };
         };
-        cuidToValues: {
+        idToValues: {
             [key: string]: {
                 [cuid: string]: string | number;
             };
@@ -118,7 +118,7 @@ declare type PrivateData = {
 };
 declare type CollectionData = {
     [key: string]: any;
-    __private?: PrivateData;
+    internal?: InternalData;
 };
 declare class Collection<T> {
     storagePath: string;
