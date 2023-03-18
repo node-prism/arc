@@ -9,22 +9,17 @@ import { isObject, Ok } from "../../utils";
  * find({ "foo": { $length: 3 } })
  */
 export function $length(source: object, query: object): boolean {
-  let matched = false;
-
-  if (isObject(query)) {
-    Ok(query).forEach((k) => {
-      const qry = query[k]["$length"];
-      const targetValue = dot.get(source, k);
-
-      if (targetValue !== undefined) {
-        if (Array.isArray(targetValue) || typeof targetValue === "string") {
-          if (targetValue.length === qry) {
-            matched = true;
-          }
-        }
-      }
-    });
+  if (!isObject(query)) {
+    return false;
   }
 
-  return matched;
+  return Object.entries(query).some(([k, qry]) => {
+    const targetValue = dot.get(source, k);
+
+    return (
+      targetValue !== undefined &&
+      (Array.isArray(targetValue) || typeof targetValue === "string") &&
+      targetValue.length === qry.$length
+    );
+  });
 }

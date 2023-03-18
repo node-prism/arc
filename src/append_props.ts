@@ -2,34 +2,32 @@ import _ from "lodash";
 import { checkAgainstQuery } from "./return_found";
 import { isEmptyObject, isObject, Ok } from "./utils";
 
-export function appendProps(source: any, query: object, newProps: any, merge: boolean = false) {
+export function appendProps(source: any, query: object, newProps: any, merge = false) {
   if (source === undefined) return undefined;
 
   const processObject = (item: any) => {
     if (!isObject(item)) return item;
-    let clone = { ...item };
+
+    const clone = _.cloneDeep(item);
     if (checkAgainstQuery(clone, query)) {
       if (!merge) {
-        clone = { ...clone, ...newProps };
+        Object.assign(clone, newProps);
       } else {
-        clone = _.merge(clone, newProps)
+        _.merge(clone, newProps);
       }
-    } 
+    }
 
-    Ok(clone).forEach((key) => {
+    for (const key of Object.keys(clone)) {
       if (isObject(clone[key]) || Array.isArray(clone[key])) {
-        clone = {
-          ...clone,
-          [key]: appendProps(clone[key], query, newProps),
-        };
+        clone[key] = appendProps(clone[key], query, newProps);
       }
-    });
+    }
 
     return clone;
   };
 
   if ((Array.isArray(source) || isObject(source)) && !isEmptyObject(query) && !isEmptyObject(newProps)) {
-    return !Array.isArray(source) ? processObject(source) : source.map((item) => processObject(item));
+    return Array.isArray(source) ? source.map(processObject) : processObject(source);
   }
 
   return source;

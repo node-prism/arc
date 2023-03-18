@@ -120,33 +120,24 @@ export function defaultQueryOptions(): QueryOptions {
 // { name: "Jean-Luc" }.
 export function stripBooleanModifiers(query: object): object {
   const ops = new Set(Ok(booleanOperators));
-  if (!isObject(query)) return query;
 
-  Object.keys(query).forEach((key) => {
-    if (isObject(key) && Ok(query[key]).every((value) => ops.has(value))) {
-      delete query[key];
-      return;
-    }
-    if (!isObject(key) && ops.has(key)) {
-      delete query[key];
-      return;
-    }
-    if (!isObject(query[key])) return;
-    if (Ok(query[key]).every((value) => ops.has(value))) {
-      delete query[key];
-      return;
-    }
-    Ok(query[key]).forEach((k) => {
-      if (!ops.has(k)) {
-        stripBooleanModifiers(query[key][k]);
-      } else {
-        delete query[key][k];
+  const stripObject = (obj: object): object => {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+      if (isObject(value)) {
+        const stripped = stripObject(value);
+        if (!isEmptyObject(stripped)) {
+          acc[key] = stripped;
+        }
+      } else if (!ops.has(key)) {
+        acc[key] = value;
       }
-    });
-  });
+      return acc;
+    }, {});
+  };
 
-  return deeplyRemoveEmptyObjects(query);
+  return deeplyRemoveEmptyObjects(stripObject(query));
 }
+
 
 export let ID_KEY = "_id";
 export let CREATED_AT_KEY = "_created_at";

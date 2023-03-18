@@ -47,29 +47,29 @@ export function update<T>(
       let cuid: string;
 
       if (collectionOptions.integerIds) {
-        let intid = item[ID_KEY];
+        const intid = item[ID_KEY];
         cuid = data.internal.id_map[intid];
       } else {
         cuid = item[ID_KEY];
       }
 
       Object.keys(collection.indices).forEach((key) => {
-        if (dot.get(item, key)) {
-          const oldValue = data.internal.index.idToValues[cuid][key];
-          const newValue = String(dot.get(item, key));
+        if (!dot.get(item, key)) { return; }
 
-          if (oldValue !== newValue) {
-            data.internal.index.valuesToId[key][newValue] = data.internal.index.valuesToId[key][newValue] || [];
-            data.internal.index.valuesToId[key][newValue].push(cuid);
-            data.internal.index.valuesToId[key][oldValue] = data.internal.index.valuesToId[key][oldValue].filter((cuid) => cuid !== cuid);
+        const oldValue = data.internal.index.idToValues[cuid][key];
+        const newValue = String(dot.get(item, key));
 
-            if (data.internal.index.valuesToId[key][oldValue].length === 0) {
-              delete data.internal.index.valuesToId[key][oldValue];
-            }
+        if (oldValue === newValue) { return; }
 
-            data.internal.index.idToValues[cuid][key] = newValue;
-          }
+        data.internal.index.valuesToId[key][newValue] = data.internal.index.valuesToId[key][newValue] || [];
+        data.internal.index.valuesToId[key][newValue].push(cuid);
+        data.internal.index.valuesToId[key][oldValue] = data.internal.index.valuesToId[key][oldValue].filter((cuid) => cuid !== cuid);
+
+        if (data.internal.index.valuesToId[key][oldValue].length === 0) {
+          delete data.internal.index.valuesToId[key][oldValue];
         }
+
+        data.internal.index.idToValues[cuid][key] = newValue;
       });
 
       item[UPDATED_AT_KEY] = Date.now();

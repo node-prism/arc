@@ -12,37 +12,25 @@ export const changeProps = (
   const processObject = (item: any) => {
     if (!isObject(item)) return item;
 
-    let itemClone = { ...item };
+    const itemClone = { ...item };
 
-    if (checkAgainstQuery(itemClone, query)) {
-      Ok(replaceProps).forEach((key) => {
-        if (createNewProperties) {
-          itemClone = {
-            ...itemClone,
-            [key]: replaceProps[key],
-          };
-        } else if (safeHasOwnProperty(itemClone, key)) {
-          itemClone = {
-            ...itemClone,
-            [key]: replaceProps[key],
-          };
-        }
-      });
+    for (const key of Object.keys(replaceProps)) {
+      if (checkAgainstQuery(itemClone, query) &&
+          (createNewProperties || safeHasOwnProperty(itemClone, key))) {
+        itemClone[key] = replaceProps[key];
+      }
     }
 
-    Ok(itemClone).forEach((key) => {
+    for (const key of Object.keys(itemClone)) {
       if (isObject(itemClone[key]) || Array.isArray(itemClone[key])) {
-        itemClone = {
-          ...itemClone,
-          [key]: changeProps(
-            itemClone[key],
-            query,
-            replaceProps,
-            createNewProperties
-          ),
-        };
+        itemClone[key] = changeProps(
+          itemClone[key],
+          query,
+          replaceProps,
+          createNewProperties
+        );
       }
-    });
+    }
 
     return itemClone;
   };
@@ -52,9 +40,9 @@ export const changeProps = (
     !isEmptyObject(query) &&
     !isEmptyObject(replaceProps)
   ) {
-    return !Array.isArray(source)
-      ? processObject(source)
-      : source.map((item) => processObject(item));
+    return Array.isArray(source)
+      ? source.map(processObject)
+      : processObject(source);
   }
 
   return source;

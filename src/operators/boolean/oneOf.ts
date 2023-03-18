@@ -13,18 +13,14 @@ export function $oneOf(source: object, query: object): boolean {
 
   if (isObject(query)) {
     Ok(query).forEach((k) => {
-      let qry = query[k]["$oneOf"];
-      qry = ensureArray(qry);
-
-      const val = dot.get(source, k);
-
-      if (val !== undefined) {
-        matches.push(qry.includes(val))
-      }
+      if (query[k]["$oneOf"] === undefined) { return; }
+      const values = ensureArray(query[k]["$oneOf"]);
+      const value = dot.get(source, k);
+      matches.push(values.includes(value));
     });
   }
 
   if (!matches.length) return false;
-  if (matches.length && matches.includes(false)) return false;
+  if (matches.includes(false)) return false;
   return true;
 }

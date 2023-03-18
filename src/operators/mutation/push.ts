@@ -6,34 +6,25 @@ import { ensureArray, isObject } from "../../utils";
 // { $push: { b: [2, 3] } }
 // { $push: { "a.b.c": 2 }}
 // { $push: { "a.b.c": [2, 3] }}
-export function $push<T>(
-  source: T[],
-  modifiers: any,
-  query: object,
-  collection: Collection<T>
-): T[] {
+export function $push<T>(source: T[], modifiers: any, query: object, collection: Collection<T>): T[] {
   const mods = ensureArray(modifiers);
-  mods.forEach((mod) => {
+  
+  return mods.reduce((acc, mod) => {
     if (isObject(mod)) {
-      Object.keys(mod).forEach((key) => {
-        source = source.map((document) => {
-          if (dot.get(document, key) !== undefined) {
-            const original = dot.get(document, key);
-            const value = mod[key];
-            if (Array.isArray(value)) {
-              const newValue = original.concat(value);
-              document = dot.set(document, key, newValue);
-            } else {
-              const newValue = original.concat([value]);
-              document = dot.set(document, key, newValue);
-            }
+      return Object.keys(mod).reduce((docs, key) => {
+        return docs.map((doc) => {
+          const original = dot.get(doc, key);
+          const value = mod[key];
+          if (original !== undefined) {
+            const newValue = Array.isArray(value) ? original.concat(value) : original.concat([value]);
+            return dot.set(doc, key, newValue);
           }
-          return document;
+          return doc;
         });
-      });
+      }, acc);
     }
-  });
-
-  return source;
+    return acc;
+  }, source);
 }
+
 

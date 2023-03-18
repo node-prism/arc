@@ -80,7 +80,7 @@ export default function find<T>(
         Object.keys(collection.indices).forEach((key) => {
           const queryPropertyValue = key.includes(".") ? flattened[key] : q[key];
           if (queryPropertyValue) {
-            const cuids = data.internal.index.valuesToCuid?.[key]?.[queryPropertyValue];
+            const cuids = data.internal.index.valuesToId?.[key]?.[queryPropertyValue];
 
             if (cuids) {
               const sourceItems = cuids?.map((cuid) => data[cuid]);

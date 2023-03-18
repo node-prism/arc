@@ -15,22 +15,12 @@ import { ensureArray, isObject, Ok } from "../../utils";
  * find({ "a.b.c": { $includes: 1 } })
  */
 export function $includes(source: object, query: object): boolean {
-  const matches = [];
+  const matches = Object.entries(query)
+    .flatMap(([key, value]) => {
+      const includes = ensureArray(value.$includes);
+      return includes.map((v) => dot.get(source, key)?.includes(v));
+    })
+    .filter((match) => match !== undefined);
 
-  if (isObject(query)) {
-    Ok(query).forEach((k) => {
-        let qry = query[k]["$includes"];
-        qry = ensureArray(qry);
-
-        if (dot.get(source, k)) {
-          qry.forEach((q: any) => {
-            matches.push(dot.get(source, k).includes(q));
-          });
-        }
-    });
-  }
-
-  if (!matches.length) return false;
-  if (matches.length && matches.includes(false)) return false;
-  return true;
+  return matches.length > 0 && matches.every(Boolean);
 }

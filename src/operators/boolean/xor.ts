@@ -1,49 +1,39 @@
 import dot from "dot-wild";
 import { ID_KEY } from "../../collection";
-import { checkAgainstQuery, returnFound } from "../../return_found";
-import { ensureArray, isObject, Ok } from "../../utils";
+import { returnFound } from "../../return_found";
+import { ensureArray, isObject } from "../../utils";
 
 export function $xor(source: object, query: object): boolean {
-  const matches = [];
+  if (!isObject(query)) {
+    return false;
+  }
 
-  if (isObject(query)) {
-    Ok(query).forEach((pk) => {
-      if (pk !== "$xor") return;
+  // @ts-ignore
+  const xorQueries = ensureArray(query.$xor);
 
-      let ors = query[pk];
-      ors = ensureArray(ors);
+  if (xorQueries.length !== 2) {
+    throw new Error(
+      `invalid $xor query. expected exactly two values, found ${xorQueries.length}.`
+    );
+  }
 
-      if (ors.length !== 2) {
-        throw new Error(
-          `invalid $xor query. expected exactly two values, found ${ors.length}.`
-        );
+  const matches = xorQueries.map((orQuery) => {
+    return Object.entries(orQuery).map(([key, value]) => {
+      const targetValue = dot.get(source, key) ?? source[key];
+
+      if (typeof value === "function") {
+        return targetValue !== undefined && value(targetValue);
+      } else {
+        const match = returnFound(source, orQuery, {
+          deep: true,
+          returnKey: ID_KEY,
+          clonedData: true
+        }, source);
+        return Boolean(match && match.length);
       }
-
-      ors.forEach((or: object) => {
-        Ok(or).forEach((orKey) => {
-          // case: { num: (n) => n%2===0 }
-
-          const orKeyValue = dot.get(or, orKey) ?? or[orKey];
-          const sourceOrKeyValue = dot.get(source, orKey);
-
-          if (
-            typeof orKeyValue === "function" &&
-            sourceOrKeyValue !== undefined
-          ) {
-            matches.push(orKeyValue(sourceOrKeyValue));
-          } else {
-            const match = returnFound(source, or, { deep: true, returnKey: ID_KEY, clonedData: true }, source)
-            matches.push(Boolean(match && match.length));
-          }
-        });
-      });
     });
-  }
+  });
 
-  if (matches.length === 2) {
-    // return true if exactly one of the matches is true
-    return matches.filter((m) => m).length === 1;
-  }
-
-  return false;
+  return matches.flat().filter((m) => m).length === 1;
 }
+

@@ -9,13 +9,12 @@ export default class LocalStorageAdapter<T> implements StorageAdapter<T> {
 
   read(): { [key: string]: T } {
     try {
-      let data = Object.assign(
+      return Object.assign(
         {},
         JSON.parse(
           localStorage.getItem(`arc_${this.storageKey}`) || "{}"
         )
       );
-      return data;
     } catch (e) {
       console.error(`arc: failed to read from key: ${this.storageKey}: ${e}`);
       return {};
