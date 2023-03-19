@@ -1,8 +1,8 @@
 # arc
 
-Lightweight, in-memory, optionally persistent, 100% JavaScript document database. Use it in node. Use it in the browser with the localStorage adapter. Use it as the embedded database solution for your electron app.
+This is a lightweight, in-memory, optionally persistent, and fully JavaScript-based document database. You can use it with node, in a browser using the localStorage adapter, or as an embedded database solution for your electron app.
 
-*This library is under active development and the API is likely to evolve as features are expanded, however it's unlikely that there will be any breaking changes.*
+*Please note that this library is currently under active development and its API may evolve as new features are added. However, it is unlikely that any breaking changes will be introduced.*
 
 * [Installation](#installation)
 * [API overview](#api-overview)
@@ -62,7 +62,7 @@ npm i @prsm/arc
 
 # API overview
 
-For a more thorough API reference, please look at the [tests](./tests/specs/) in this repository.
+For a comprehensive API reference, please refer to the [tests](./tests/specs/) in this repository.
 
 ## Creating a collection
 
@@ -93,7 +93,7 @@ const collection = new Collection<Planet>(".data", "planets");
 
 ### Storage adapters
 
-How data is read and written depends on which `StorageAdapter` the collection is using. The default storage adapter is the `FSAdapter` and, unsurprisingly, it reads and writes to a file. For persistence in a browser environment, you can use the provided `LocalStorageAdapter`, or create your own adapter by implementing the `StorageAdapter` interface. There is also an `EncryptedFSAdapter`, which encrypts before writing and decrypts before reading.
+The method of data retrieval and storage depends on the `StorageAdapter` used by the collection. The default storage adapter is `FSAdapter`, which reads and writes data to a file. To achieve persistence in a browser environment, you may use the included `LocalStorageAdapter`. Alternatively, you can create a custom adapter by implementing the `StorageAdapter` interface. Additionally, an `EncryptedFSAdapter` is available that encrypts data before writing and decrypts it before reading.
 
 ### Using another adapter
 
@@ -111,7 +111,7 @@ new Collection(path, name, { adapter });
 
 ### Auto sync
 
-By default, any operation that mutates data is followed by a sync using whichever adapter the collection was initialized with. You can disable this `autosync` feature when creating the collection:
+By default, any operation that modifies data is followed by a synchronization using the adapter with which the collection was initialized. You have the option to disable this `autosync` feature during collection creation:
 
 ```typescript
 new Collection(".data", "planets", { autosync: false });
@@ -130,7 +130,7 @@ When `autosync` is disabled, you must call `collection.sync()` to persist, which
   find({ planet: { composition: { type: "gas" }}});
   ```
 
-- The value of the key must be something that can be converted to a string with `String(value)`.
+- The value of the key must be a type that can be converted to a string using `String(value)`.
 - Indexes can optionally enforce a unique constraint, e.g.: `createIndex({ key: "planet.life.dominant_species", unique: true })`
 - You can create an index at any time, even if your database has existing records with the index key provided, although ideally they are defined at the point of database creation.
 
@@ -174,7 +174,7 @@ insert([
 
 ## Finding
 
-arc's query syntax is simple and, combined with its boolean operators, allows for wildly complex yet readable queries. These boolean operators, outlined below, may seem familiar if you've used either [MongoDB](https://www.mongodb.com) or [NeDB](https://github.com/louischatriot/nedb).
+arc's query syntax is uncomplicated and, with the many builtin boolean operators, enables the creation of complex yet intelligible queries. These boolean operators, described below, may seem familiar to those who have experience with either [MongoDB](https://www.mongodb.com) or [NeDB](https://github.com/louischatriot/nedb).
 
 See the [finding tests](tests/specs/finding/basic.test.ts) for more examples.
 
@@ -712,7 +712,7 @@ You can use the `aggregate` object to create intermediate properties derived fro
 
 The provided `aggregate` helpers are: `$add`, `$sub`, `$mult`, `$div`, `$floor`, `$ceil` and `$fn`.
 
-Aggregation happens before projection. This means that you can define as many intermediate properties during the aggregation step as you wish, before ultimately projecting them out of the result documents. In the example below, `total` is created and used by subsequent aggregation steps before being projected out of the result.
+Aggregation happens before projection. This means that you can define as many intermediate properties during the aggregation step as you wish, before ultimately projecting them out of the result documents. In the example below, `total` is created and used in subsequent aggregation steps before ultimately being projected out of the result.
 
 ```typescript
 // [
@@ -872,8 +872,7 @@ users.find(
 // ]
 ```
 
-`join` allows for `options` (type `QueryOptions`) which in turn allows for `join`.
-Said another way, joins can be nested infinitely for more hierarchical relationships between collections.
+`join` provides the ability to include `options` of type `QueryOptions`, which in turn facilitates further joins. In simpler terms, you can nest joins infinitely to achieve more complex hierarchical relationships between collections.
 
 ```typescript
 users.find(
