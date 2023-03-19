@@ -13,27 +13,21 @@ export function $unshift<T>(
   collection: Collection<T>
 ): T[] {
   const mods = ensureArray(modifiers);
-  mods.forEach((mod) => {
+  
+  return mods.reduce((acc, mod) => {
     if (isObject(mod)) {
       Object.keys(mod).forEach((key) => {
-        source = source.map((document) => {
-          if (dot.get(document, key) !== undefined) {
-            const original = dot.get(document, key);
+        acc = acc.map((doc: T) => {
+          const original = dot.get(doc, key);
+          if (original !== undefined) {
             const value = mod[key];
-            if (Array.isArray(value)) {
-              const newValue = value.concat(original);
-              document = dot.set(document, key, newValue);
-            } else {
-              const newValue = [value].concat(original);
-              document = dot.set(document, key, newValue);
-            }
+            const newValue = Array.isArray(value) ? value.concat(original) : [value].concat(original);
+            return dot.set(doc, key, newValue);
           }
-          return document;
+          return doc;
         });
       });
     }
-  });
-
-  return source;
+    return acc;
+  }, source);
 }
-

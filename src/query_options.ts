@@ -48,50 +48,30 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
       }
       return res;
     },
-    $add: (item: object, arr: (string|number)[]) => {
-      let res = undefined;
-      for (const a of arr) {
-        if (typeof a === "number") {
-          if (res === undefined) {
-            res = a;
-          } else {
-            res += a;
-          }
-        } else if (res === undefined) {
-          res = Number(dot.get(item, a) ?? 0);
-        } else {
-          res += Number(dot.get(item, a) ?? 0);
-        }
-      }
-      return res;
-    },
+    $add: (item: object, arr: (string|number)[]) =>
+      arr.reduce((acc, val) =>
+        typeof val === 'number'
+          ? (acc === undefined ? val : Number(acc) + val)
+          : (
+              acc === undefined
+                ? Number(dot.get(item, val) ?? 0)
+                : Number(acc) + Number(dot.get(item, val) ?? 0)
+            )
+      , undefined),
     $mult: (item: object, arr: (string|number)[]) => {
-      let res = 1;
-      for (const a of arr) {
+      return arr.reduce((res, a) => {
         if (typeof a === "number") {
-          res *= a;
+          return Number(res) * a;
         } else {
-          res *= Number(dot.get(item, a) ?? 1);
+          return Number(res) * (Number(dot.get(item, a)) || 1);
         }
-      }
-      return res;
+      }, 1);
     },
     $div: (item: object, arr: (string|number)[]) => {
-      let res = undefined;
-      for (const a of arr) {
-        if (typeof a === "number") {
-          if (res === undefined) {
-            res = a;
-          } else {
-            res /= a;
-          }
-        } else if (res === undefined) {
-          res = Number(dot.get(item, a) ?? 1);
-        } else {
-          res /= Number(dot.get(item, a) ?? 1);
-        }
-      }
-      return res;
+      return arr.reduce((res: number | undefined, a: string | number) => {
+        const val = typeof a === 'number' ? a : Number(dot.get(item, a) ?? 1);
+        return res === undefined ? val : res / val;
+      }, undefined);
     },
     $fn: (item: object, fn: (i: any) => unknown) => {
       return fn(item);
@@ -166,69 +146,61 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     data = data.slice(0, options.take);
   }
 
-  if (options.join && Array.isArray(options.join)) {
-    options.join.forEach((join) => {
+  function joinData(data: any[], joinOptions: any[]) {
+    return joinOptions.reduce((acc, join) => {
       if (!join.collection) throw new Error("Missing required field in join: collection");
       if (!join.from) throw new Error("Missing required field in join: from");
       if (!join.on) throw new Error("Missing required field in join: on");
       if (!join.as) throw new Error("Missing required field in join: as");
-
-      const qo = join?.options || {};
+  
+      const qo = join.options || {};
       const db = join.collection;
-      const tmp = join.collection.createId();
-      let asDotStar = false;
-      data = data.map((item) => {
-        if (join.as.includes(".")) {
-          if (!join.as.includes("*")) {
-            throw new Error("as field must include * when using dot notation, e.g. items.*.meta");
-          }
-
-          asDotStar = true;
-        }
-
-        if (!asDotStar) item[join.as] = ensureArray(item[join.as]);
-
+      const tmp = db.createId();
+  
+      const asDotStar = join.as.includes(".") && join.as.includes("*");
+  
+      return acc.map((item) => {
+        if (!asDotStar) item = dot.set(item, join.as, ensureArray(dot.get(item, join.as)));
         item[tmp] = [];
-
         const from = join.from.includes(".") ? dot.get(item, join.from) : item[join.from];
         if (from === undefined) return item;
-
+        item = dot.set(item, join.as, []);
+  
         if (Array.isArray(from)) {
           from.forEach((key: unknown, index: number) => {
             const query = { [`${join.on}`]: key };
-
             if (asDotStar) {
-              item = dot.set(
-                item,
-                join.as.replaceAll("*", index.toString()),
-                db.find(query, qo)[0]
-              );
+              item = dot.set(item, join.as.replaceAll("*", index.toString()), db.find(query, qo)[0]);
             } else {
-              item[tmp] = item[tmp].concat(
-                db.find(query, qo)
-              );
+              item[tmp] = item[tmp].concat(db.find(query, qo));
             }
           });
-
-          if (!asDotStar) item[join.as] = item[tmp];
-
+  
+          if (!asDotStar) {
+            item = dot.set(item, join.as, dot.get(item, join.as).concat(item[tmp]));
+          }
+  
           delete item[tmp];
-
+  
           return item;
         }
-
+  
         const query = { [`${join.on}`]: from };
-
+  
         if (!asDotStar) {
           item[tmp] = db.find(query, qo);
-          item[join.as] = item[tmp];
+          item = dot.set(item, join.as, dot.get(item, join.as).concat(item[tmp]));
         }
-
+  
         delete item[tmp];
-
+  
         return item;
       });
-    });
+    }, data);
+  }
+
+  if (options.join) {
+    data = joinData(data, options.join);
   }
 
   function ifNull(item: any, opts: Record<string, any>) {
@@ -247,35 +219,23 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
   }
 
   function ifEmpty(item: any, opts: Record<string, any>) {
-    for (const key in opts) {
+    const emptyCheckers = {
+      array: (value: any) => Array.isArray(value) && value.length === 0,
+      string: (value: any) => typeof value === "string" && value.trim().length === 0,
+      object: (value: any) => typeof value === "object" && Object.keys(value).length === 0,
+    };
+  
+    return Object.entries(opts).reduce((result, [key, value]) => {
       const itemValue = dot.get(item, key);
-      if (Array.isArray(itemValue) && itemValue.length === 0) {
-        if (typeof opts[key] === "function") {
-          item = dot.set(item, key, opts[key](item));
-        } else {
-          item = dot.set(item, key, opts[key]);
-        }
+      const isEmpty = Object.values(emptyCheckers).some((checker) => checker(itemValue));
+      if (isEmpty) {
+        const newValue = typeof value === "function" ? value(item) : value;
+        return dot.set(result, key, newValue);
       }
-
-      if (typeof itemValue === "string" && itemValue.trim().length === 0) {
-        if (typeof opts[key] === "function") {
-          item = dot.set(item, key, opts[key](item));
-        } else {
-          item = dot.set(item, key, opts[key]);
-        }
-      }
-
-      if (typeof itemValue === "object" && Object.keys(itemValue).length === 0) {
-        if (typeof opts[key] === "function") {
-          item = dot.set(item, key, opts[key](item));
-        } else {
-          item = dot.set(item, key, opts[key]);
-        }
-      }
-    }
-
-    return item;
+      return result;
+    }, item);
   }
+  
 
   if (options.ifNull) {
     data = data.map((item) => ifNull(item, options.ifNull));
@@ -286,7 +246,7 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
   }
 
   if (options.ifNullOrEmpty) {
-    data = data
+    return data
       .map((item) => ifNull(item, options.ifNullOrEmpty))
       .map((item) => ifEmpty(item, options.ifNullOrEmpty));
   }

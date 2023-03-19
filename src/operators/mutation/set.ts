@@ -1,6 +1,7 @@
+import dot from "dot-wild";
 import { Collection } from "../..";
 import { changeProps } from "../../change_props";
-import { ensureArray, isObject, Ok } from "../../utils";
+import { ensureArray, isObject, Ok, unescapedFlatten } from "../../utils";
 
 export function $set<T>(
   source: T[],
@@ -11,14 +12,21 @@ export function $set<T>(
   const mods = ensureArray(modifiers);
 
   mods.forEach((mod) => {
-    if (!isObject(mod) && !Array.isArray(mod)) {
-      const obj = {};
+    if (!isObject(mod)) {
+      const flattened = unescapedFlatten(query);
 
-      Ok(query).forEach((key) => {
-        obj[key] = mod;
+      Ok(flattened).forEach((key) => {
+        source = source.map((doc: T) => dot.set(doc, key, mod));
       });
 
-      source = changeProps(source, query, obj, true);
+      return;
+    }
+
+    if (isObject(mod)) {
+      Ok(mod).forEach((key) => {
+        source = source.map((doc: T) => dot.set(doc, key, mod[key]));
+      });
+
       return;
     }
 

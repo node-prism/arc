@@ -25,11 +25,11 @@ export function $not(source: object, query: object): boolean {
 
             return true;
           }
-          return safeHasOwnProperty(source, not)
+          return !safeHasOwnProperty(source, not)
         })
       );
     });
   }
 
-  return matches.every((m) => !m) || false;
+  return matches.every((m) => !m);
 }

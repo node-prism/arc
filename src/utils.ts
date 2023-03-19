@@ -1,3 +1,5 @@
+import dot from "dot-wild";
+
 export function ensureArray(input: any): any[] {
   if (Array.isArray(input)) return input;
   else if (input === undefined || input === null) return [];
@@ -42,4 +44,14 @@ export function deeplyRemoveEmptyObjects(o: object) {
   });
 
   return o;
+}
+
+export function unescapedFlatten(o: object) {
+  const flattened = dot.flatten(o);
+
+  return Object.keys(flattened).reduce((acc, key) => {
+    const unescapedKey = key.replace(/\\./g, ".");
+    acc[unescapedKey] = flattened[key];
+    return acc;
+  }, {});
 }

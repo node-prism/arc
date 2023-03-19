@@ -11,7 +11,7 @@ import {
 import { processMutationOperators } from "./operators";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
-import { ensureArray, Ov, safeHasOwnProperty } from "./utils";
+import { ensureArray, Ov } from "./utils";
 
 export function update<T>(
   data: CollectionData,
@@ -47,29 +47,29 @@ export function update<T>(
       let cuid: string;
 
       if (collectionOptions.integerIds) {
-        let intid = item[ID_KEY];
-        cuid = data.__private.id_map[intid];
+        const intid = item[ID_KEY];
+        cuid = data.internal.id_map[intid];
       } else {
         cuid = item[ID_KEY];
       }
 
       Object.keys(collection.indices).forEach((key) => {
-        if (dot.get(item, key)) {
-          const oldValue = data.__private.index.cuidToValues[cuid][key];
-          const newValue = String(dot.get(item, key));
+        if (!dot.get(item, key)) { return; }
 
-          if (oldValue !== newValue) {
-            data.__private.index.valuesToCuid[key][newValue] = data.__private.index.valuesToCuid[key][newValue] || [];
-            data.__private.index.valuesToCuid[key][newValue].push(cuid);
-            data.__private.index.valuesToCuid[key][oldValue] = data.__private.index.valuesToCuid[key][oldValue].filter((cuid) => cuid !== cuid);
+        const oldValue = data.internal.index.idToValues[cuid][key];
+        const newValue = String(dot.get(item, key));
 
-            if (data.__private.index.valuesToCuid[key][oldValue].length === 0) {
-              delete data.__private.index.valuesToCuid[key][oldValue];
-            }
+        if (oldValue === newValue) { return; }
 
-            data.__private.index.cuidToValues[cuid][key] = newValue;
-          }
+        data.internal.index.valuesToId[key][newValue] = data.internal.index.valuesToId[key][newValue] || [];
+        data.internal.index.valuesToId[key][newValue].push(cuid);
+        data.internal.index.valuesToId[key][oldValue] = data.internal.index.valuesToId[key][oldValue].filter((cuid) => cuid !== cuid);
+
+        if (data.internal.index.valuesToId[key][oldValue].length === 0) {
+          delete data.internal.index.valuesToId[key][oldValue];
         }
+
+        data.internal.index.idToValues[cuid][key] = newValue;
       });
 
       item[UPDATED_AT_KEY] = Date.now();

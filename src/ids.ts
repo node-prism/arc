@@ -31,6 +31,18 @@ function pad(str: string, size: number) {
   return s.substring(s.length - size);
 }
 
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0, len = str.length; i < len; i++) {
+    let chr = str.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+const SHARD_COUNT = 32;
+
 export function getCreateId(opts: { init: number; len: number }) {
   let len = opts.len || 16;
   let str = "";
@@ -51,6 +63,16 @@ export function getCreateId(opts: { init: number; len: number }) {
       while (num--) str += HEX[(256 * Math.random()) | 0];
       str = str.substring((num = 0), len);
     }
-    return `a${Date.now().toString(36)}${pad(counter(), 6)}${HEX[num++]}${str}`;
+
+    /* const decimal = parseInt(str, 16); */
+    const date = Date.now().toString(36);
+    const paddedCounter = pad(counter(), 6);
+    const hex = HEX[num++];
+
+    // shardKey will be the first character of the
+    const shardKey = parseInt(String(hex), 16) % SHARD_COUNT;
+
+    const id = `a-${date}-${paddedCounter}-${hex}-${str}-${shardKey}`;
+    return id;
   };
 }

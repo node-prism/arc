@@ -1,9 +1,6 @@
 import { Collection } from "../collection";
 import { Ok } from "../utils";
-import { $gt } from "./boolean/gt";
-import { $gte } from "./boolean/gte";
-import { $lt } from "./boolean/lt";
-import { $lte } from "./boolean/lte";
+import { $gt, $gte, $lt, $lte } from "./boolean/gtlt";
 import { $and } from "./boolean/and";
 import { $or } from "./boolean/or";
 import { $xor } from "./boolean/xor";

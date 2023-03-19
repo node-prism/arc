@@ -87,7 +87,7 @@ export function returnFound(
 ): any[] | undefined {
   if (source === undefined) return undefined;
 
-  source["__private"] && delete source["__private"];
+  source["internal"] && delete source["internal"];
 
   if (safeHasOwnProperty(source, options.returnKey)) {
     parentDocument = source;

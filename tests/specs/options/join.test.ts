@@ -5,7 +5,7 @@ export default testSuite(async ({ describe }) => {
   describe("join", ({ test }) => {
     test("works", () => {
       const users = testCollection();
-      const tickets = testCollection({ name: "tickets", integerIds: true });
+      const tickets = testCollection({ name: "tickets", integerIds: true, timestamps: false });
 
       users.insert({ name: "Jonathan", tickets: [3, 4] });
       tickets.insert({ title: "Ticket 0", description: "Ticket 0 description" });
@@ -18,18 +18,25 @@ export default testSuite(async ({ describe }) => {
           from: "tickets",
           on: "_id",
           as: "userTickets",
+          options: {
+            project: { _id: 0 },
+          },
         }],
       }))[0];
 
-      const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
-
-      expect(res).toHaveProperty("userTickets");
-      expect((res as any).userTickets).toEqual(tks);
+      expect(res).toEqual({
+        name: "Jonathan",
+        tickets: [3, 4],
+        userTickets: [
+          { title: "Ticket 0", description: "Ticket 0 description" },
+          { title: "Ticket 1", description: "Ticket 1 description" },
+        ],
+      });
     });
 
     test("will overwrite original property", () => {
       const users = testCollection();
-      const tickets = testCollection({ name: "tickets", integerIds: true });
+      const tickets = testCollection({ name: "tickets", integerIds: true, timestamps: false });
 
       users.insert({ name: "Jonathan", tickets: [3, 4] });
       tickets.insert({ title: "Ticket 0", description: "Ticket 0 description" });
@@ -42,13 +49,21 @@ export default testSuite(async ({ describe }) => {
           from: "tickets",
           on: "_id",
           as: "tickets",
+          options: {
+            project: { _id: 0 },
+          }
         }],
       }))[0];
 
       const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
 
-      expect(res).toHaveProperty("tickets");
-      expect((res as any).tickets).toEqual(tks);
+      expect(res).toEqual({
+        name: "Jonathan",
+        tickets: [
+          { title: "Ticket 0", description: "Ticket 0 description" },
+          { title: "Ticket 1", description: "Ticket 1 description" },
+        ],
+      });
     });
 
     test("creates the 'as' property even when nothing matches", () => {
@@ -70,6 +85,25 @@ export default testSuite(async ({ describe }) => {
       expect((res as any).userTickets).toEqual([]);
     });
 
+    test("creates the 'as' property even when nothing matches, dot notation", () => {
+      const users = testCollection();
+      const tickets = testCollection({ name: "tickets" });
+
+      users.insert({ name: "Jonathan", tickets: [] });
+
+      const res = nrml(users.find({ name: "Jonathan" }, {
+        join: [{
+          collection: tickets,
+          from: "tickets",
+          on: "_id",
+          as: "user.tickets",
+        }],
+      }))[0];
+      
+      expect(res).toHaveProperty("user.tickets");
+      expect((res as any).user.tickets).toEqual([]);
+    });
+
     test("respects QueryOptions", () => {
       const users = testCollection();
       const tickets = testCollection({ name: "tickets", integerIds: true });
@@ -89,10 +123,11 @@ export default testSuite(async ({ describe }) => {
         }],
       }))[0];
 
-      const tks = tickets.find({ _id: { $oneOf: [3, 4] } }, { project: { title: 1 } });
-
-      expect(res).toHaveProperty("userTickets");
-      expect((res as any).userTickets).toEqual(tks);
+      expect(res).toEqual({
+        name: "Jonathan",
+        tickets: [3, 4],
+        userTickets: [{ title: "Ticket 0" }, { title: "Ticket 1" }],
+      });
     });
 
     test("multiple joins", () => {
@@ -145,9 +180,9 @@ export default testSuite(async ({ describe }) => {
     });
 
     test("nested joins", () => {
-      const users = testCollection();
-      const tickets = testCollection({ name: "tickets", integerIds: true });
-      const seats = testCollection({ name: "seats", integerIds: true });
+      const users = testCollection({ timestamps: false });
+      const tickets = testCollection({ name: "tickets", integerIds: true, timestamps: false });
+      const seats = testCollection({ name: "seats", integerIds: true, timestamps: false });
 
       users.insert({ name: "Jonathan", tickets: [3, 4] });
       tickets.insert({ title: "Ticket 0", seat: 3 });
@@ -164,28 +199,40 @@ export default testSuite(async ({ describe }) => {
           on: "_id",
           as: "userTickets",
           options: {
+            project: { _id: 0 },
             join: [{
               collection: seats,
               from: "seat",
               on: "_id",
-              as: "userSeats",
+              as: "ticketSeats",
+              options: {
+                project: { _id: 0 },
+              }
             }]
           },
         }],
+        project: { _id: 0 },
       }))[0];
 
-      const tks = tickets.find({ _id: { $oneOf: [3, 4] } });
-      const sts = seats.find({ _id: { $oneOf: [3, 5] } });
-
-      expect(res).toHaveProperty("userTickets");
-      res["userTickets"].forEach((t: any) => {
-        expect(t).toHaveProperty("userSeats");
+      expect(res).toEqual({
+        name: "Jonathan",
+        tickets: [3, 4],
+        userTickets: [
+          {
+            title: "Ticket 0",
+            seat: 3,
+            ticketSeats: [{ seat: "S3" }],
+          },
+          {
+            title: "Ticket 1",
+            seat: 5,
+            ticketSeats: [{ seat: "S5" }],
+          },
+        ]
       });
-      expect((res as any).userTickets[0]).toEqual({ ...tks[0] as object, userSeats: [sts[0]] });
-      expect((res as any).userTickets[1]).toEqual({ ...tks[1] as object, userSeats: [sts[1]] });
     });
 
-    test("with from dot notation, accessing array of objects", () => {
+    test("with join.from and join.as dot notation, accessing array index on join.as", () => {
       const inventory = testCollection();
       const items = testCollection({ name: "items", integerIds: true });
 
@@ -221,5 +268,51 @@ export default testSuite(async ({ describe }) => {
         ],
       })
     });
+
+    test("with join.from and join.as dot notation, no array '*' on join.as", () => {
+      const inventory = testCollection();
+      const items = testCollection({ name: "items", integerIds: true });
+
+      inventory.insert({
+        name: "Jonathan",
+        items: [
+          { itemId: 3, quantity: 1 },
+          { itemId: 5, quantity: 2 },
+        ],
+        meta: {
+          data: [],
+        }
+      });
+
+      items.insert({ name: "The Unstoppable Force", atk: 100 }); // id 3
+      items.insert({ name: "Sneakers", agi: 100 });              // id 4
+      items.insert({ name: "The Immovable Object", def: 100 });  // id 5
+
+      const res = nrml(inventory.find({ name: "Jonathan" }, {
+        join: [{
+          collection: items,
+          from: "items.*.itemId",
+          on: "_id",
+          as: "meta.data",
+          options: {
+            project: { _id: 0, _created_at: 0, _updated_at: 0 },
+          }
+        }],
+      }))[0];
+
+      expect(res).toEqual({
+        name: "Jonathan",
+        items: [
+          { itemId: 3, quantity: 1 },
+          { itemId: 5, quantity: 2 },
+        ],
+        meta: {
+          data: [
+            { name: "The Unstoppable Force", atk: 100 },
+            { name: "The Immovable Object", def: 100 }
+          ],
+        },
+      });
+    })
   });
 });

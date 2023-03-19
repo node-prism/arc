@@ -45,31 +45,31 @@ export default testSuite(async ({ describe }) => {
       const alice = collection.find({ "person.name": "Alice" });
       const bob = collection.find({ "person.name": "Bob" });
 
-      expect(collection.data.__private.index.valuesToCuid["person.name"]["Alice"]).toEqual([(alice[0] as any)._id]);
-      expect(collection.data.__private.index.valuesToCuid["person.email"]["alice@alice.com"]).toEqual([(alice[0] as any)._id]);
-      expect(collection.data.__private.index.valuesToCuid["person.name"]["Bob"]).toEqual([(bob[0] as any)._id]);
-      expect(collection.data.__private.index.valuesToCuid["person.email"]["bob@bob.com"]).toEqual([(bob[0] as any)._id]);
+      expect(collection.data.internal.index.valuesToId["person.name"]["Alice"]).toEqual([(alice[0] as any)._id]);
+      expect(collection.data.internal.index.valuesToId["person.email"]["alice@alice.com"]).toEqual([(alice[0] as any)._id]);
+      expect(collection.data.internal.index.valuesToId["person.name"]["Bob"]).toEqual([(bob[0] as any)._id]);
+      expect(collection.data.internal.index.valuesToId["person.email"]["bob@bob.com"]).toEqual([(bob[0] as any)._id]);
 
-      expect(collection.data.__private.index.cuidToValues[(alice[0] as any)._id]["person.name"]).toEqual("Alice");
-      expect(collection.data.__private.index.cuidToValues[(alice[0] as any)._id]["person.email"]).toEqual("alice@alice.com");
-      expect(collection.data.__private.index.cuidToValues[(bob[0] as any)._id]["person.name"]).toEqual("Bob");
-      expect(collection.data.__private.index.cuidToValues[(bob[0] as any)._id]["person.email"]).toEqual("bob@bob.com");
+      expect(collection.data.internal.index.idToValues[(alice[0] as any)._id]["person.name"]).toEqual("Alice");
+      expect(collection.data.internal.index.idToValues[(alice[0] as any)._id]["person.email"]).toEqual("alice@alice.com");
+      expect(collection.data.internal.index.idToValues[(bob[0] as any)._id]["person.name"]).toEqual("Bob");
+      expect(collection.data.internal.index.idToValues[(bob[0] as any)._id]["person.email"]).toEqual("bob@bob.com");
 
       collection.update({ person: { name: "Alice" } }, { $merge: { person: { email: "a@a.com" }}});
 
-      expect(collection.data.__private.index.valuesToCuid["person.email"]["a@a.com"]).toEqual([(alice[0] as any)._id]);
-      expect(collection.data.__private.index.cuidToValues[(alice[0] as any)._id]["person.email"]).toEqual("a@a.com");
+      expect(collection.data.internal.index.valuesToId["person.email"]["a@a.com"]).toEqual([(alice[0] as any)._id]);
+      expect(collection.data.internal.index.idToValues[(alice[0] as any)._id]["person.email"]).toEqual("a@a.com");
 
       // no more documents have this email value, so the tracked index key should be removed.
-      expect(collection.data.__private.index.valuesToCuid["person.email"]["alice@alice.com"]).toBeUndefined();
+      expect(collection.data.internal.index.valuesToId["person.email"]["alice@alice.com"]).toBeUndefined();
       // the person.name index should still be there.
-      expect(collection.data.__private.index.valuesToCuid["person.name"]["Alice"]).toEqual([(alice[0] as any)._id]);
+      expect(collection.data.internal.index.valuesToId["person.name"]["Alice"]).toEqual([(alice[0] as any)._id]);
 
       collection.remove({ person: { name: "Alice" } });
 
-      expect(collection.data.__private.index.valuesToCuid["person.name"]["Alice"]).toBeUndefined();
-      expect(collection.data.__private.index.valuesToCuid["person.email"]["a@a.com"]).toBeUndefined();
-      expect(collection.data.__private.index.cuidToValues[(alice[0] as any)._id]).toBeUndefined();
+      expect(collection.data.internal.index.valuesToId["person.name"]["Alice"]).toBeUndefined();
+      expect(collection.data.internal.index.valuesToId["person.email"]["a@a.com"]).toBeUndefined();
+      expect(collection.data.internal.index.idToValues[(alice[0] as any)._id]).toBeUndefined();
 
       collection.sync();
     });
