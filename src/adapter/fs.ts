@@ -1,6 +1,6 @@
 import fs from "fs-extra";
+import path from "path";
 import { StorageAdapter } from ".";
-import { buildPath } from "../utils";
 
 export class SimpleFIFO {
   elements: any[] = [];
@@ -32,7 +32,7 @@ export default class FSAdapter<T> implements StorageAdapter<T> {
     this.storagePath = storagePath;
     this.name = name;
     this.queue = new SimpleFIFO();
-    this.filePath = buildPath(this.storagePath, this.name);
+    this.filePath = path.join(this.storagePath, this.name);
     this.prepareStorage();
   }
 
@@ -80,6 +80,6 @@ function writeJSON(data: any, ...args: any[]) {
 }
 
 function write(data: any, ...args: any[]) {
-  const pth = buildPath(...args);
+  const pth = path.join(...args);
   return fs.writeFileSync(pth, data);
 }

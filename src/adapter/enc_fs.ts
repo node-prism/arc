@@ -1,8 +1,8 @@
 import fs from "fs-extra";
+import path from "path";
 import { StorageAdapter } from ".";
 import { SimpleFIFO } from "./fs";
 import crypto from "crypto";
-import { buildPath } from "../utils";
 
 export default class EncryptedFSAdapter<T> implements StorageAdapter<T> {
   storagePath: string;
@@ -18,7 +18,7 @@ export default class EncryptedFSAdapter<T> implements StorageAdapter<T> {
     this.storagePath = storagePath;
     this.name = name;
     this.queue = new SimpleFIFO();
-    this.filePath = buildPath(this.storagePath, this.name);
+    this.filePath = path.join(this.storagePath, this.name);
     this.prepareStorage();
   }
 
@@ -74,7 +74,7 @@ const encryptAndWrite = (data: any, ...args: any[]) => {
 };
 
 const write = (data: string, ...args: any) => {
-  return fs.writeFileSync(buildPath(...args), data);
+  return fs.writeFileSync(path.join(...args), data);
 };
 
 /**
