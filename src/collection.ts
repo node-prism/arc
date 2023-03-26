@@ -1,11 +1,10 @@
 import dot from "dot-wild";
 import find from "./find";
 import fs_adapter from "./adapter/fs";
-import ls_adapter from "./adapter/localStorage";
 import { booleanOperators } from "./operators";
 import { Transaction } from "./transaction";
 import { update } from "./update";
-import { deeplyRemoveEmptyObjects, isEmptyObject, isNode, isObject, Ok } from "./utils";
+import { deeplyRemoveEmptyObjects, isEmptyObject, isObject, Ok } from "./utils";
 import { getCreateId } from "./ids";
 
 export interface StorageAdapter<T> {
@@ -183,7 +182,8 @@ export class Collection<T> {
     options.autosync = options.autosync ?? true;
     options.timestamps = options.timestamps ?? true;
     options.integerIds = options.integerIds ?? false;
-    options.adapter = options.adapter ?? (isNode() ? new fs_adapter<T>(this.storagePath, this.name) : new ls_adapter<T>(this.name));
+    options.adapter =
+      options.adapter ?? new fs_adapter<T>(this.storagePath, this.name);
 
     this.options = options;
 
