@@ -1,11 +1,12 @@
 import dot from "dot-wild";
 import find from "./find";
-import fs_adapter from "./adapter/fs";
 import { booleanOperators } from "./operators";
 import { Transaction } from "./transaction";
 import { update } from "./update";
 import { deeplyRemoveEmptyObjects, isEmptyObject, isObject, Ok } from "./utils";
 import { getCreateId } from "./ids";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 export interface StorageAdapter<T> {
   read: () => { [key: string]: T };
@@ -182,8 +183,13 @@ export class Collection<T> {
     options.autosync = options.autosync ?? true;
     options.timestamps = options.timestamps ?? true;
     options.integerIds = options.integerIds ?? false;
-    options.adapter =
-      options.adapter ?? new fs_adapter<T>(this.storagePath, this.name);
+    // options.adapter =
+    //   options.adapter ?? new fs_adapter<T>(this.storagePath, this.name);
+
+      if (!options.adapter) {
+        const fs_adap = require("./adapter/fs");
+        options.adapter = new fs_adap.default(this.storagePath, this.name);
+      }
 
     this.options = options;
 
