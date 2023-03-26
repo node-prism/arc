@@ -61,7 +61,10 @@ export default class EncryptedFSAdapter<T> implements StorageAdapter<T> {
   }
 }
 
-const ENCRYPTION_KEY = String(process.env.ARC_ENCFS_KEY || "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7")
+let ENCRYPTION_KEY = "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7";
+try {
+  ENCRYPTION_KEY = String(process.env.ARC_ENCFS_KEY);
+} catch (e) {}
 
 const encryptAndWrite = (data: any, ...args: any[]) => {
   const json = JSON.stringify(data, null, 0);
