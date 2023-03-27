@@ -121,8 +121,6 @@ declare type CollectionData = {
     internal?: InternalData;
 };
 declare class Collection<T> {
-    storagePath: string;
-    name: string;
     options: CollectionOptions<T>;
     data: CollectionData;
     _transaction: Transaction<T>;
@@ -132,7 +130,7 @@ declare class Collection<T> {
         };
     };
     createId: () => string;
-    constructor(storagePath?: string, name?: string, options?: CollectionOptions<T>);
+    constructor(options?: CollectionOptions<T>);
     adapterRead(): void;
     /**
      * Given objects found by a query, assign `document` directly to these objects.
