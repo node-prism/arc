@@ -1,9 +1,13 @@
-import { testSuite, expect } from "manten";
+import { expect, testSuite } from "manten";
+import FSAdapter from "../../src/adapter/fs";
 import { Collection } from "../../src/collection";
-import { nrml, testCollection } from "../common";
 
 const getCollection = () => {
-  const collection = new Collection(".test", "index", { autosync: false, integerIds: false });
+  const collection = new Collection({
+    autosync: false,
+    integerIds: false,
+    adapter: new FSAdapter(".test", "index"),
+  });
   collection.drop();
   return collection;
 };

@@ -1,11 +1,13 @@
 import { Collection, CREATED_AT_KEY, ID_KEY, UPDATED_AT_KEY } from "../src/collection";
 import EncryptedFSAdapter from "../src/adapter/enc_fs";
+import FSAdapter from "../src/adapter/fs";
 
 const getCollection = <T>({ name = "test", integerIds = false, populate = true, timestamps = true }): Collection<T> => {
-  const collection = new Collection<T>(".test", name, {
+  const collection = new Collection<T>({
     autosync: false,
     integerIds,
     timestamps,
+    adapter: new FSAdapter(".test", name),
   });
   collection.drop();
 
@@ -24,13 +26,11 @@ const getCollection = <T>({ name = "test", integerIds = false, populate = true, 
 };
 
 const getEncryptedCollection = <T>({ name = "test", integerIds = false }): Collection<T> => { 
-  const collection = new Collection<T>(".test", name, {
+  return new Collection<T>({
     autosync: false,
     integerIds,
     adapter: new EncryptedFSAdapter(".test", name),
   });
-
-  return collection;
 };
 
 export function testCollection<T>({ name = "test", integerIds = false, populate = true, timestamps = true } = {}): Collection<T> {

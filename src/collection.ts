@@ -1,6 +1,5 @@
 import dot from "dot-wild";
 import find from "./find";
-import fs_adapter from "./adapter/fs";
 import { booleanOperators } from "./operators";
 import { Transaction } from "./transaction";
 import { update } from "./update";
@@ -162,8 +161,6 @@ const isValidIndexValue = (value: unknown) =>
   value !== undefined && (typeof value === "string" || typeof value === "number" || typeof value === "boolean");
 
 export class Collection<T> {
-  storagePath: string;
-  name: string;
   options: CollectionOptions<T>;
   data: CollectionData = {};
   _transaction: Transaction<T> = null;
@@ -172,18 +169,15 @@ export class Collection<T> {
 
 
   constructor(
-    storagePath: string = ".data",
-    name: string = "db",
     options: CollectionOptions<T> = {}
   ) {
-    this.storagePath = storagePath;
-    this.name = name;
-
     options.autosync = options.autosync ?? true;
     options.timestamps = options.timestamps ?? true;
     options.integerIds = options.integerIds ?? false;
-    options.adapter =
-      options.adapter ?? new fs_adapter<T>(this.storagePath, this.name);
+    
+    if (!options.adapter) {
+      throw new Error("No adapter provided.");
+    }
 
     this.options = options;
 
