@@ -189,7 +189,8 @@ declare class EncryptedFSAdapter<T> implements StorageAdapter<T> {
     name: string;
     filePath: string;
     queue: SimpleFIFO;
-    constructor(storagePath: string, name: string);
+    key: string;
+    constructor(storagePath: string, name: string, key?: string);
     prepareStorage(): void;
     read(): {
         [key: string]: T;
