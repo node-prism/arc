@@ -21,33 +21,24 @@
 
 */
 
-let IDX = 256;
-let HEX = [];
+const HEX: string[] = [];
 
-while (IDX--) HEX[IDX] = (IDX + 256).toString(16).substring(1);
-
-function pad(str: string, size: number) {
-  let s = "000000" + str;
-  return s.substring(s.length - size);
+for (let i = 0; i < 256; i++) {
+  HEX[i] = (i + 256).toString(16).substring(1);
 }
 
-function hashCode(str) {
-  let hash = 0;
-  for (let i = 0, len = str.length; i < len; i++) {
-    let chr = str.charCodeAt(i);
-    hash = (hash << 5) - hash + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
+function pad(str: string, size: number) {
+  const s = "000000" + str;
+  return s.substring(s.length - size);
 }
 
 const SHARD_COUNT = 32;
 
 export function getCreateId(opts: { init: number; len: number }) {
-  let len = opts.len || 16;
+  const len = opts.len || 16;
   let str = "";
   let num = 0;
-  let discreteValues = Math.pow(36, 4); // 1679616
+  const discreteValues = 1_679_616; // Math.pow(36, 4)
   let current = opts.init + Math.ceil(discreteValues / 2);
 
   function counter() {
@@ -56,7 +47,7 @@ export function getCreateId(opts: { init: number; len: number }) {
     return (current - 1).toString(16);
   }
 
-  return function () {
+  return () => {
     if (!str || num === 256) {
       str = "";
       num = ((1 + len) / 2) | 0;
@@ -64,15 +55,12 @@ export function getCreateId(opts: { init: number; len: number }) {
       str = str.substring((num = 0), len);
     }
 
-    /* const decimal = parseInt(str, 16); */
     const date = Date.now().toString(36);
     const paddedCounter = pad(counter(), 6);
     const hex = HEX[num++];
 
-    // shardKey will be the first character of the
-    const shardKey = parseInt(String(hex), 16) % SHARD_COUNT;
+    const shardKey = parseInt(hex, 16) % SHARD_COUNT;
 
-    const id = `a-${date}-${paddedCounter}-${hex}-${str}-${shardKey}`;
-    return id;
+    return `a${date}${paddedCounter}${hex}${str}${shardKey}`;
   };
 }
