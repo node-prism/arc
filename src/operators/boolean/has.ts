@@ -28,24 +28,3 @@ export function $has(source: object, query: object): boolean {
 
   return match;
 }
-
-// export function $has(source: object, query: object): boolean {
-//   // @ts-ignore
-//   const queryValues = ensureArray(query.$has);
-//   return queryValues.every((q: any) => dot.get(source, q) !== undefined);
-// }
-// export function $has(source: object, query: object): boolean {
-//   // @ts-ignore
-//   const queryValues = ensureArray(query.$has);
-//   return queryValues.every((q: any) => dot.get(source, q) !== undefined) &&
-//          Object.keys(source).some((key: string) => queryValues.includes(key));
-// }
-
-// export function $has(source: object, query: object): boolean {
-//   // @ts-ignore
-//   const queryValues = ensureArray(query.$has);
-//   const sourceKeys = Object.keys(source);
-  
-//   return queryValues.every((q: any) => sourceKeys.includes(q)) &&
-//          sourceKeys.every((key: string) => queryValues.includes(key) || dot.get(source, key) !== undefined);
-// }
