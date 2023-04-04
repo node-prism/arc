@@ -34,30 +34,19 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
     $sub: (item: object, arr: (string|number)[]) => {
       let res = undefined;
       for (const a of arr) {
-        if (typeof a === "number") {
-          if (res === undefined) {
-            res = a;
-          } else {
-            res -= a;
-          }
-        } else if (res === undefined) {
-          res = Number(dot.get(item, a) ?? 0);
-        } else {
-          res -= Number(dot.get(item, a) ?? 0);
-        }
+        const val = typeof a === "number" ? a : Number(dot.get(item, a) ?? 0);
+        res = res === undefined ? val : res - val;
       }
       return res;
     },
-    $add: (item: object, arr: (string|number)[]) =>
-      arr.reduce((acc, val) =>
-        typeof val === 'number'
-          ? (acc === undefined ? val : Number(acc) + val)
-          : (
-              acc === undefined
-                ? Number(dot.get(item, val) ?? 0)
-                : Number(acc) + Number(dot.get(item, val) ?? 0)
-            )
-      , undefined),
+    $add: (item: object, arr: (string|number)[]) => {
+      return arr.reduce((acc, val) => {
+        const numVal = Number(dot.get(item, val) ?? 0);
+        return typeof val === 'number'
+          ? (acc === undefined ? val : acc + val)
+          : (acc === undefined ? numVal : acc + numVal);
+      }, undefined);
+    },
     $mult: (item: object, arr: (string|number)[]) => {
       return arr.reduce((res, a) => {
         if (typeof a === "number") {
