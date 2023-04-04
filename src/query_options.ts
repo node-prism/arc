@@ -40,7 +40,7 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
       return res;
     },
     $add: (item: object, arr: (string|number)[]) => {
-      return arr.reduce((acc, val) => {
+      return arr.reduce((acc: number, val: number) => {
         const numVal = Number(dot.get(item, val) ?? 0);
         return typeof val === 'number'
           ? (acc === undefined ? val : acc + val)
