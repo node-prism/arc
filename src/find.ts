@@ -18,16 +18,10 @@ const makeDistinctByKey = (arr: any[], key: string) => {
   return arr.filter((el) => {
     if (el === undefined) return;
     val = map.get(el[key]);
-    if (val) {
-      if (el[key] != val) {
-        map.delete(el[key]);
-        map.set(el[key], el[key]);
-        return true;
-      } else {
-        return false;
-      }
+    if (val !== undefined) {
+      return false;
     }
-    map.set(el[key], el[key]);
+    map.set(el[key], true);
     return true;
   });
 };
