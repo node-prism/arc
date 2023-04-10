@@ -86,7 +86,7 @@ type Planet = {
 };
 
 // from `./.data` load or create `planets.json`
-const collection = new Collection<Planet>(".data", "planets");
+const collection = new Collection<Planet>({ adapter: new FSAdapter(".data", "planets") });
 ```
 
 ## Persistence
