@@ -15,7 +15,7 @@ const getSortFunctions = (keys: string[]) =>
 const getSortDirections = (nums: number[]) =>
   nums.map((num) => num === 1 ? "asc" : "desc");
 
-function applyAggregation(data: any[], options: QueryOptions): any[] {
+const applyAggregation = (data: any[], options: QueryOptions): any[] => {
   const ops = {
     $floor: (item: object, str: string) => {
       const prop = dot.get(item, str);
@@ -81,9 +81,9 @@ function applyAggregation(data: any[], options: QueryOptions): any[] {
   });
 
   return data;
-}
+};
 
-export function applyQueryOptions(data: any[], options: QueryOptions): any {
+export const applyQueryOptions = (data: any[], options: QueryOptions): any => {
   if (options.aggregate) {
     data = applyAggregation(data, options);
   }
@@ -135,7 +135,7 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     data = data.slice(0, options.take);
   }
 
-  function joinData(data: any[], joinOptions: any[]) {
+  const joinData = (data: any[], joinOptions: any[]) => {
     return joinOptions.reduce((acc, join) => {
       if (!join.collection) throw new Error("Missing required field in join: collection");
       if (!join.from) throw new Error("Missing required field in join: from");
@@ -186,13 +186,13 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
         return item;
       });
     }, data);
-  }
+  };
 
   if (options.join) {
     data = joinData(data, options.join);
   }
 
-  function ifNull(item: any, opts: Record<string, any>) {
+  const ifNull = (item: any, opts: Record<string, any>) => {
     for (const key in opts) {
       const itemValue = dot.get(item, key);
       if (itemValue === null || itemValue === undefined) {
@@ -205,9 +205,9 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
     }
 
     return item;
-  }
+  };
 
-  function ifEmpty(item: any, opts: Record<string, any>) {
+  const ifEmpty = (item: any, opts: Record<string, any>) => {
     const emptyCheckers = {
       array: (value: any) => Array.isArray(value) && value.length === 0,
       string: (value: any) => typeof value === "string" && value.trim().length === 0,
@@ -223,7 +223,7 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
       }
       return result;
     }, item);
-  }
+  };
   
 
   if (options.ifNull) {
@@ -241,4 +241,4 @@ export function applyQueryOptions(data: any[], options: QueryOptions): any {
   }
 
   return data;
-}
+};
