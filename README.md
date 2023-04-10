@@ -102,11 +102,7 @@ import { EncryptedFSAdapter } from "@prsm/arc";
 
 process.env.ARC_ENCFS_KEY = "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7";
 
-const path = ".data";
-const name = "planets";
-
-const adapter = new EncryptedFSAdapter(path, name);
-new Collection(path, name, { adapter });
+new Collection<Planet>({ autosync: false, adapter: new EncryptedFSAdapter(".data", "planets") });
 ```
 
 ### Auto sync
@@ -114,7 +110,7 @@ new Collection(path, name, { adapter });
 By default, any operation that modifies data is followed by a synchronization using the adapter with which the collection was initialized. You have the option to disable this `autosync` feature during collection creation:
 
 ```typescript
-new Collection(".data", "planets", { autosync: false });
+new Collection<Planet>({ autosync: false, adapter: new FSAdapter(".data", "planets") });
 ```
 
 When `autosync` is disabled, you must call `collection.sync()` to persist, which calls the in-use adapter's `write` method.
