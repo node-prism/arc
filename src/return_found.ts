@@ -9,7 +9,7 @@ import {
   safeHasOwnProperty,
 } from "./utils";
 
-export function checkAgainstQuery(source: object, query: object): boolean {
+export const checkAgainstQuery = (source: object, query: object): boolean => {
   if (typeof source !== typeof query) return false;
 
   const process = (src: object | object[], key: string) => {
@@ -77,14 +77,14 @@ export function checkAgainstQuery(source: object, query: object): boolean {
   }
 
   return source === query;
-}
+};
 
-export function returnFound(
+export const returnFound = (
   source: any,
   query: any,
   options: QueryOptions,
   parentDocument: object = null
-): any[] | undefined {
+): any[] | undefined => {
   if (source === undefined) return undefined;
 
   source["internal"] && delete source["internal"];
@@ -99,7 +99,7 @@ export function returnFound(
   // to determine if we should return a document.
   const queryHasMods = Object.keys(query).some((key) => key.startsWith("$"));
 
-  function appendResult(item: object) {
+  const appendResult = (item: object) => {
     if (!item || isEmptyObject(item)) return;
 
     result = ensureArray(result);
@@ -112,9 +112,9 @@ export function returnFound(
     }
 
     result = result.concat(item);
-  }
+  };
 
-  function processObject(item: object) {
+  const processObject = (item: object) => {
     if (!item) return;
 
     if (safeHasOwnProperty(item, options.returnKey)) parentDocument = item;
@@ -135,7 +135,7 @@ export function returnFound(
         });
       }
     }
-  }
+  };
 
   source = ensureArray(source);
 
@@ -171,4 +171,4 @@ export function returnFound(
   }
 
   return result;
-}
+};
