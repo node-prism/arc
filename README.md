@@ -69,7 +69,7 @@ For a comprehensive API reference, please refer to the [tests](./tests/specs/) i
 A collection is just a `.json` file when you're using the default `FSAdapter`.
 
 ```typescript
-import { Collection } from "@prsm/arc";
+import { Collection, FSAdapter } from "@prsm/arc";
 
 type Planet = {
   planet: {
