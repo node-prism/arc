@@ -60,6 +60,22 @@ This is a lightweight, in-memory, optionally persistent, and fully JavaScript-ba
 npm i @prsm/arc
 ```
 
+# Quick note before you read on
+
+arc runs entirely in-process &mdash; not as a port-bound service. [`@prsm/arc-server`](https://github.com/node-prism/arc-server) fills this gap.
+
+## @prsm/arc-server
+
+[https://github.com/node-prism/arc-server](https://github.com/node-prism/arc-server)
+
+If you'd prefer to run this as a self-contained service within your stack that accepts connections over TCP, authenticates them, and receives and responds to queries in this manner, you may want to use `@prsm/arc-server`. It's currently moderately opinionated in the way that it handles authentication (no RBAC or Collection-level permissions), so if it does not meet your expectations, you may consider developing your own service-based solution.
+
+## @prsm/arc-client
+
+[https://github.com/node-prism/arc-client](https://github.com/node-prism/arc-client)
+
+If you decide to use [`@prsm/arc-server`](https://github.com/node-prism/arc-server), you most likely also want to use [`@prsm/arc-client`](https://github.com/node-prism/arc-client) as a means of simplifying communication with `@prsm/arc-server`
+
 # API overview
 
 For a comprehensive API reference, please refer to the [tests](./tests/specs/) in this repository.
