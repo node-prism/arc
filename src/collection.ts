@@ -5,11 +5,7 @@ import { Transaction } from "./transaction";
 import { update } from "./update";
 import { deeplyRemoveEmptyObjects, isEmptyObject, isObject, Ok } from "./utils";
 import { getCreateId } from "./ids";
-
-export interface StorageAdapter<T> {
-  read: () => { [key: string]: T };
-  write: (data: { [key: string]: T }) => any;
-}
+import { StorageAdapter } from "./adapter";
 
 export type CollectionOptions<T> = Partial<{
   /** When true, automatically syncs to disk when a change is made to the database. */

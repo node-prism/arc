@@ -7,8 +7,8 @@ export type AdapterConstructorOptions<T> = {
   name?: string;
   key?: string;
 }
+
 export interface StorageAdapter<T> {
   read: () => { [key: string]: T };
   write: (data: { [key: string]: T }) => any;
 }
-
