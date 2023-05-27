@@ -1,6 +1,7 @@
 import { Collection, CREATED_AT_KEY, ID_KEY, UPDATED_AT_KEY } from "../src/collection";
 import EncryptedFSAdapter from "../src/adapter/enc_fs";
 import FSAdapter from "../src/adapter/fs";
+import { ShardedCollection } from "../src/sharded_collection";
 
 const getCollection = <T>({ name = "test", integerIds = false, populate = true, timestamps = true }): Collection<T> => {
   const collection = new Collection<T>({
@@ -40,6 +41,18 @@ export function testCollection<T>({ name = "test", integerIds = false, populate 
 export function testCollectionEncrypted<T>({ name = "test", integerIds = false } = {}): Collection<T> {
   return getEncryptedCollection({ name, integerIds });
 }
+
+export function getShardedCollection<T>({ name ="testShard", autosync = true, integerIds = false } = {}): ShardedCollection<T> {
+  return new ShardedCollection<T>(
+    { autosync, integerIds },
+    {
+      shardKey: "key",
+      shardCount: 3,
+      adapter: FSAdapter,
+      adapterOptions: { name, storagePath: ".test" },
+    },
+  );
+};
 
 export function nrml<T>(results: T[], { keepIds = false } = {}): T[] {
   // Remove all the _id fields, and

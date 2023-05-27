@@ -44,3 +44,7 @@ await describe("utils", ({ runTestSuite }) => {
 await describe("indexes", ({ runTestSuite}) => {
   runTestSuite(import("./specs/index.test.js"));
 });
+
+await describe("sharded collection", ({ runTestSuite }) => {
+  runTestSuite(import("./specs/sharded_collection"));
+});
