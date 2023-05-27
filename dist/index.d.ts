@@ -154,6 +154,11 @@ declare class Collection<T> {
     transaction(fn: (transaction: Transaction<T>) => void): void;
 }
 
+declare type AdapterConstructorOptions<T> = {
+    storagePath: string;
+    name?: string;
+    key?: string;
+};
 interface StorageAdapter<T> {
     read: () => {
         [key: string]: T;
@@ -174,7 +179,7 @@ declare class FSAdapter<T> implements StorageAdapter<T> {
     name: string;
     filePath: string;
     queue: SimpleFIFO;
-    constructor(storagePath: string, name: string);
+    constructor({ storagePath, name }: AdapterConstructorOptions<T>);
     prepareStorage(): void;
     read(): {
         [key: string]: T;
@@ -190,7 +195,7 @@ declare class EncryptedFSAdapter<T> implements StorageAdapter<T> {
     filePath: string;
     queue: SimpleFIFO;
     key: string;
-    constructor(storagePath: string, name: string, key?: string);
+    constructor({ storagePath, name, key }: AdapterConstructorOptions<T>);
     prepareStorage(): void;
     read(): {
         [key: string]: T;
@@ -202,7 +207,7 @@ declare class EncryptedFSAdapter<T> implements StorageAdapter<T> {
 
 declare class LocalStorageAdapter<T> implements StorageAdapter<T> {
     storageKey: string;
-    constructor(storageKey: string);
+    constructor({ storagePath }: AdapterConstructorOptions<T>);
     read(): {
         [key: string]: T;
     };
