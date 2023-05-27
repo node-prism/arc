@@ -6,7 +6,7 @@ const getCollection = () => {
   const collection = new Collection({
     autosync: false,
     integerIds: false,
-    adapter: new FSAdapter(".test", "index"),
+    adapter: new FSAdapter({ storagePath: ".test", name: "index" }),
   });
   collection.drop();
   return collection;

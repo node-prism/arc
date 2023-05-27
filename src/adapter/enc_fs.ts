@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { StorageAdapter } from ".";
+import { AdapterConstructorOptions, StorageAdapter } from ".";
 import { SimpleFIFO } from "./fs";
 import crypto from "crypto";
 
@@ -11,7 +11,7 @@ export default class EncryptedFSAdapter<T> implements StorageAdapter<T> {
   queue: SimpleFIFO;
   key: string;
 
-  constructor(storagePath: string, name: string, key: string = "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7") {
+  constructor({ storagePath, name, key = "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7" }: AdapterConstructorOptions<T>) {
     if (!name.endsWith(".json")) {
       name += ".json";
     }

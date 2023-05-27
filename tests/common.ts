@@ -7,7 +7,7 @@ const getCollection = <T>({ name = "test", integerIds = false, populate = true, 
     autosync: false,
     integerIds,
     timestamps,
-    adapter: new FSAdapter(".test", name),
+    adapter: new FSAdapter({ storagePath: ".test", name }),
   });
   collection.drop();
 
@@ -29,7 +29,7 @@ const getEncryptedCollection = <T>({ name = "test", integerIds = false }): Colle
   return new Collection<T>({
     autosync: false,
     integerIds,
-    adapter: new EncryptedFSAdapter(".test", name),
+    adapter: new EncryptedFSAdapter({ storagePath: ".test", name }),
   });
 };
 

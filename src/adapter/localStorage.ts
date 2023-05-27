@@ -1,10 +1,10 @@
-import { StorageAdapter } from ".";
+import { AdapterConstructorOptions, StorageAdapter } from ".";
 
 export default class LocalStorageAdapter<T> implements StorageAdapter<T> {
   storageKey: string;
 
-  constructor(storageKey: string) {
-    this.storageKey = `arc_${storageKey}`;
+  constructor({ storagePath }: AdapterConstructorOptions<T>) {
+    this.storageKey = `arc_${storagePath}`;
   }
 
   read(): { [key: string]: T } {

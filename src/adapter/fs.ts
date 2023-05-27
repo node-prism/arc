@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { StorageAdapter } from ".";
+import { AdapterConstructorOptions, StorageAdapter } from ".";
 
 export class SimpleFIFO {
   elements: any[] = [];
@@ -24,7 +24,7 @@ export default class FSAdapter<T> implements StorageAdapter<T> {
   filePath: string;
   queue: SimpleFIFO;
 
-  constructor(storagePath: string, name: string) {
+  constructor({ storagePath, name }: AdapterConstructorOptions<T>) {
     if (!name.endsWith(".json")) {
       name += ".json";
     }
