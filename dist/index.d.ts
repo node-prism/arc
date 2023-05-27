@@ -25,7 +25,15 @@ declare class Transaction<T> {
     commit(): void;
 }
 
-interface StorageAdapter$1<T> {
+interface AdapterConstructor<T> {
+    new ({ storagePath, name, key }: AdapterConstructorOptions<T>): StorageAdapter<T>;
+}
+declare type AdapterConstructorOptions<T> = {
+    storagePath: string;
+    name?: string;
+    key?: string;
+};
+interface StorageAdapter<T> {
     read: () => {
         [key: string]: T;
     };
@@ -33,6 +41,7 @@ interface StorageAdapter$1<T> {
         [key: string]: T;
     }) => any;
 }
+
 declare type CollectionOptions<T> = Partial<{
     /** When true, automatically syncs to disk when a change is made to the database. */
     autosync: boolean;
@@ -41,7 +50,7 @@ declare type CollectionOptions<T> = Partial<{
     /** When true, document ids are integers that increment from 0. */
     integerIds: boolean;
     /** The storage adapter to use. By default, uses a filesystem adapter. */
-    adapter: StorageAdapter$1<T>;
+    adapter: StorageAdapter<T>;
 }>;
 declare type CreateIndexOptions = Partial<{
     key: string;
@@ -154,18 +163,31 @@ declare class Collection<T> {
     transaction(fn: (transaction: Transaction<T>) => void): void;
 }
 
-declare type AdapterConstructorOptions<T> = {
-    storagePath: string;
-    name?: string;
-    key?: string;
+declare type ShardOptions<T> = {
+    shardKey: string;
+    shardCount: number;
+    adapter: AdapterConstructor<T>;
+    adapterOptions: AdapterConstructorOptions<T>;
 };
-interface StorageAdapter<T> {
-    read: () => {
-        [key: string]: T;
+declare class ShardedCollection<T> {
+    private collectionOptions;
+    shards: {
+        [key: string]: Collection<T>;
     };
-    write: (data: {
-        [key: string]: T;
-    }) => any;
+    private shardKey;
+    private shardCount;
+    private adapter;
+    private adapterOptions;
+    constructor(collectionOptions: CollectionOptions<T>, shardOptions: ShardOptions<T>);
+    private getShard;
+    private hashCode;
+    find(query?: object, options?: QueryOptions): T[];
+    insert(docs: T[] | T): T[];
+    update(query: object, operations: object, options?: QueryOptions): T[];
+    upsert(query: object, operations: object, options?: QueryOptions): T[];
+    remove(query: object, options?: QueryOptions): T[];
+    drop(): void;
+    sync(): void;
 }
 
 declare class SimpleFIFO {
@@ -216,4 +238,4 @@ declare class LocalStorageAdapter<T> implements StorageAdapter<T> {
     }): void;
 }
 
-export { Collection, CollectionOptions, EncryptedFSAdapter, FSAdapter, LocalStorageAdapter, QueryOptions };
+export { AdapterConstructor, AdapterConstructorOptions, Collection, CollectionOptions, EncryptedFSAdapter, FSAdapter, LocalStorageAdapter, QueryOptions, ShardOptions, ShardedCollection, StorageAdapter };
