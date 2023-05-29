@@ -20,7 +20,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --minify",
     "test": "tsx tests/index.ts",
     "benchmark": "tsx tests/benchmark.ts",
-    "release": "bumpp && pnpm publish --access public"
+    "release": "bumpp package.json --commit 'Release %s' --push --tag && pnpm publish --access public"
   },
   "author": "nvms",
   "license": "ISC",
