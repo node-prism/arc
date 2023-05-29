@@ -1,5 +1,7 @@
 # arc
 
+[![NPM version](https://img.shields.io/npm/v/@prsm/arc?color=a1b858&label=)](https://www.npmjs.com/package/@prsm/arc)
+
 This is a lightweight, in-memory, optionally persistent, and fully JavaScript-based document database. You can use it with node, in a browser using the localStorage adapter, or as an embedded database solution for your electron app.
 
 *Please note that this library is currently under active development and its API may evolve as new features are added. However, it is unlikely that any breaking changes will be introduced.*
