@@ -104,7 +104,7 @@ type Planet = {
 };
 
 // from `./.data` load or create `planets.json`
-const collection = new Collection<Planet>({ adapter: new FSAdapter(".data", "planets") });
+const collection = new Collection<Planet>({ adapter: new FSAdapter({ storagePath: ".data", name: "planets" }) });
 ```
 
 ## Persistence
@@ -120,7 +120,7 @@ import { EncryptedFSAdapter } from "@prsm/arc";
 
 process.env.ARC_ENCFS_KEY = "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7";
 
-new Collection<Planet>({ autosync: false, adapter: new EncryptedFSAdapter(".data", "planets") });
+new Collection<Planet>({ autosync: false, adapter: new EncryptedFSAdapter({ storagePath: ".data", name: "planets" }) });
 ```
 
 ### Auto sync
@@ -128,7 +128,7 @@ new Collection<Planet>({ autosync: false, adapter: new EncryptedFSAdapter(".data
 By default, any operation that modifies data is followed by a synchronization using the adapter with which the collection was initialized. You have the option to disable this `autosync` feature during collection creation:
 
 ```typescript
-new Collection<Planet>({ autosync: false, adapter: new FSAdapter(".data", "planets") });
+new Collection<Planet>({ autosync: false, adapter: new FSAdapter({ storagePath: ".data", name: "planets" }) });
 ```
 
 When `autosync` is disabled, you must call `collection.sync()` to persist, which calls the in-use adapter's `write` method.
