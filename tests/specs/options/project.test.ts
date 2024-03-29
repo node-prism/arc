@@ -65,6 +65,20 @@ export default testSuite(async ({ describe }) => {
       expect(foundWithId).toEqual([{ _id: id, a: 1, b: 1 }]);
     });
 
+    test("empty query respects projection", () => {
+      const collection = testCollection({ timestamps: false });
+      collection.insert({ a: 1, b: 1, c: 1 });
+      collection.insert({ a: 2, b: 2, c: 2 });
+
+      const found = collection.find({}, { project: { b: 1 } });
+
+      for (const doc of found) {
+        expect(doc[ID_KEY]).toBeUndefined();
+        expect(doc[CREATED_AT_KEY]).toBeUndefined();
+        expect(doc[UPDATED_AT_KEY]).toBeUndefined();
+      }
+    });
+
     describe("aggregation", ({ test }) => {
       test("$floor, $ceil, $sub, $add, $mult, $div", () => {
         const collection = testCollection({ timestamps: false });

@@ -5,7 +5,7 @@ import { ensureArray, isObject, Ok } from "../../utils";
  * @example
  * { $hasAny: "a" } <-- source has property "a"
  * { $hasAny: ["a", "b"] } <-- source has properties "a" OR "b"
- * 
+ *
  * @related
  * $has
  * $not

@@ -18,7 +18,10 @@ export class ShardedCollection<T> {
   private adapter: AdapterConstructor<T>;
   private adapterOptions: AdapterConstructorOptions<T>;
 
-  constructor(collectionOptions: CollectionOptions<T>, shardOptions: ShardOptions<T>) {
+  constructor(
+    collectionOptions: CollectionOptions<T>,
+    shardOptions: ShardOptions<T>
+  ) {
     this.collectionOptions = collectionOptions;
     this.shardKey = shardOptions.shardKey;
     this.shardCount = shardOptions.shardCount;
@@ -36,7 +39,12 @@ export class ShardedCollection<T> {
     const shardId = this.hashCode(key.toString()) % this.shardCount;
 
     if (this.shards[shardId] === undefined) {
-      const adapterOptions = { ...this.adapterOptions, name: `${this.adapterOptions?.name || "collection"}_shard${shardId}.json` };
+      const adapterOptions = {
+        ...this.adapterOptions,
+        name: `${
+          this.adapterOptions?.name || "collection"
+        }_shard${shardId}.json`,
+      };
 
       this.shards[shardId] = new Collection<T>({
         ...this.collectionOptions,
@@ -52,7 +60,7 @@ export class ShardedCollection<T> {
     if (str.length === 0) return hash;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // convert to 32bit int
     }
 

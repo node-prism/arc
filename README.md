@@ -4,57 +4,57 @@
 
 This is a lightweight, in-memory, optionally persistent, and fully JavaScript-based document database. You can use it with node, in a browser using the localStorage adapter, or as an embedded database solution for your electron app.
 
-*Please note that this library is currently under active development and its API may evolve as new features are added. However, it is unlikely that any breaking changes will be introduced.*
+_Please note that this library is currently under active development and its API may evolve as new features are added. However, it is unlikely that any breaking changes will be introduced._
 
-* [Installation](#installation)
-* [API overview](#api-overview)
-  * [Creating a collection](#creating-a-collection)
-  * [Persistence](#persistence)
-    * [Storage adapters](#storage-adapters)
-    * [Using another adapter](#using-another-adapter)
-    * [Auto sync](#auto-sync)
-  * [Indexing](#indexing)
-    * [Index limitations](#index-limitations)
-  * [Inserting](#inserting)
-  * [Finding](#finding)
-    * [Boolean operators](#boolean-operators)
-      * [$and](#and)
-      * [$or](#or)
-      * [$xor](#xor)
-      * [$has](#has)
-      * [$hasAny](#hasany)
-      * [$includes](#includes)
-      * [$length](#length)
-      * [$oneOf](#oneof)
-      * [$re](#re)
-      * [$fn](#fn)
-      * [$gt, $gte, $lt, $lte](#gt-gte-lt-lte)
-  * [Updating](#updating)
-    * [Mutation operators](#mutation-operators)
-      * [$set](#set)
-      * [$unset](#unset)
-      * [$change](#change)
-      * [$push](#push)
-      * [$unshift](#unshift)
-      * [$merge](#merge)
-      * [$map](#map)
-      * [$inc, $dev, $mult, $div](#inc-dev-mult-div)
-  * [Removing](#removing)
-  * [Query options](#query-options)
-    * [ifNull](#ifnull)
-    * [ifEmpty](#ifempty)
-    * [ifNullOrEmpty](#ifnullorempty)
-    * [Sorting](#sorting)
-    * [Skip & take (i.e. LIMIT)](#skip--take-ie-limit)
-    * [Projection](#projection)
-      * [Implicit exclusion](#implicit-exclusion)
-      * [Implicit inclusion](#implicit-inclusion)
-      * [Explicit](#explicit)
-    * [Aggregation](#aggregation)
-    * [Joining](#joining)
-  * [Misc](#misc)
-    * [Builtin property name defaults](#builtin-property-name-defaults)
-    * [Documents](#documents)
+- [Installation](#installation)
+- [API overview](#api-overview)
+  - [Creating a collection](#creating-a-collection)
+  - [Persistence](#persistence)
+    - [Storage adapters](#storage-adapters)
+    - [Using another adapter](#using-another-adapter)
+    - [Auto sync](#auto-sync)
+  - [Indexing](#indexing)
+    - [Index limitations](#index-limitations)
+  - [Inserting](#inserting)
+  - [Finding](#finding)
+    - [Boolean operators](#boolean-operators)
+      - [$and](#and)
+      - [$or](#or)
+      - [$xor](#xor)
+      - [$has](#has)
+      - [$hasAny](#hasany)
+      - [$includes](#includes)
+      - [$length](#length)
+      - [$oneOf](#oneof)
+      - [$re](#re)
+      - [$fn](#fn)
+      - [$gt, $gte, $lt, $lte](#gt-gte-lt-lte)
+  - [Updating](#updating)
+    - [Mutation operators](#mutation-operators)
+      - [$set](#set)
+      - [$unset](#unset)
+      - [$change](#change)
+      - [$push](#push)
+      - [$unshift](#unshift)
+      - [$merge](#merge)
+      - [$map](#map)
+      - [$inc, $dev, $mult, $div](#inc-dev-mult-div)
+  - [Removing](#removing)
+  - [Query options](#query-options)
+    - [ifNull](#ifnull)
+    - [ifEmpty](#ifempty)
+    - [ifNullOrEmpty](#ifnullorempty)
+    - [Sorting](#sorting)
+    - [Skip & take (i.e. LIMIT)](#skip--take-ie-limit)
+    - [Projection](#projection)
+      - [Implicit exclusion](#implicit-exclusion)
+      - [Implicit inclusion](#implicit-inclusion)
+      - [Explicit](#explicit)
+    - [Aggregation](#aggregation)
+    - [Joining](#joining)
+  - [Misc](#misc)
+    - [Builtin property name defaults](#builtin-property-name-defaults)
+    - [Documents](#documents)
 
 # Installation
 
@@ -104,7 +104,9 @@ type Planet = {
 };
 
 // from `./.data` load or create `planets.json`
-const collection = new Collection<Planet>({ adapter: new FSAdapter({ storagePath: ".data", name: "planets" }) });
+const collection = new Collection<Planet>({
+  adapter: new FSAdapter({ storagePath: ".data", name: "planets" }),
+});
 ```
 
 ## Persistence
@@ -120,7 +122,10 @@ import { EncryptedFSAdapter } from "@prsm/arc";
 
 process.env.ARC_ENCFS_KEY = "Mahpsee2X7TKLe1xwJYmar91pCSaZIY7";
 
-new Collection<Planet>({ autosync: false, adapter: new EncryptedFSAdapter({ storagePath: ".data", name: "planets" }) });
+new Collection<Planet>({
+  autosync: false,
+  adapter: new EncryptedFSAdapter({ storagePath: ".data", name: "planets" }),
+});
 ```
 
 ### Auto sync
@@ -128,7 +133,10 @@ new Collection<Planet>({ autosync: false, adapter: new EncryptedFSAdapter({ stor
 By default, any operation that modifies data is followed by a synchronization using the adapter with which the collection was initialized. You have the option to disable this `autosync` feature during collection creation:
 
 ```typescript
-new Collection<Planet>({ autosync: false, adapter: new FSAdapter({ storagePath: ".data", name: "planets" }) });
+new Collection<Planet>({
+  autosync: false,
+  adapter: new FSAdapter({ storagePath: ".data", name: "planets" }),
+});
 ```
 
 When `autosync` is disabled, you must call `collection.sync()` to persist, which calls the in-use adapter's `write` method.
@@ -141,19 +149,19 @@ When `autosync` is disabled, you must call `collection.sync()` to persist, which
 
   ```typescript
   find({ "planet.composition.type": "gas" });
-  find({ planet: { composition: { type: "gas" }}});
+  find({ planet: { composition: { type: "gas" } } });
   ```
 
 - The value of the key must be a type that can be converted to a string using `String(value)`.
 - Indexes can optionally enforce a unique constraint, e.g.: `createIndex({ key: "planet.life.dominant_species", unique: true })`
 - You can create an index at any time, even if your database has existing records with the index key provided, although ideally they are defined at the point of database creation.
 
-In large databases, ***especially*** with complex documents, you will see a noticeable performance boost when making practical use of indexes:
+In large databases, **_especially_** with complex documents, you will see a noticeable performance boost when making practical use of indexes:
 
 In a collection made up of 1,000,000 `Planet` documents:
 
 - Without an index on `planet.composition.type`, a `find({ "planet.composition.type": "gas" })` takes an average of 2s.
-- With an index on `planet.composition.type`, a `find({ "planet.composition.type": "gas" })` takes an average of 25ms, which is ***80x faster***.
+- With an index on `planet.composition.type`, a `find({ "planet.composition.type": "gas" })` takes an average of 25ms, which is **_80x faster_**.
 
 These numbers were seen while benchmarking on a 2022 M1. YMMV.
 
@@ -165,7 +173,7 @@ You can't combine boolean expressions with indexes, because the result of the ex
 // This bypasses known index records for the key "planet.composition.type",
 // because the documents that match the provided expression cannot be known
 // until the `$oneOf` expression is evaluated.
-find({ "planet.composition.type": { $oneOf: ["gas", "molten"]} });
+find({ "planet.composition.type": { $oneOf: ["gas", "molten"] } });
 
 // Instead, if performance was a concern for this query, you'd be better off
 // doing something like this:
@@ -178,11 +186,36 @@ const molten = find({ "planet.composition.type": "molten" }); // index hit
 See the [inserting tests](tests/specs/insert/basic.test.ts) for more examples.
 
 ```typescript
-insert({ planet: { name: "Mercury", moons: [], temp: { avg: 475 }, composition: "molten" } });
+insert({
+  planet: {
+    name: "Mercury",
+    moons: [],
+    temp: { avg: 475 },
+    composition: "molten",
+  },
+});
 insert([
-  { planet: { name: "Venus", moons: [], temp: { avg: 737_000 } }, composition: "molten" },
-  { planet: { name: "Earth", population: 8_000_000_000, moons: ["Luna"], temp: { avg: 13 }, composition: "molten" } },
-  { planet: { name: "Jupiter", moons: ["Io", "Europa", "Ganymede"], temp: { avg: -145 }, composition: "molten" } },
+  {
+    planet: { name: "Venus", moons: [], temp: { avg: 737_000 } },
+    composition: "molten",
+  },
+  {
+    planet: {
+      name: "Earth",
+      population: 8_000_000_000,
+      moons: ["Luna"],
+      temp: { avg: 13 },
+      composition: "molten",
+    },
+  },
+  {
+    planet: {
+      name: "Jupiter",
+      moons: ["Io", "Europa", "Ganymede"],
+      temp: { avg: -145 },
+      composition: "molten",
+    },
+  },
 ]);
 ```
 
@@ -196,23 +229,25 @@ Here's a brief overview:
 
 ```typescript
 find({ avg: -145 }); // implicit deep searching
-find({ planet: { temp: { avg: -145 }}}); // explicit deep searching
+find({ planet: { temp: { avg: -145 } } }); // explicit deep searching
 find({ "planet.temp.avg": -145 }); // dot notation
-find({ avg: { $gt: 12_000 }});
-find({ temp: { avg: { $lt: 1_000 }}});
-find({ "planet.temp.avg": { $lt: 1_000 }});
+find({ avg: { $gt: 12_000 } });
+find({ temp: { avg: { $lt: 1_000 } } });
+find({ "planet.temp.avg": { $lt: 1_000 } });
 find({ $and: [{ avg: { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
-find({ $and: [{ $not: { $has: "planet.population" } }, { moons: { $gt: 1 } }] });
+find({
+  $and: [{ $not: { $has: "planet.population" } }, { moons: { $gt: 1 } }],
+});
 find({ $and: [{ "planet.temp.avg": { $gt: 100 } }, { avg: { $lt: 10_000 } }] });
-find({ planet: { name: { $length: { $gt: 7 }}}}); // string length
-find({ "planet.moons": { $length: 1 }}); // array length
-find({ "planet.composition.type": { $oneOf: ["molten", "gas"] }});
+find({ planet: { name: { $length: { $gt: 7 } } } }); // string length
+find({ "planet.moons": { $length: 1 } }); // array length
+find({ "planet.composition.type": { $oneOf: ["molten", "gas"] } });
 
 // etc.
-find({ $not: { a: 1, b: 2 }});
-find({ $not: { "planet.temp.avg": { $gt: 10_000 }}})
-find({ $and: [{ $not: { a: { $lte: 2 }}}, { $not: { a: { $gte: 5 }}}] });
-find({ $xor: [{ "planet": { $includes: "art" }}, { num: { $lt: 9 }}] });
+find({ $not: { a: 1, b: 2 } });
+find({ $not: { "planet.temp.avg": { $gt: 10_000 } } });
+find({ $and: [{ $not: { a: { $lte: 2 } } }, { $not: { a: { $gte: 5 } } }] });
+find({ $xor: [{ planet: { $includes: "art" } }, { num: { $lt: 9 } }] });
 ```
 
 ### Boolean operators
@@ -222,9 +257,19 @@ find({ $xor: [{ "planet": { $includes: "art" }}, { num: { $lt: 9 }}] });
 [Read tests](tests/specs/operators/boolean/and.test.ts)
 
 ```typescript
-find({ $and: [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }]});
-find({ $and: [{ "planet.name": { $includes: "Ea" } }, { population: { $gt: 1_000_000 } }] });
-find({ $and: [{ "planet.composition.type": "gas" }, { planet: { moons: { $length: { $gt: 5 }}}}]});
+find({ $and: [{ a: 1 }, { b: 2 }, { c: 3 }, { d: 4 }] });
+find({
+  $and: [
+    { "planet.name": { $includes: "Ea" } },
+    { population: { $gt: 1_000_000 } },
+  ],
+});
+find({
+  $and: [
+    { "planet.composition.type": "gas" },
+    { planet: { moons: { $length: { $gt: 5 } } } },
+  ],
+});
 ```
 
 #### $or
@@ -232,7 +277,12 @@ find({ $and: [{ "planet.composition.type": "gas" }, { planet: { moons: { $length
 [Read tests](tests/specs/operators/boolean/or.test.ts)
 
 ```typescript
-find({ $or: [{ planet: { temp: { avg: { $lt: 100 }}}}, { "planet.temp.avg": { $gt: 5_000 }} ]});
+find({
+  $or: [
+    { planet: { temp: { avg: { $lt: 100 } } } },
+    { "planet.temp.avg": { $gt: 5_000 } },
+  ],
+});
 find({ $or: [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }] });
 ```
 
@@ -242,7 +292,9 @@ find({ $or: [{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }] });
 
 ```typescript
 find({ $xor: [{ a: 1 }, { b: 2 }] });
-find({ $xor: [{ $has: "planet.population" }, { "planet.moons": { $length: 0 } }]});
+find({
+  $xor: [{ $has: "planet.population" }, { "planet.moons": { $length: 0 } }],
+});
 ```
 
 #### $has
@@ -264,7 +316,7 @@ find({ $has: ["planet.population", "planet.temp.avg"] }); // documents that have
 
 ```typescript
 find({ $hasAny: ["planet.population", "planet.temp.avg"] }); // documents that have EITHER of these properties
-find({ planet: { $hasAny: ["population", "temp.avg"] }}); // effectively the same as above
+find({ planet: { $hasAny: ["population", "temp.avg"] } }); // effectively the same as above
 ```
 
 #### $includes
@@ -274,10 +326,10 @@ For an "excludes" query, prefix this with `$not`.
 [Read tests](tests/specs/operators/boolean/includes.test.ts)
 
 ```typescript
-find({ planet: { moons: { $includes: "Io" }}}); // Array.includes, because planet.moons is an array
-find({ planet: { name: { $includes: "Ear" }}}); // String.includes, because planet.name is a string
-find({ "planet.moons": { $includes: ["Io", "Europa"] }}); // match when ALL of the provided values are included in the document array
-find({ $not: { "planet.moons": { $includes: "Io" }}}); // planets that do not have a moon named "Io"
+find({ planet: { moons: { $includes: "Io" } } }); // Array.includes, because planet.moons is an array
+find({ planet: { name: { $includes: "Ear" } } }); // String.includes, because planet.name is a string
+find({ "planet.moons": { $includes: ["Io", "Europa"] } }); // match when ALL of the provided values are included in the document array
+find({ $not: { "planet.moons": { $includes: "Io" } } }); // planets that do not have a moon named "Io"
 ```
 
 #### $length
@@ -285,8 +337,8 @@ find({ $not: { "planet.moons": { $includes: "Io" }}}); // planets that do not ha
 [Read tests](tests/specs/operators/boolean/length.test.ts)
 
 ```typescript
-find({ "planet.name": { $length: 5 }}); // String.length
-find({ "planet.moons": { $length: 0 }}); // Array.length
+find({ "planet.name": { $length: 5 } }); // String.length
+find({ "planet.moons": { $length: 0 } }); // Array.length
 ```
 
 #### $oneOf
@@ -294,7 +346,7 @@ find({ "planet.moons": { $length: 0 }}); // Array.length
 [Read tests](tests/specs/operators/boolean/oneOf.test.ts)
 
 ```typescript
-find({ "planet.composition.type": { $oneOf: ["gas", "molten", "rock"] }});
+find({ "planet.composition.type": { $oneOf: ["gas", "molten", "rock"] } });
 ```
 
 #### $re
@@ -302,7 +354,7 @@ find({ "planet.composition.type": { $oneOf: ["gas", "molten", "rock"] }});
 [Read tests](tests/specs/operators/boolean/re.test.ts)
 
 ```typescript
-find({ "visitor.ip": { $re: IP_REGEX }});
+find({ "visitor.ip": { $re: IP_REGEX } });
 ```
 
 #### $fn
@@ -313,10 +365,9 @@ find({ "visitor.ip": { $re: IP_REGEX }});
 const populated = (v) => v > 1_000_000;
 const notOverlyPopulated = (v) => v < 2_000_000;
 
-find({ planet: { population: { $fn: populated }}});
-find({ planet: { population: { $fn: [populated, notOverlyPopulated] }}});
+find({ planet: { population: { $fn: populated } } });
+find({ planet: { population: { $fn: [populated, notOverlyPopulated] } } });
 ```
-
 
 #### $gt, $gte, $lt, $lte
 
@@ -328,9 +379,9 @@ When used against a number, does a numeric comparison. When used against a strin
 - [Read $lte tests](tests/specs/operators/boolean/lte.test.ts)
 
 ```typescript
-find({ "planet.temp.avg": { $lt: 500 }}); // numeric comparison
-find({ planet: { name: { $gt: "Earth" }}}); // lexicographical comparison
-find({ "planet.moons": { $gt: 2 }}); // array length comparison; planets with more than two moons
+find({ "planet.temp.avg": { $lt: 500 } }); // numeric comparison
+find({ planet: { name: { $gt: "Earth" } } }); // lexicographical comparison
+find({ "planet.moons": { $gt: 2 } }); // array length comparison; planets with more than two moons
 ```
 
 ## Updating
@@ -364,11 +415,11 @@ update({ a: 1 }, { $set: { ...someObject }}) // -> { a: 1, ...someObject }
 ```typescript
 // given
 // { a: 1, b: { c: 2 } }
-update({ a: 1 }, { $unset: "b.c" }) // -> { a: 1 }
-update({ a: 1 }, { $unset: ["a", "b.c"] }) // -> {}
+update({ a: 1 }, { $unset: "b.c" }); // -> { a: 1 }
+update({ a: 1 }, { $unset: ["a", "b.c"] }); // -> {}
 // given
 // { a: 1, b: [{ c: 1, d: 1 }, { c: 2, d: 2 }] }
-update({ a: 1 }, { $unset: "b.*.c" }) // -> { a: 1, b: [{ d: 1 }, { d: 2 }] }
+update({ a: 1 }, { $unset: "b.*.c" }); // -> { a: 1, b: [{ d: 1 }, { d: 2 }] }
 ```
 
 #### $change
@@ -380,8 +431,8 @@ Like `$set`, but refuses to create new properties.
 ```typescript
 // given
 // { a: 1 }
-update({ a: 1 }, { $change: { a: 2 }}) // -> { a: 2 }
-update({ a: 1 }, { $change: { b: 2 }}) // -> { a: 1 }, no property created
+update({ a: 1 }, { $change: { a: 2 } }); // -> { a: 2 }
+update({ a: 1 }, { $change: { b: 2 } }); // -> { a: 1 }, no property created
 ```
 
 #### $push
@@ -393,14 +444,14 @@ Push will concat an item or items to an array. It refuses to create the target a
 ```typescript
 // given
 // { a: 1, b: [1] }
-update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1, b: [1, 2] }
-update({ a: 1 }, { $push: { b: [2, 3] }}) // -> { a: 1, b: [1, 2, 3] }
+update({ a: 1 }, { $push: { b: 2 } }); // -> { a: 1, b: [1, 2] }
+update({ a: 1 }, { $push: { b: [2, 3] } }); // -> { a: 1, b: [1, 2, 3] }
 // given
 // { a: 1 }
-update({ a: 1 }, { $push: { b: 2 }}) // -> { a: 1 }, no property created
+update({ a: 1 }, { $push: { b: 2 } }); // -> { a: 1 }, no property created
 // given
 // { a: 1, b: { c: [] } }
-update({ $has: "b.c" }, { $push: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
+update({ $has: "b.c" }, { $push: { "b.c": 1 } }); // -> { a: 1, b: { c: [1] } }
 ```
 
 #### $unshift
@@ -412,14 +463,14 @@ Unshift will insert new elements to the start of the target array. It refuses to
 ```typescript
 // given
 // { a: 1, b: [1] }
-update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1, b: [2, 1] }
-update({ a: 1 }, { $unshift: { b: [2, 3] }}) // -> { a: 1, b: [2, 3, 1] }
+update({ a: 1 }, { $unshift: { b: 2 } }); // -> { a: 1, b: [2, 1] }
+update({ a: 1 }, { $unshift: { b: [2, 3] } }); // -> { a: 1, b: [2, 3, 1] }
 // given
 // { a: 1 }
-update({ a: 1 }, { $unshift: { b: 2 }}) // -> { a: 1 }, no property created
+update({ a: 1 }, { $unshift: { b: 2 } }); // -> { a: 1 }, no property created
 // given
 // { a: 1, b: { c: [] } }
-update({ $has: "b.c" }, { $unshift: { "b.c": 1 }}) // -> { a: 1, b: { c: [1] } }
+update({ $has: "b.c" }, { $unshift: { "b.c": 1 } }); // -> { a: 1, b: { c: [1] } }
 ```
 
 #### $merge
@@ -431,9 +482,9 @@ Merge the provided object into the documents that match the query.
 ```typescript
 // given
 // { a: 1, b: { c: 5 }}
-update({ a: 1 }, { $merge: { a: 2, b: { d: 6 }}}) // -> { a: 2, b: { c: 5, d: 6 } }
-update({ c: 5 }, { $merge: { a: 2 }}) // -> { a: 1, b: { c: 5, a: 2 }}
-update({ c: 5 }, { $merge: { ...someObject }}) // -> { a: 1, b: { c: 5, ...someObject }}
+update({ a: 1 }, { $merge: { a: 2, b: { d: 6 } } }); // -> { a: 2, b: { c: 5, d: 6 } }
+update({ c: 5 }, { $merge: { a: 2 } }); // -> { a: 1, b: { c: 5, a: 2 }}
+update({ c: 5 }, { $merge: { ...someObject } }); // -> { a: 1, b: { c: 5, ...someObject }}
 ```
 
 #### $map
@@ -446,7 +497,7 @@ Effectively `Array.map` against only the documents that match the query.
 // given
 // { a: 1 }
 // { a: 2 }
-update({ a: 1 }, { $map: (doc) => ({ ...doc, d: 1 }) }) // -> { a: 1, d: 1 }, { a: 2 }
+update({ a: 1 }, { $map: (doc) => ({ ...doc, d: 1 }) }); // -> { a: 1, d: 1 }, { a: 2 }
 ```
 
 #### $inc, $dev, $mult, $div
@@ -457,18 +508,21 @@ update({ a: 1 }, { $map: (doc) => ({ ...doc, d: 1 }) }) // -> { a: 1, d: 1 }, { 
 // increase population, creating the property if it doesn't exist.
 update({ planet: { name: "Earth" } }, { $inc: { planet: { population: 1 } } });
 update({ name: "Earth" }, { $inc: { "planet.population": 1 } });
-update({ planet: { population: { $gt: 0 }}}, { $inc: 1 });
+update({ planet: { population: { $gt: 0 } } }, { $inc: 1 });
 ```
 
 When one of these operators is given in the format `{ $inc: 5 }` without a property specified, we implicitly apply the operator to the properties defined in the query that was used to find the document. For example:
 
 ```typescript
-update({ planet: { name: { $includes: "a" }, $has: "population" }}, { $inc: 1 });
+update(
+  { planet: { name: { $includes: "a" }, $has: "population" } },
+  { $inc: 1 }
+);
 // Implicitly increases the property "planet.population" by 1 if it exists.
 // Doesn't try to add `1` to "planet.name" because it is a string.
 // Doesn't increase the population of Mars, because it has no "planet.population" property.
 
-update({ a: { $hasAny: ["b", "c"] }}, { $inc: 1 });
+update({ a: { $hasAny: ["b", "c"] } }, { $inc: 1 });
 // If "a.b" or "a.c" exists, and it is a number, it has the modifier applied to it.
 ```
 
@@ -869,7 +923,7 @@ users.find(
         as: "items.*.itemData", // creates a new `itemData` property for each item in `from`
         options: {
           project: { _id: 0, _created_at: 0, _updated_at: 0 },
-        }
+        },
       },
     ],
   }

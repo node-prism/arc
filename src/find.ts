@@ -2,10 +2,12 @@ import _ from "lodash";
 import dot from "dot-wild";
 import {
   Collection,
-  CollectionData, CollectionOptions, defaultQueryOptions,
+  CollectionData,
+  CollectionOptions,
+  defaultQueryOptions,
   ID_KEY,
   QueryOptions,
-  stripBooleanModifiers
+  stripBooleanModifiers,
 } from "./collection";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
@@ -49,7 +51,7 @@ export default function find<T>(
         out.push(_.cloneDeep(data[key]));
       }
 
-      return out;
+      return applyQueryOptions(out, options);
     }
 
     return applyQueryOptions([...Ov(data)], options);
@@ -62,23 +64,37 @@ export default function find<T>(
     let r = [];
     if (q[ID_KEY] && !isObject(q[ID_KEY]) && !collectionOptions.integerIds) {
       r.push(data[q[ID_KEY]]);
-    } else if (q[ID_KEY] && !isObject(q[ID_KEY]) && collectionOptions.integerIds) {
+    } else if (
+      q[ID_KEY] &&
+      !isObject(q[ID_KEY]) &&
+      collectionOptions.integerIds
+    ) {
       const f = data.internal.id_map[q[ID_KEY]];
       // If we have `f`, it's a cuid.
-      if (f) r.push(data[f])
+      if (f) r.push(data[f]);
     } else {
       const strippedQuery = stripBooleanModifiers(_.cloneDeep(q));
-      const flattened = Object.fromEntries(Object.entries(dot.flatten(strippedQuery)).map(([k, v]) => [k.replace(/\\./g, "."), v]));
+      const flattened = Object.fromEntries(
+        Object.entries(dot.flatten(strippedQuery)).map(([k, v]) => [
+          k.replace(/\\./g, "."),
+          v,
+        ])
+      );
 
       if (Object.keys(flattened).some((key) => collection.indices[key])) {
         Object.keys(collection.indices).forEach((key) => {
-          const queryPropertyValue = key.includes(".") ? flattened[key] : q[key];
+          const queryPropertyValue = key.includes(".")
+            ? flattened[key]
+            : q[key];
           if (queryPropertyValue) {
-            const cuids = data.internal.index.valuesToId?.[key]?.[queryPropertyValue];
+            const cuids =
+              data.internal.index.valuesToId?.[key]?.[queryPropertyValue];
 
             if (cuids) {
               const sourceItems = cuids?.map((cuid) => data[cuid]);
-              r.push(...returnFound(sourceItems, q, options, collectionOptions));
+              r.push(
+                ...returnFound(sourceItems, q, options, collectionOptions)
+              );
             } else {
               r.push(...returnFound(withoutPrivate, q, options, collection));
             }
