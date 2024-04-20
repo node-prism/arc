@@ -198,7 +198,9 @@ insert({
     name: "Mercury",
     moons: [],
     temp: { avg: 475 },
-    composition: "molten",
+    composition: {
+      type: "molten",
+    },
   },
 });
 insert([
@@ -207,7 +209,9 @@ insert([
       name: "Venus",
       moons: [],
       temp: { avg: 737_000 },
-      composition: "molten",
+      composition: {
+        type: "molten",
+      },
     },
   },
   {
@@ -216,7 +220,9 @@ insert([
       population: 8_000_000_000,
       moons: ["Luna"],
       temp: { avg: 13 },
-      composition: "molten",
+      composition: {
+        type: "molten",
+      },
     },
   },
   {
@@ -224,7 +230,9 @@ insert([
       name: "Jupiter",
       moons: ["Io", "Europa", "Ganymede"],
       temp: { avg: -145 },
-      composition: "molten",
+      composition: {
+        type: "gas",
+      },
     },
   },
 ]);
