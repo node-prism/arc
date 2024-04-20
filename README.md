@@ -196,8 +196,12 @@ insert({
 });
 insert([
   {
-    planet: { name: "Venus", moons: [], temp: { avg: 737_000 } },
-    composition: "molten",
+    planet: {
+      name: "Venus",
+      moons: [],
+      temp: { avg: 737_000 },
+      composition: "molten",
+    },
   },
   {
     planet: {
