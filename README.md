@@ -10,56 +10,57 @@ _Please note that this library is currently under active development and its API
 
 * [Installation](#installation)
 * [Quick note before you read on](#quick-note-before-you-read-on)
-    * [@prsm/arc-server](#prsmarc-server)
-    * [@prsm/arc-client](#prsmarc-client)
+  * [@prsm/arc-server](#prsmarc-server)
+  * [@prsm/arc-client](#prsmarc-client)
 * [API overview](#api-overview)
-    * [Creating a collection](#creating-a-collection)
-    * [Persistence](#persistence)
-        * [Storage adapters](#storage-adapters)
-        * [Using another adapter](#using-another-adapter)
-        * [Auto sync](#auto-sync)
-    * [Indexing](#indexing)
-        * [Index limitations](#index-limitations)
-    * [Inserting](#inserting)
-    * [Finding](#finding)
-        * [Boolean operators](#boolean-operators)
-            * [$and](#and)
-            * [$or](#or)
-            * [$xor](#xor)
-            * [$has](#has)
-            * [$hasAny](#hasany)
-            * [$includes](#includes)
-            * [$length](#length)
-            * [$oneOf](#oneof)
-            * [$re](#re)
-            * [$fn](#fn)
-            * [$gt, $gte, $lt, $lte](#gt-gte-lt-lte)
-    * [Updating](#updating)
-        * [Mutation operators](#mutation-operators)
-            * [$set](#set)
-            * [$unset](#unset)
-            * [$change](#change)
-            * [$push](#push)
-            * [$unshift](#unshift)
-            * [$merge](#merge)
-            * [$map](#map)
-            * [$inc, $dev, $mult, $div](#inc-dev-mult-div)
-    * [Removing](#removing)
-    * [Query options](#query-options)
-        * [ifNull](#ifnull)
-        * [ifEmpty](#ifempty)
-        * [ifNullOrEmpty](#ifnullorempty)
-        * [Sorting](#sorting)
-        * [Skip & take (i.e. LIMIT)](#skip--take-ie-limit)
-        * [Projection](#projection)
-            * [Implicit exclusion](#implicit-exclusion)
-            * [Implicit inclusion](#implicit-inclusion)
-            * [Explicit](#explicit)
-        * [Aggregation](#aggregation)
-        * [Joining](#joining)
-    * [Misc](#misc)
-        * [Builtin property name defaults](#builtin-property-name-defaults)
-        * [Documents](#documents)
+  * [Creating a collection](#creating-a-collection)
+  * [Persistence](#persistence)
+    * [Storage adapters](#storage-adapters)
+    * [Using another adapter](#using-another-adapter)
+    * [Auto sync](#auto-sync)
+  * [Indexing](#indexing)
+    * [Index limitations](#index-limitations)
+  * [Inserting](#inserting)
+  * [Finding](#finding)
+    * [Boolean operators](#boolean-operators)
+      * [$and](#and)
+      * [$or](#or)
+      * [$xor](#xor)
+      * [$has](#has)
+      * [$hasAny](#hasany)
+      * [$includes](#includes)
+      * [$length](#length)
+      * [$oneOf](#oneof)
+      * [$re](#re)
+      * [$fn](#fn)
+      * [$gt, $gte, $lt, $lte](#gt-gte-lt-lte)
+  * [Updating](#updating)
+    * [Mutation operators](#mutation-operators)
+      * [$set](#set)
+      * [$unset](#unset)
+      * [$change](#change)
+      * [$push](#push)
+      * [$unshift](#unshift)
+      * [$merge](#merge)
+      * [$map](#map)
+      * [$inc, $dev, $mult, $div](#inc-dev-mult-div)
+  * [Filtering](#filtering)
+  * [Removing](#removing)
+  * [Query options](#query-options)
+    * [ifNull](#ifnull)
+    * [ifEmpty](#ifempty)
+    * [ifNullOrEmpty](#ifnullorempty)
+    * [Sorting](#sorting)
+    * [Skip & take (i.e. LIMIT)](#skip--take-ie-limit)
+    * [Projection](#projection)
+      * [Implicit exclusion](#implicit-exclusion)
+      * [Implicit inclusion](#implicit-inclusion)
+      * [Explicit](#explicit)
+    * [Aggregation](#aggregation)
+    * [Joining](#joining)
+  * [Misc](#misc)
+    * [Builtin property name defaults](#builtin-property-name-defaults)
+    * [Documents](#documents)
 
 <!-- vim-markdown-toc -->
 
@@ -545,6 +546,17 @@ update({ a: { $hasAny: ["b", "c"] } }, { $inc: 1 });
 // If "a.b" or "a.c" exists, and it is a number, it has the modifier applied to it.
 ```
 
+## Filtering
+
+There's also a `filter` method on the collection for when the provided update operations don't support your use case.
+
+```typescript
+// given
+// { a: 1 }
+// { a: 2 }
+filter((doc) => doc.a > 1); // -> { a: 2 }
+```
+
 ## Removing
 
 See the [remove tests](tests/specs/remove/basic.test.ts) for more examples.
@@ -734,11 +746,9 @@ The ID property of a document is always included unless explicitly excluded.
 
 #### Implicit exclusion
 
-When all projected properties have a value of `1`, this
-is "implicit exclusion" mode.
+When all projected properties have a value of `1`, this is "implicit exclusion" mode.
 
-In this mode, all document properties that are not defined
-in the projection are excluded from the result document.
+In this mode, all document properties that are not defined in the projection are excluded from the result document.
 
 ```typescript
 // [
@@ -754,11 +764,9 @@ find({ a: 1 }, { project: { b: 1 } });
 
 #### Implicit inclusion
 
-When all projected properties have a value of `0`, this
-is "implicit inclusion" mode.
+When all projected properties have a value of `0`, this is "implicit inclusion" mode.
 
-In this mode, all document properties that are not defined
-in the projection are included from the result document.
+In this mode, all document properties that are not defined in the projection are included from the result document.
 
 ```typescript
 // [
@@ -774,8 +782,7 @@ find({ a: 1 }, { project: { b: 0 } });
 
 #### Explicit
 
-In the only remaining case (a mixture of 1s and 0s), all document properties
-are included unless explicitly removed with a `0`.
+In the only remaining case (a mixture of 1s and 0s), all document properties are included unless explicitly removed with a `0`.
 
 This is effectively the same behavior as implicit inclusion.
 
@@ -986,8 +993,7 @@ users.find(
 
 ### Builtin property name defaults
 
-The default property names for document ID (default `_id`), "created at"
-(default `_created_at`) and "updated at" (default `_updated_at`) timestamps can all be changed.
+The default property names for document ID (default `_id`), "created at" (default `_created_at`) and "updated at" (default `_updated_at`) timestamps can all be changed.
 
 ```typescript
 import { ID_KEY, CREATED_AT_KEY, UPDATED_AT_KEY } from "@prsm/arc";
@@ -1001,5 +1007,4 @@ If you do this, make sure to do it at the beginning of collection creation.
 
 ### Documents
 
-The returned value from `find`, `update` and `remove` is always an `Array<T>`, even when there
-are no results.
+The returned value from `find`, `update`, `filter` and `remove` is always an `Array<T>`, even when there are no results.
