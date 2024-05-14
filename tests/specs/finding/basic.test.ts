@@ -34,6 +34,15 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([{ foo: "bar" }]);
     });
 
+    test("simple find, more criteria", () => {
+      const collection = testCollection();
+      collection.insert({ a: 1, b: 2, c: 3 });
+      collection.insert({ a: 1, b: 2, c: 4 });
+      collection.insert({ a: 2, b: 3, c: 4 });
+      const found = nrml(collection.find({ a: 1, b: 2 }));
+      expect(found).toEqual([{ a: 1, b: 2, c: 3 }, { a: 1, b: 2, c: 4 }]);
+    });
+
     test("simple find - deep false", () => {
       const collection = testCollection();
       collection.insert({ foo: { bar: "bar" } });
