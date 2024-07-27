@@ -24,6 +24,7 @@ _Please note that this library is currently under active development and its API
   * [Finding](#finding)
     * [Boolean operators](#boolean-operators)
       * [$and](#and)
+      * [$not](#not)
       * [$or](#or)
       * [$xor](#xor)
       * [$has](#has)
@@ -292,6 +293,30 @@ find({
 });
 ```
 
+#### $not
+
+[Read tests](tests/specs/operators/boolean/not.test.ts)
+
+```typescript
+// { a: 1, b: 2 }
+// { nested: { a: 1 } }
+find({ $not: { a: 1 } }); // Won't return either of the above
+find({ $not: { "nested.a": 1 } }); // Returns the first document
+
+// $not is commonly used with other boolean operators, like $and:
+// { nested: { a: 1, b: 2 } }
+find({
+  $and: [
+    { $not: { "nested.a": 1 } },
+    { $not: { "nested.b": 2 } },
+  ],
+});
+
+// or $includes:
+find({ $not: { moons: { $includes: "Io" } } });
+find({ $not: { planet: { moons: { $includes: ["Io", "Ganymede"] } } } });
+```
+
 #### $or
 
 [Read tests](tests/specs/operators/boolean/or.test.ts)
@@ -326,6 +351,8 @@ find({
 ```typescript
 find({ $has: "planet.population" });
 find({ $has: ["planet.population", "planet.temp.avg"] }); // documents that have BOTH of these properties
+find({ $not: { $has: "planet.temp.avg" } });
+find({ $not: { "planet.temp": { $has: "avg" } } });
 ```
 
 #### $hasAny
@@ -337,6 +364,8 @@ find({ $has: ["planet.population", "planet.temp.avg"] }); // documents that have
 ```typescript
 find({ $hasAny: ["planet.population", "planet.temp.avg"] }); // documents that have EITHER of these properties
 find({ planet: { $hasAny: ["population", "temp.avg"] } }); // effectively the same as above
+find({ $not: { $hasAny: ["planet.population", "planet.temp.avg"] } });
+find({ $not: { "planet.temp": { $hasAny: ["max", "avg"] } } });
 ```
 
 #### $includes
