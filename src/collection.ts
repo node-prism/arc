@@ -5,7 +5,7 @@ import { Transaction } from "./transaction";
 import { update } from "./update";
 import { deeplyRemoveEmptyObjects, isEmptyObject, isObject, Ok } from "./utils";
 import { getCreateId } from "./ids";
-import { StorageAdapter } from "./adapter";
+import type { StorageAdapter } from "./adapter";
 
 export type CollectionOptions<T> = Partial<{
   /** When true, automatically syncs to disk when a change is made to the database. */
@@ -195,6 +195,21 @@ export class Collection<T> {
     }
 
     this.createId = getCreateId({ init: this.data.internal.current, len: 4 });
+  }
+
+  static from<Y>(data: CollectionData = {}, options: CollectionOptions<Y> = {}) {
+    const c = new Collection<Y>({
+      adapter: { read: () => ({} as any), write: () => {} },
+      autosync: false,
+      timestamps: false,
+      ...options,
+    });
+  
+    c.insert(data as any);
+    const initial = c.data;
+    c.adapterRead = () => { c.data = initial; };
+  
+    return c;
   }
 
   adapterRead() {
