@@ -49,7 +49,7 @@ export function deeplyRemoveEmptyObjects(o: object) {
 export function unescapedFlatten(o: object) {
   const flattened = dot.flatten(o);
 
-  return Object.keys(flattened).reduce((acc, key) => {
+  return Ok(flattened).reduce((acc, key) => {
     const unescapedKey = key.replace(/\\./g, ".");
     acc[unescapedKey] = flattened[key];
     return acc;

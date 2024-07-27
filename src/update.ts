@@ -11,7 +11,7 @@ import {
 import { processMutationOperators } from "./operators";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
-import { ensureArray, Ov } from "./utils";
+import { ensureArray, Ok, Ov } from "./utils";
 
 export function update<T>(
   data: CollectionData,
@@ -53,7 +53,7 @@ export function update<T>(
         cuid = item[ID_KEY];
       }
 
-      Object.keys(collection.indices).forEach((key) => {
+      Ok(collection.indices).forEach((key) => {
         if (!dot.get(item, key)) { return; }
 
         const oldValue = data.internal.index.idToValues[cuid][key];

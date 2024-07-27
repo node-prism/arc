@@ -65,7 +65,7 @@ export const checkAgainstQuery = (source: object, query: object): boolean => {
 
   if (Array.isArray(source) && isObject(query)) {
     // supports e.g. [1, 2, 3], { $includes: 1 }
-    return Object.keys(query).every((key) => {
+    return Ok(query).every((key) => {
       return process(source, key);
     });
   }
@@ -97,7 +97,7 @@ export const returnFound = (
 
   // If the query included mods, then we defer to the result of those mods
   // to determine if we should return a document.
-  const queryHasMods = Object.keys(query).some((key) => key.startsWith("$"));
+  const queryHasMods = Ok(query).some((key) => key.startsWith("$"));
 
   const appendResult = (item: object) => {
     if (!item || isEmptyObject(item)) return;

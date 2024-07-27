@@ -11,7 +11,7 @@ import {
 } from "./collection";
 import { applyQueryOptions } from "./query_options";
 import { returnFound } from "./return_found";
-import { ensureArray, isObject, Ov } from "./utils";
+import { ensureArray, isObject, Ok, Ov } from "./utils";
 
 const makeDistinctByKey = (arr: any[], key: string) => {
   const map = new Map();
@@ -39,7 +39,7 @@ export default function find<T>(
   query = ensureArray(query);
 
   // remove any empty objects from the query.
-  query = query.filter((q: object) => Object.keys(q).length > 0);
+  query = query.filter((q: object) => Ok(q).length > 0);
 
   // if there's no query, return all data.
   if (!query.length) {
@@ -81,8 +81,8 @@ export default function find<T>(
         ])
       );
 
-      if (Object.keys(flattened).some((key) => collection.indices[key])) {
-        Object.keys(collection.indices).forEach((key) => {
+      if (Ok(flattened).some((key) => collection.indices[key])) {
+        Ok(collection.indices).forEach((key) => {
           const queryPropertyValue = key.includes(".")
             ? flattened[key]
             : q[key];

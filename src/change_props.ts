@@ -28,7 +28,7 @@ export const changeProps = <T>(
     const itemClone = _.cloneDeep(item);
 
     // loop through replaceProps object keys
-    for (const key of Object.keys(replaceProps)) {
+    for (const key of Ok(replaceProps)) {
       // if itemClone matches query and createNewProperties is true or the key already exists in itemClone
       if (checkAgainstQuery(itemClone, query) &&
           (createNewProperties || safeHasOwnProperty(itemClone, key))) {
@@ -38,7 +38,7 @@ export const changeProps = <T>(
     }
 
     // loop through itemClone keys
-    for (const key of Object.keys(itemClone)) {
+    for (const key of Ok(itemClone)) {
       // if the value of the key is an object or an array, call processObject recursively
       if (isObject(itemClone[key]) || Array.isArray(itemClone[key])) {
         itemClone[key] = changeProps(

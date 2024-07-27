@@ -36,7 +36,7 @@ export function appendProps(source: any, query: object, newProps: any, merge = f
     }
 
     // Recursively process child objects and arrays
-    for (const key of Object.keys(clone)) {
+    for (const key of Ok(clone)) {
       if (isObject(clone[key]) || Array.isArray(clone[key])) {
         clone[key] = processObject(clone[key]);
       }

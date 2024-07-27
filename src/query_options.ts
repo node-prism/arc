@@ -96,14 +96,14 @@ export const applyQueryOptions = (data: any[], options: QueryOptions): any => {
     // 1. Implicit exclusion: { a: 1, b: 1 }
     // 2. Implicit inclusion: { a: 0, b: 0 }
     // 3. Explicit: { a: 0, b: 1 }
-    const projectionTotal = Object.keys(options.project).reduce((acc, key) => {
+    const projectionTotal = Ok(options.project).reduce((acc, key) => {
       if (typeof options.project[key] === "number" && typeof acc === "number") {
         return acc + options.project[key];
       }
     }, 0);
 
     const projectionMode =
-      projectionTotal === Object.keys(options.project).length
+      projectionTotal === Ok(options.project).length
         ? ProjectionMode.ImplicitExclusion
         : projectionTotal === 0
         ? ProjectionMode.ImplicitInclusion
@@ -114,7 +114,7 @@ export const applyQueryOptions = (data: any[], options: QueryOptions): any => {
     } else if (projectionMode === ProjectionMode.ImplicitInclusion) {
       data = data.map((item) => _.omit(item, Ok(options.project)));
     } else if (projectionMode === ProjectionMode.Explicit) {
-      const omit = Object.keys(options.project).filter((key) => options.project[key] === 0);
+      const omit = Ok(options.project).filter((key) => options.project[key] === 0);
       data = data.map((item) => _.omit(item, omit));
     }
   }
@@ -211,7 +211,7 @@ export const applyQueryOptions = (data: any[], options: QueryOptions): any => {
     const emptyCheckers = {
       array: (value: any) => Array.isArray(value) && value.length === 0,
       string: (value: any) => typeof value === "string" && value.trim().length === 0,
-      object: (value: any) => typeof value === "object" && Object.keys(value).length === 0,
+      object: (value: any) => typeof value === "object" && Ok(value).length === 0,
     };
   
     return Object.entries(opts).reduce((result, [key, value]) => {

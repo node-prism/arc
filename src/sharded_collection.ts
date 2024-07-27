@@ -1,5 +1,6 @@
 import { AdapterConstructor, AdapterConstructorOptions } from "./adapter";
 import { Collection, CollectionOptions, QueryOptions } from "./collection";
+import { Ok } from "./utils";
 
 export type ShardOptions<T> = {
   shardKey: string;
@@ -70,7 +71,7 @@ export class ShardedCollection<T> {
   find(query?: object, options: QueryOptions = {}): T[] {
     const docs = [];
 
-    for (const shardId of Object.keys(this.shards)) {
+    for (const shardId of Ok(this.shards)) {
       const shardDocs = this.shards[shardId].find(query, options);
       docs.push(...shardDocs);
     }
@@ -96,7 +97,7 @@ export class ShardedCollection<T> {
   update(query: object, operations: object, options: QueryOptions = {}): T[] {
     const updatedDocs = [];
 
-    for (const shardId of Object.keys(this.shards)) {
+    for (const shardId of Ok(this.shards)) {
       const shardDocs = this.shards[shardId].update(query, operations, options);
       updatedDocs.push(...shardDocs);
     }
@@ -107,7 +108,7 @@ export class ShardedCollection<T> {
   upsert(query: object, operations: object, options: QueryOptions = {}): T[] {
     const upsertedDocs = [];
 
-    for (const shardId of Object.keys(this.shards)) {
+    for (const shardId of Ok(this.shards)) {
       const shardDocs = this.shards[shardId].upsert(query, operations, options);
       upsertedDocs.push(...shardDocs);
     }
@@ -118,7 +119,7 @@ export class ShardedCollection<T> {
   remove(query: object, options: QueryOptions = {}): T[] {
     const removedDocs = [];
 
-    for (const shardId of Object.keys(this.shards)) {
+    for (const shardId of Ok(this.shards)) {
       const shardDocs = this.shards[shardId].remove(query, options);
       removedDocs.push(...shardDocs);
     }
@@ -127,13 +128,13 @@ export class ShardedCollection<T> {
   }
 
   drop(): void {
-    for (const shardId of Object.keys(this.shards)) {
+    for (const shardId of Ok(this.shards)) {
       this.shards[shardId].drop();
     }
   }
 
   sync(): void {
-    for (const shardId of Object.keys(this.shards)) {
+    for (const shardId of Ok(this.shards)) {
       this.shards[shardId].sync();
     }
   }
