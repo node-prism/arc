@@ -140,6 +140,7 @@ declare class Collection<T> {
     };
     createId: () => string;
     constructor(options?: CollectionOptions<T>);
+    static from<Y>(data?: CollectionData, options?: CollectionOptions<Y>): Collection<Y>;
     adapterRead(): void;
     /**
      * Given objects found by a query, assign `document` directly to these objects.
