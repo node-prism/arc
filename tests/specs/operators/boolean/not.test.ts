@@ -71,7 +71,7 @@ export default testSuite(async ({ describe }) => {
         { a: 2, b: 2, c: 3 },
         { a: 3, b: 3, c: 3 },
       ]);
-      const found = nrml(collection.find({ $not: { a: 1, b: 2}}));
+      const found = nrml(collection.find({ $not: { a: 1, b: 2 }}));
       expect(found).toEqual([
         { xxx: "xxx" },
         { yyy: "yyy" },
@@ -204,6 +204,19 @@ export default testSuite(async ({ describe }) => {
       expect(found).toEqual([]);
 
       const found2 = nrml(collection.find({ $not: { "a.b.c.d": { $hasAny: ["baz"] } } }));
+      expect(found2).toEqual([{ a: { b: { c: { d: { foo: "foo", bar: "bar" } } } } }]);
+    });
+
+    test("works with $has, infinitely deep, using dot notation", () => {
+      const collection = testCollection({ populate: false });
+      collection.insert([
+      { a: { b: { c: { d: { foo: "foo", bar: "bar", baz: "baz" } } } } },
+      { a: { b: { c: { d: { foo: "foo", bar: "bar" } } } } }
+      ]);
+      const found = nrml(collection.find({ $not: { "a.b.c.d": { $has: ["foo", "bar"] } } }));
+      expect(found).toEqual([]);
+
+      const found2 = nrml(collection.find({ $not: { "a.b.c.d": { $has: ["baz"] } } }));
       expect(found2).toEqual([{ a: { b: { c: { d: { foo: "foo", bar: "bar" } } } } }]);
     });
   });
